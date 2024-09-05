@@ -37,13 +37,13 @@ neuLang = {};
     neuLang[35] = "Could not locate any games on the USB device"
     neuLang[36] = "size doesn't matter"
     neuLang[37] = "programmed by Maximus32"
-    neuLang[38] = "launcher by sync-on-Luma(Y) Howling Wolf & Chelsea"
+    neuLang[38] = "launcher by sync-on-Luma(Y), Howling Wolf & Chelsea, MegaBitmap"
     neuLang[39] = "special thanks to nuno6573, and xGamer"
     neuLang[40] = "Warning: Settings file not found.\nOptional launch parameters disabled."
     neuLang[41] = "Loading Favorites List"
     neuLang[42] = "Loading Main List"
-    neuLang[43] = "neutrino Launcher (HDD)"
-    neuLang[44] = "Launch games from the hard drive with neutrino"
+    neuLang[43] = "Neutrino Launcher (UDPBD)"
+    neuLang[44] = "Launch games from the network interface with neutrino"
     neuLang[45] = "Cleaning up backgrounds. . ."
     neuLang[46] = "Loading Config"
     neuLang[47] = "No favorites in list"
@@ -90,13 +90,13 @@ elseif XEBPlusLanguage == "es-419" then
     neuLang[35] = "No se encontraron juegos en el dispositivo USB"
     neuLang[36] = "El tamaño no importa"
     neuLang[37] = "programado por Maximus32"
-    neuLang[38] = "lanzador por sync-on-Luma(Y), Howling Wolf y Chelsea"
+    neuLang[38] = "lanzador por sync-on-Luma(Y), Howling Wolf y Chelsea, MegaBitmap"
     neuLang[39] = "Un agradecimiento especial a nuno6573, y xGamer"
     neuLang[40] = "Advertencia: No se encontró el archivo de configuración.\nLos parámetros de inicio opcionales están deshabilitados."
     neuLang[41] = "Cargando lista de favoritos"
     neuLang[42] = "Cargando lista principal"
-    neuLang[43] = "Lanzador neutrino (HDD)"
-    neuLang[44] = "Ejecuta juegos desde el disco duro con neutrino"
+    neuLang[43] = "Lanzador neutrino (UDPBD)"
+    neuLang[44] = "Ejecuta juegos desde la interfaz de red con neutrino"
     neuLang[45] = "Limpeza de fundos..."
     neuLang[46] = "Cargando configuración"
     neuLang[47] = "No hay favoritos en la lista"
@@ -143,13 +143,13 @@ elseif XEBPlusLanguage == "pt-BR" then
     neuLang[35] = "Não se encontra nenhum jogo no dispositivo USB"
     neuLang[36] = "tamanho não importa"
     neuLang[37] = "programado por Maximus32"
-    neuLang[38] = "launcher por sync-on-Luma(Y), Howling Wolf & Chelsea"
+    neuLang[38] = "launcher por sync-on-Luma(Y), Howling Wolf & Chelsea, MegaBitmap"
     neuLang[39] = "agradecimentos especiais ao nuno6573, xGamer"
     neuLang[40] = "Aviso: ficheiro de definições não encontrado.\nParâmetros de arranque opcionais desativados."
     neuLang[41] = "Carregando lista de favoritos"
     neuLang[42] = "Carregando lista principal"
-    neuLang[43] = "neutrino Launcher (HDD)"
-    neuLang[44] = "Inicie os jogos do disco rígido com o neutrino"
+    neuLang[43] = "Neutrino Launcher (UDPBD)"
+    neuLang[44] = "Execute jogos a partir da interface de rede com neutrino"
     neuLang[45] = "Limpar backgrounds..."
     neuLang[46] = "Carregando Configurações"
     neuLang[47] = "Não há favoritos na lista" 
@@ -166,14 +166,14 @@ PluginData.Category = 3;
 PluginData.Name = neuLang[43];
 PluginData.Description = neuLang[44];
 PluginData.Safe = true;
-PluginData.ValueA = "APPS/neutrinoHDD/neutrinoLauncherHDD.lua";
+PluginData.ValueA = "APPS/neutrinoUDPBD/neutrinoLauncherUDPBD.lua";
 PluginData.ValueB = "NONE";
 PluginData.ValueC = "NONE";
 if theXEBPlusVersion == "XEBPLUS-2022-09" then -- If using the XEB+ Xmas showcase, an external icon will be loaded
 	PluginData.Icon = 88; -- Preventive, in case the game files' are missing
-	if System.doesFileExist(System.currentDirectory().."APPS/neutrinoHDD/image/ic_tool_neutrino_hdl.png") then
+	if System.doesFileExist(System.currentDirectory().."APPS/neutrinoUDPBD/image/ic_tool_neutrino_hdl.png") then
 		AddneutrinohdlIcon=#themeInUse+1
-		themeInUse[AddneutrinohdlIcon] = Graphics.loadImage(System.currentDirectory().."APPS/neutrinoHDD/image/ic_tool_neutrino_hdl.png")
+		themeInUse[AddneutrinohdlIcon] = Graphics.loadImage(System.currentDirectory().."APPS/neutrinoUDPBD/image/ic_tool_neutrino_hdl.png")
 		PluginData.Icon = AddneutrinohdlIcon;
 	end
 else -- Else, the icon will be loaded from XEB+'s theme

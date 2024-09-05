@@ -1,5 +1,5 @@
 --------------------------------------------------------
--- NEUTRINO LAUNCHER HDD
+-- NEUTRINO UDPBD FOR XEB+
 --------------------------------------------------------
 GoToSubMenuIcon(actualCat,actualOption,true)
 XEBKeepInSubMenu=true
@@ -14,8 +14,8 @@ function NEUTRINO_DebugLog(message)
 	io.write("  ")
 	io.close(log)
 end
-if System.doesFileExist("CFG/neutrinoHDD.cfg") then
-    ContextMenu_TempFile = io.open("CFG/neutrinoHDD.cfg", "r")
+if System.doesFileExist("CFG/neutrinoUDPBD.cfg") then
+    ContextMenu_TempFile = io.open("CFG/neutrinoUDPBD.cfg", "r")
     NEUTRINO_Settings = (ContextMenu_TempFile:read())
     io.close(ContextMenu_TempFile)
 else
@@ -1486,7 +1486,7 @@ while XEBKeepInSubMenu do
 				end
 				
 
-				NEUTRINO_RadShellText = "fontsize 0.6\r\nload ioman.irx\r\nsleep 1\r\nrun neutrino.elf -bsd=ata -bsdfs=exfat \"-dvd=mass:"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder.."/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name.."."..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Extension.."\" -mt="..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Media.." "..NEUTRINO_LaunchOptions.."\r\n                                                                                                                                                                                                                                                                      "
+				NEUTRINO_RadShellText = "fontsize 0.6\r\nload ioman.irx\r\nsleep 1\r\nrun neutrino.elf -bsd=udpbd \"-dvd=mass:"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder.."/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name.."."..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Extension.."\" -mt="..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Media.." "..NEUTRINO_LaunchOptions.."\r\n                                                                                                                                                                                                                                                                      "
 				NEUTRINO_RadShellFile = System.openFile(xebLua_AppWorkingPath.."radshellmod.ios", FRDWR)
 				System.removeFile(NEUTRINO_RadShellFile)
 				System.closeFile(NEUTRINO_RadShellFile)

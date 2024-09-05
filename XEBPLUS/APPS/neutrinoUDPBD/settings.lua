@@ -17,8 +17,8 @@ ContextMenu[3].Description = nSetLang[5]
 ContextMenu[4].Description = nSetLang[6]
 ContextMenu[5].Description = nSetLang[7]
 
-if System.doesFileExist("CFG/neutrinoHDD.cfg") then
-    ContextMenu_TempFile = io.open("CFG/neutrinoHDD.cfg", "r")
+if System.doesFileExist("CFG/neutrinoUDPBD.cfg") then
+    ContextMenu_TempFile = io.open("CFG/neutrinoUDPBD.cfg", "r")
     Settings = (ContextMenu_TempFile:read())
     io.close(ContextMenu_TempFile)
 else
@@ -187,9 +187,9 @@ ContextMenu_NewSettings = ContextMenu_DisableArt
 ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_DisableStatus
 ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_DisableReload
 if ContextMenu_NewSettings == "" then
-    System.removeFile(System.currentDirectory().."CFG/neutrinoHDD.cfg")
+    System.removeFile(System.currentDirectory().."CFG/neutrinoUDPBD.cfg")
 else
-    ContextMenu_TempFile = io.open("CFG/neutrinoHDD.cfg", "w")
+    ContextMenu_TempFile = io.open("CFG/neutrinoUDPBD.cfg", "w")
     io.output(ContextMenu_TempFile)
     io.write(ContextMenu_NewSettings)
     io.close(ContextMenu_TempFile)

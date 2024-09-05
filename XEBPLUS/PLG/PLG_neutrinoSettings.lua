@@ -1,7 +1,7 @@
 nSetLang = {};
 if XEBPlusLanguage == "en-US" then
-    nSetLang[1] = "neutrino Launcher (HDD) Settings"
-    nSetLang[2] = "Configure neutrino Launcher menu"
+    nSetLang[1] = "Neutrino Launcher (UDPBD) Settings"
+    nSetLang[2] = "Configure Neutrino Launcher menu"
     nSetLang[3] = "Disable game specific artwork in menu."
     nSetLang[4] = "Disable loading and other messages\nthat appear at the bottom of the screen."
     nSetLang[5] = "Highlighted game's icon will not rotate."
@@ -16,7 +16,7 @@ if XEBPlusLanguage == "en-US" then
     nSetLang[14] = "Cache Rebuild Queued"
     nSetLang[15] = "Disable Icon Animation"
 elseif XEBPlusLanguage == "es-419" then
-    nSetLang[1] = "Configuración del lanzador neutrino (HDD)"
+    nSetLang[1] = "Configuración del lanzador neutrino (UDPBD)"
     nSetLang[2] = "Configurar el menú del lanzador de neutrino"
     nSetLang[3] = "Desactiva el arte específico del juego en\nel menú."
     nSetLang[4] = "Deshabilitar la carga y otros mensajes que\naparecen en la parte inferior de la pantalla."
@@ -32,8 +32,8 @@ elseif XEBPlusLanguage == "es-419" then
     nSetLang[14] = "Encolada la reconstrucción del caché"
     nSetLang[15] = "Desactivar animación de iconos"
 elseif XEBPlusLanguage == "pt-BR" then
-    nSetLang[1] = "Configurações do neutrino Launcher (HDD)"
-    nSetLang[2] = "Configurar menu do neutrino Launcher"
+    nSetLang[1] = "Configurações do Neutrino Launcher (UDPBD)"
+    nSetLang[2] = "Configurar menu do Neutrino Launcher"
     nSetLang[3] = "Desative a artwork específica do jogo\nno menu."
     nSetLang[4] = "Desative o carregamento e outras\nmensagens que apareçam na parte\ninferior do ecrã."
     nSetLang[5] = "Desative a animação do ícone  do\ndisco no menu"
@@ -55,14 +55,14 @@ PluginData.Category = 6;
 PluginData.Name = nSetLang[1];
 PluginData.Description = nSetLang[2];
 PluginData.Safe = true;
-PluginData.ValueA = "APPS/neutrinoHDD/settings.lua";
+PluginData.ValueA = "APPS/neutrinoUDPBD/settings.lua";
 PluginData.ValueB = "NONE";
 PluginData.ValueC = "NONE";
 if theXEBPlusVersion == "XEBPLUS-2022-09" then -- If using the XEB+ Xmas showcase, an external icon will be loaded
 	PluginData.Icon = 70; -- Preventive, in case the game files' are missing
-	if System.doesFileExist(System.currentDirectory().."APPS/neutrinoHDD/image/ic_set_neutrino_hdl.png") then
+	if System.doesFileExist(System.currentDirectory().."APPS/neutrinoUDPBD/image/ic_set_neutrino_hdl.png") then
 		AddneutrinosethdlIcon=#themeInUse+1
-		themeInUse[AddneutrinosethdlIcon] = Graphics.loadImage(System.currentDirectory().."APPS/neutrinoHDD/image/ic_set_neutrino_hdl.png")
+		themeInUse[AddneutrinosethdlIcon] = Graphics.loadImage(System.currentDirectory().."APPS/neutrinoUDPBD/image/ic_set_neutrino_hdl.png")
 		PluginData.Icon = AddneutrinosethdlIcon;
 	end
 else -- Else, the icon will be loaded from XEB+'s theme
