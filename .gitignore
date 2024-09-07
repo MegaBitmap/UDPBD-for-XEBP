@@ -11,7 +11,8 @@ luac.out
 *.os
 *.ko
 *.obj
-*.elf
+# commented this out to keep neutrino.elf and ee_core.elf
+# *.elf
 
 # Precompiled Headers
 *.gch
