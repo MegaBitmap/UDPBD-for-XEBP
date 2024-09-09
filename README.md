@@ -20,8 +20,10 @@ It is bundled with a windows app `UDPBD-for-XEB+.exe` to automate the setup proc
 ## Requirements
 
 - A PlayStation 2 console configured to run unsigned code via an exploit such as FreeMCBoot or PS2BBL.
+- LaunchELF v4.43x_isr (bundled with PS2BBL) or LaunchELF v4.43a 41e4ebe (bundled with FMCB v1.966)
 - A PlayStation 2 slim with built in Ethernet or a fat model with an OEM network adapter.
-- A MBR FAT32 formatted USB drive that is ready to be erased. This is used for XEB+ and assorted files. Game ISOs are stored on the PC.
+- A MBR FAT32 formatted USB drive that is ready to be erased.  
+This is used for XEB+ and assorted files. Game ISOs are stored on the PC.
 - A Windows PC with enough free space to store ISOs.
 - A Ethernet cable to connect the PS2 to the PC.
 
@@ -29,7 +31,7 @@ It is bundled with a windows app `UDPBD-for-XEB+.exe` to automate the setup proc
 
 1. Use [rufus](https://rufus.ie/en/) to format the USB flash drive with settings as shown:  
 ![mbr-fat32-usb-drive](./images/mbr-fat32-usb-drive.jpg)
-2. Download the Xtreme Eliete Boot Plus Xmas 2021 showcase [here](https://web.archive.org/web/20240729132341/http://www.hwc.nat.cu/ps2-vault/hwc-projects/xebplus/).  
+2. Download the Xtreme Elite Boot Plus Xmas 2021 showcase [here](https://web.archive.org/web/*/hwc.nat.cu/ps2-vault/hwc-projects/xebplus).  
 3. Use [7-zip](https://7-zip.org/) to extract the `XEBPLUS` folder to the root of your USB drive. (Windows does not natively support `.rar` with passwords.)
 The password is at the bottom of `xebplus_xmas_showcase.rar\Distibution License.txt`.
 4. Download the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases).
@@ -187,9 +189,20 @@ If this happens, the behavior will persist until the cache is refreshed manually
   * Scrolling through the list quickly may cause corrupted graphics to be displayed briefly.
   * This plugin does not currently support virtual memory cards. Further development / testing is required to implement this feature.
 
+## Compiling the Sync App
+
+If you wish to make any modifications to the windows presentation framework (wpf) application follow these steps:
+1. Download and install Visual Studio Community with the `.NET desktop development` workload.
+2. Clone this repository.
+3. Open the `Sync-App-Source\UDPBD-for-XEB+.sln` file with Visual Studio.
+4. Edit `MainWindow.xaml` to change the appearance, or edit `MainWindow.xaml.cs` to change the functionality.
+5. Click Build -> Build Solution, then copy the files from `Sync-App-Source\needed-for-release` to `Sync-App-Source\UDPBD-for-XEB+\bin\Debug\net8.0-windows`  
+This only needs to be done once.
+6. Now you can test your changes by clicking the green arrow in VS or open `Sync-App-Source\UDPBD-for-XEB+\bin\Debug\net8.0-windows\UDPBD-for-XEB+.exe`
+
 ## Credits
 
-Big thanks to these developers:  
+Big Thanks to these Devs!  
 
 awaken1ng - udpbd-vexfat - v0.2.0  
 https://github.com/awaken1ng/udpbd-vexfat
