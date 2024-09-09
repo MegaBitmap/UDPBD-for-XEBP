@@ -1400,6 +1400,77 @@ while XEBKeepInSubMenu do
 		end
 		if NEUTRINO_ShowHelp == false then
 		if Pads.check(pad, PAD_ACCEPT) and not Pads.check(oldpad, PAD_ACCEPT) then
+			spinSpeed = 0.34
+			for NEUTRINO_WaveByeBye = 1, 25 do
+				Screen.clear()
+				if backgroundFilter then
+					Graphics.drawImageExtended(themeInUse[-1], 352, plusYValue+240, 0, 0, backgroundValueX, backgroundValueY, 704, 480, 0, 255)
+				else
+					Graphics.drawImage(themeInUse[-1], 0, plusYValue+0)
+				end
+				thmDrawBKG()
+				DrawSubMenu(actualCat,actualOption,true)
+				NEUTRINO_ItemPosition = -5
+				for NEUTRINO_iB = NEUTRINO_SelectedItem-6, NEUTRINO_SelectedItem+5 do
+					NEUTRINO_iB_Y = NEUTRINO_ItemPosition*71
+					if NEUTRINO_iB ~= NEUTRINO_SelectedItem then
+						NEUTRINO_DrawItem(NEUTRINO_CurrentList[NEUTRINO_iB].Favorite, NEUTRINO_CurrentList[NEUTRINO_iB].IconSlot, 152, NEUTRINO_iB_Y+135, true, NEUTRINO_CurrentList[NEUTRINO_iB].Name, NEUTRINO_CurrentList[NEUTRINO_iB].Folder)
+					end
+					NEUTRINO_ItemPosition=NEUTRINO_ItemPosition+1
+				end
+				spinDisc()
+				thmDrawBKGOL()
+				Graphics.drawRect(352, 240, 704, 480, Color.new(0,0,0,NEUTRINO_WaveByeBye*10))
+				NEUTRINO_DrawItem(NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Favorite, NEUTRINO_CurrentList[NEUTRINO_SelectedItem].IconSlot, 152, 206, false, NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name, NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder)
+				Screen.waitVblankStart()
+				Screen.flip()
+			end
+			for NEUTRINO_WaveByeBye = 1, 25 do
+				Screen.clear()
+				NEUTRINO_DrawItem(NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Favorite, NEUTRINO_CurrentList[NEUTRINO_SelectedItem].IconSlot, 152, 206, false, NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name, NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder)
+				Graphics.drawRect(352, 240, 704, 480, Color.new(0,0,0,NEUTRINO_WaveByeBye*10))
+				Screen.waitVblankStart()
+				Screen.flip()
+			end
+			for NEUTRINO_WaveByeBye = 1, 25 do
+				Screen.clear()
+				NEUTRINO_ColorToDraw=NEUTRINO_WaveByeBye*10
+				NEUTRINO_ColorToDraw=255-NEUTRINO_ColorToDraw
+				Font.ftPrint(fontBig, 352, plusYValue+223, 11, 512, 64, "neutrino", Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+240, 11, 512, 64, neuLang[36], Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+414, 11, 512, 64, neuLang[37], Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+427, 11, 512, 64, neuLang[38], Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+440, 11, 512, 64, neuLang[39], Color.new(255,255,255,128))
+				Graphics.drawRect(352, 240, 704, 480, Color.new(0,0,0,NEUTRINO_ColorToDraw))
+				Screen.waitVblankStart()
+				Screen.flip()
+			end
+			for NEUTRINO_WaveByeBye = 1, 52 do
+				Screen.clear()
+				Font.ftPrint(fontBig, 352, plusYValue+223, 11, 512, 64, "neutrino", Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+240, 11, 512, 64, neuLang[36], Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+414, 11, 512, 64, neuLang[37], Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+427, 11, 512, 64, neuLang[38], Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+440, 11, 512, 64, neuLang[39], Color.new(255,255,255,128))
+				Screen.waitVblankStart()
+				Screen.flip()
+			end
+			for NEUTRINO_WaveByeBye = 1, 25 do
+				Screen.clear()
+				Font.ftPrint(fontBig, 352, plusYValue+223, 11, 512, 64, "neutrino", Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+240, 11, 512, 64, neuLang[36], Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+414, 11, 512, 64, neuLang[37], Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+427, 11, 512, 64, neuLang[38], Color.new(255,255,255,128))
+				Font.ftPrint(fontSmall, 352, plusYValue+440, 11, 512, 64, neuLang[39], Color.new(255,255,255,128))
+				Graphics.drawRect(352, 240, 704, 480, Color.new(0,0,0,NEUTRINO_WaveByeBye*10))
+				Screen.waitVblankStart()
+				Screen.flip()
+			end
+			for NEUTRINO_WaveByeBye = 1, 2 do
+				Screen.clear()
+				Screen.waitVblankStart()
+				Screen.flip()
+			end
 			if NEUTRINO_LocationPrefix~=System.currentDirectory().."CD/" then
 				if System.doesFileExist("mass:/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder.."/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name..".cfg") then
 					NEUTRINO_TempFile = io.open("mass:/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder.."/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name..".cfg", "r")
@@ -1415,7 +1486,7 @@ while XEBKeepInSubMenu do
 				end
 				
 
-				NEUTRINO_RadShellText = "run neutrino.elf -bsd=udpbd \"-dvd=mass:"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder.."/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name.."."..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Extension.."\" -mt="..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Media.." "..NEUTRINO_LaunchOptions.."\r\n                                                                                                                                                                                                                                                                      "
+				NEUTRINO_RadShellText = "fontsize 0.6\r\nload ioman.irx\r\nsleep 1\r\nrun neutrino.elf -bsd=udpbd \"-dvd=mass:"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder.."/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name.."."..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Extension.."\" -mt="..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Media.." "..NEUTRINO_LaunchOptions.."\r\n                                                                                                                                                                                                                                                                      "
 				NEUTRINO_RadShellFile = System.openFile(xebLua_AppWorkingPath.."radshellmod.ios", FRDWR)
 				System.removeFile(NEUTRINO_RadShellFile)
 				System.closeFile(NEUTRINO_RadShellFile)
