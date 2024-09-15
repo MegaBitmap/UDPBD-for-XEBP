@@ -29,7 +29,7 @@ namespace UDPBD_for_XEB_
             "https://web.archive.org/web/*/hwc.nat.cu/ps2-vault/hwc-projects/xebplus\n\n" +
             "Rick Gaiser - neutrino - v1.3.1\n" +
             "https://github.com/rickgaiser/neutrino\n\n" +
-            "sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v1.0.1\n" +
+            "sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v1.0.2\n" +
             "https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin";
 
         readonly List<string> gameList = [];
