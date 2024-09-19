@@ -1758,7 +1758,7 @@ for NEUTRINO_i = 1, 3 do
 	oldpad = pad;
 	Screen.flip()
 end
-for NEUTRINO_i = -90, -111, -1 do
+for NEUTRINO_i = -90, -111 do
 	if themeInUse[NEUTRINo_i] > 0 then
 		Graphics.freeImage(themeInUse[NEUTRINO_i])
 	end
