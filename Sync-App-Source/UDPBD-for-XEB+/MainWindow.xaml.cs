@@ -1,9 +1,11 @@
-﻿using Microsoft.Win32;
+﻿using DiscUtils.Iso9660;
+using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows;
 
 namespace UDPBD_for_XEB_
@@ -12,11 +14,11 @@ namespace UDPBD_for_XEB_
     {
         readonly string version = $"Version {Assembly.GetExecutingAssembly().GetName().Version} by MegaBitmap";
         const string helpUrl = "https://github.com/MegaBitmap/UDPBD-for-XEBP?tab=readme-ov-file#setup";
+        const string artUrl = "https://archive.org/download/OPLM_ART_2024_09/OPLM_ART_2024_09.zip/PS2/SERIALID/SERIALID";
         const string serverName = "udpbd-vexfat";
         const string defaultUdpbdConfig = "bsd-udpbd.toml";
-        const string dummyIso = "dummy.iso";
         const string serverExe = "udpbd-vexfat.exe";
-        readonly string[] neededFiles = [defaultUdpbdConfig, dummyIso , serverExe];
+        readonly string[] neededFiles = [defaultUdpbdConfig , serverExe];
 
         const string udpbdConfigXeb = "/mass/0/XEBPLUS/APPS/neutrinoUDPBD/config/bsd-udpbd.toml";
         const string udpbdConfigFolder = "/mass/0/XEBPLUS/APPS/neutrinoUDPBD/config/";
@@ -198,7 +200,6 @@ namespace UDPBD_for_XEB_
             tempUDPCFG.Close();
 
             FtpUploadFile($"ftp://{address}{udpbdConfigXeb}", tempUdpbdConfig);
-            File.Delete(tempUdpbdConfig);
 
             string[] folders = [$"ftp://{address}/mass/0/DVD", $"ftp://{address}/mass/0/CD"];
             foreach (string folder in folders)
@@ -207,17 +208,78 @@ namespace UDPBD_for_XEB_
                 {
                     CreateFtpDirectory(folder);
                 }
-                else if (GetFtpSize(folder) < 10)
+                else if (GetFtpSize(folder) < 50000)
                 {
                     DeleteFtpDirectory(folder);
                 }
             }
             foreach (string game in gameList)
             {
-                FtpUploadFile($"ftp://{address}/mass/0/{game.Replace(@"\", "/")}", "dummy.iso");
+                string serialID = GetSerialID(game);
+                TextWriter tempIso = new StreamWriter("tempIso.txt");
+                tempIso.Write(serialID);
+                tempIso.Close();
+                FtpUploadFile($"ftp://{address}/mass/0/{game.Replace(@"\", "/")}", "tempIso.txt");
+                if (EnableArtworkDownload.IsChecked == true)
+                {
+                    if (GetArtwork(serialID) == true)
+                    {
+                        FtpUploadFile($"ftp://{address}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png", "temp_BG.png");
+                        FtpUploadFile($"ftp://{address}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png", "temp_ICO.png");
+                    }
+                }
             }
             SaveSettings();
             MessageBox.Show("Synchronization with the PS2 is now complete.");
+        }
+
+        private static bool GetArtwork(string serialID)
+        {
+            try
+            {
+                using WebClient client = new();
+                client.DownloadFile(new Uri(artUrl.Replace("SERIALID", serialID) + "_BG_00.png"), "temp_BG.png");
+                client.DownloadFile(new Uri(artUrl.Replace("SERIALID", serialID) + "_ICO.png"), "temp_ICO.png");
+                return true;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show($"Failed to download artwork for {serialID}.");
+                return false;
+            }
+        }
+
+        private string GetSerialID(string game)
+        {
+            string fullGamePath = gamePath + @"\" + game;
+            try
+            {
+                string content;
+                using (FileStream isoStream = File.Open(fullGamePath, FileMode.Open))
+                {
+                    CDReader cd = new(isoStream, true);
+                    if (!cd.FileExists(@"SYSTEM.CNF"))
+                    {
+                        MessageBox.Show(game + " Is not a valid PS2 game ISO.\nThe SYSTEM.CNF file is missing.");
+                        return "";
+                    }
+                    using Stream fileStream = cd.OpenFile(@"SYSTEM.CNF", FileMode.Open);
+                    using StreamReader reader = new(fileStream);
+                    content = reader.ReadToEnd();
+                }
+                if (!content.Contains("BOOT2"))
+                {
+                    MessageBox.Show(game + " Is not a valid PS2 game ISO.\nThe SYSTEM.CNF file does not contain BOOT2.");
+                    return "";
+                }
+                string serialID = SerialMask().Replace(content.Split("\n")[0], "");
+                return serialID;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(game + " Is not a valid PS2 game ISO.\nThe ISO file may be corrupt.");
+                return "";
+            }
         }
 
         private void StartServer_Click(object sender, RoutedEventArgs e)
@@ -407,5 +469,8 @@ namespace UDPBD_for_XEB_
             aboutWindow.TextBoxAbout.Text = credits.Replace("https://", "").Replace("http://", "");
             aboutWindow.ShowDialog();
         }
+
+        [GeneratedRegex(@".*\\|;.*")]
+        private static partial Regex SerialMask();
     }
 }

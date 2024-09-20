@@ -40,6 +40,7 @@
         <TextBlock Name="TextBlockConnection" Text="Disconnected" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="40,20" Grid.Column="0" Grid.Row="1"/>
         <Button Content="Select Game Path" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="1" Grid.Row="1" Click="SelectPath_Click"/>
         <TextBlock Name="TextBlockGameList" Text="" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="40,20" Grid.Column="1" Grid.Row="1"/>
+        <CheckBox Name="EnableArtworkDownload" Content="Download Artwork" HorizontalAlignment="Center" Padding="4,-6,0,0" Margin="30" Grid.Column="2" Grid.Row="1"/>
         <Button Content="Sync with PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="2" Grid.Row="1" Click="Sync_Click"/>
         <Button Content="View Help" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="0" Grid.Row="2" Click="Help_Click"/>
         <Button Content="Start Server" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="1" Grid.Row="2" Click="StartServer_Click"/>
