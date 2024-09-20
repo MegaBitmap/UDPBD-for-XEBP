@@ -251,26 +251,6 @@ NEUTRINO_GamesTotal = 0
 NEUTRINO_FavoritesTotal = 0
 NEUTRINO_Games = {};
 NEUTRINO_Favorites = {};
-NEUTRINO_TitlePrefix = {};
-NEUTRINO_TitlePrefix[1] = "SLES"; --3243
-NEUTRINO_TitlePrefix[2] = "SLUS"; --2430
-NEUTRINO_TitlePrefix[3] = "SLPM"; --717
-NEUTRINO_TitlePrefix[4] = "SLPS"; --579
-NEUTRINO_TitlePrefix[5] = "SCES"; --564
-NEUTRINO_TitlePrefix[6] = "SCUS"; --268
-NEUTRINO_TitlePrefix[7] = "SCPS"; --96
-NEUTRINO_TitlePrefix[8] = "SLKA"; --65
-NEUTRINO_TitlePrefix[9] = "SCAJ"; --42
-NEUTRINO_TitlePrefix[10] = "SCKA"; --26
-NEUTRINO_TitlePrefix[11] = "PBPX"; --13
-NEUTRINO_TitlePrefix[12] = "SLAJ"; --13
-NEUTRINO_TitlePrefix[13] = "SCCS"; --6
-NEUTRINO_TitlePrefix[14] = "SLED"; --3
-NEUTRINO_TitlePrefix[15] = "TCPS"; --3
-NEUTRINO_TitlePrefix[16] = "SKAJ"; --1
-NEUTRINO_TitlePrefix[17] = "SRPM";
-NEUTRINO_TitlePrefix[18] = "PSXC";
-NEUTRINO_TitlePrefix[19] = "MARF";
 
 NEUTRINO_CurrentList = NEUTRINO_Games
 NEUTRINO_CachedCount = 0
@@ -279,17 +259,12 @@ NEUTRINO_NBgCount = 0
 NEUTRINO_NDiscCount = 0
 NEUTRINO_Timer = 0
 
-function NEUTRINO_GetTitleId()
-	for NEUTRINO_i = 1, #NEUTRINO_TitlePrefix do
-		if string.match(NEUTRINO_Games[NEUTRINO_GamesTotal].Name, NEUTRINO_TitlePrefix[NEUTRINO_i]) then
-			a, b = string.match(NEUTRINO_Games[NEUTRINO_GamesTotal].Name, "(.*)"..NEUTRINO_TitlePrefix[NEUTRINO_i].."(.*)") 
-			a = string.sub(string.gsub(string.sub(b,1,8), "[%D]+", ""), 1, 5)
-			NEUTRINO_Games[NEUTRINO_GamesTotal].TitleId = NEUTRINO_TitlePrefix[NEUTRINO_i].."_"..string.sub(a, 1, 3).."."..string.sub(a, 4, 5)
-			NEUTRINO_TitleIdCount = NEUTRINO_TitleIdCount + 1
-			break
-		elseif NEUTRINO_i == #NEUTRINO_TitlePrefix then
-			NEUTRINO_Games[NEUTRINO_GamesTotal].TitleId = ""
-		end
+function NEUTRINO_GetTitleId(fullFileName)
+	NEUTRINO_TempFile = io.open(fullFileName, "r")
+	NEUTRINO_Games[NEUTRINO_GamesTotal].TitleId = (NEUTRINO_TempFile:read())
+	io.close(NEUTRINO_TempFile)
+	if NEUTRINO_Games[NEUTRINO_GamesTotal].TitleId ~= "" and NEUTRINO_Games[NEUTRINO_GamesTotal].TitleId ~= nil then
+		NEUTRINO_TitleIdCount = NEUTRINO_TitleIdCount + 1
 	end
 end
 
@@ -429,7 +404,7 @@ if System.doesDirectoryExist(NEUTRINO_LocationPrefix) then
 			NEUTRINO_Games[NEUTRINO_GamesTotal].Folder = "DVD";
 			NEUTRINO_Games[NEUTRINO_GamesTotal].Extension = "iso";
 			NEUTRINO_Games[NEUTRINO_GamesTotal].Media = "dvd";
-			NEUTRINO_GetTitleId()
+			NEUTRINO_GetTitleId(NEUTRINO_LocationPrefix..NEUTRINO_Games[NEUTRINO_GamesTotal].Name..".iso")
 		end
 	end
 end
@@ -448,7 +423,7 @@ if System.doesDirectoryExist(NEUTRINO_LocationPrefix) then
 			NEUTRINO_Games[NEUTRINO_GamesTotal].Folder = "CD";
 			NEUTRINO_Games[NEUTRINO_GamesTotal].Extension = "iso";
 			NEUTRINO_Games[NEUTRINO_GamesTotal].Media = "cd";
-			NEUTRINO_GetTitleId()
+			NEUTRINO_GetTitleId(NEUTRINO_LocationPrefix..NEUTRINO_Games[NEUTRINO_GamesTotal].Name..".iso")
 		end
 	end
 end
