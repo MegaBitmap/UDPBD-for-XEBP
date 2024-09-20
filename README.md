@@ -78,17 +78,11 @@ Repeat steps 13-23 of the setup process each time you add or remove games.
 The Neutrino UDPBD Loader plugin can display game-specific artwork in the selection menu.  
 This feature uses the same file type and naming conventions as Open PS2 Loader,  
 which allows the plugin to take advantage of existing PS2 artwork libraries designed for OPL.  
-
-
-To make use of this feature, the following additional steps are required:
-
-1. Ensure that the games you wish to display artwork for have their PlayStation 2 title ID somewhere in the filename.  
-Most title ID formats will work, such as `SLUS_123.45`, `SLUS-12345`, `SLUS.12345`, `SLUS12345`, ect.  
-2. Prepare or acquire artwork files with the same file format and naming conventions as those used by OPL.  
 Note that only background (*_BG*) and disc art (*_ICO*) files are used by this plugin.  
-3. Copy the artwork files you wish to use to `/XEBPLUS/GME/ART` on your USB drive.  
-It is recommended that you copy as few files as possible to this directory.  
-4. Launch XEB+ and select the Neutrino Loader (UDPBD) plugin.  
+
+To make use of this feature, check the box `Download Artwork` before clicking sync.  
+This will download artwork from the [OPLM art backup on archive.org](https://oplmanager.com/site/?backups).  
+
 If the plugin detects files at `/XEBPLUS/GME/ART`, it will automatically create an artwork cache in the plugin folder.  
 This is necessary to maintain a usable level of performance while displaying artwork in the menu.  
 The caching process can take a long time to complete the first time it runs,  
