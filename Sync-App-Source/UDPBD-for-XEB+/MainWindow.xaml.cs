@@ -184,6 +184,10 @@ namespace UDPBD_for_XEB_
             }
             _ = IPAddress.TryParse(TextBoxPS2IP.Text, out IPAddress? address);
             if (address == null) return;
+            if (!KillServer())
+            {
+                return;
+            }
             if (!FtpDirectoryExists($"ftp://{address}{udpbdConfigFolder}"))
             {
                 MessageBox.Show("Please install XtremeEliteBoot and the Neutrino UDPBD plugin first.");
@@ -231,6 +235,22 @@ namespace UDPBD_for_XEB_
             }
             SaveSettings();
             MessageBox.Show("Synchronization with the PS2 is now complete.");
+        }
+
+        private static bool KillServer()
+        {
+            Process[] processes = Process.GetProcessesByName(serverName);
+            if (!(processes.Length == 0))
+            {
+                MessageBoxResult response = MessageBox.Show("The server is currently running.\nClick OK to stop the server and sync.", "The server is running", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (response == MessageBoxResult.OK)
+                {
+                    foreach (var item in processes) item.Kill();
+                    return true;
+                }
+                else return false;
+            }
+            return true;
         }
 
         private static bool GetArtwork(string serialID)
