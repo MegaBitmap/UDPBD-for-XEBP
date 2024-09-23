@@ -12,21 +12,22 @@ namespace UDPBD_for_XEB_
 {
     public partial class MainWindow : Window
     {
-        readonly string version = $"Version {Assembly.GetExecutingAssembly().GetName().Version} by MegaBitmap";
+        readonly string version = $"Version {Assembly.GetExecutingAssembly().GetName().Version}-VMC by MegaBitmap";
         const string helpUrl = "https://github.com/MegaBitmap/UDPBD-for-XEBP?tab=readme-ov-file#setup";
         const string artUrl = "https://archive.org/download/OPLM_ART_2024_09/OPLM_ART_2024_09.zip/PS2/SERIALID/SERIALID";
-        const string serverName = "udpbd-vexfat";
+        const string serverName = "udpbd-server";
+        const string serverExe = "udpbd-server.exe";
         const string defaultUdpbdConfig = "bsd-udpbd.toml";
-        const string serverExe = "udpbd-vexfat.exe";
-        readonly string[] neededFiles = [defaultUdpbdConfig, serverExe];
+        const string blankVMC = "BlankVMC.bin";
+        readonly string[] neededFiles = [defaultUdpbdConfig, serverExe, blankVMC];
 
         const string udpbdConfigXeb = "/mass/0/XEBPLUS/APPS/neutrinoUDPBD/config/bsd-udpbd.toml";
         const string udpbdConfigFolder = "/mass/0/XEBPLUS/APPS/neutrinoUDPBD/config/";
         const string settingsCfg = "settings.cfg";
         const string tempUdpbdConfig = "tempbsd-udpbd.toml";
         const string credits =
-            "\n\nawaken1ng - udpbd-vexfat - v0.2.0\n" +
-            "https://github.com/awaken1ng/udpbd-vexfat\n\n" +
+            "\n\nAlex Parrado & El_isra & Rick Gaiser - udpbd-server - 2023-3-8\n" +
+            "https://github.com/israpps/udpbd-server\n\n" +
             "Howling Wolf & Chelsea - XtremeEliteBoot+\n" +
             "https://web.archive.org/web/*/hwc.nat.cu/ps2-vault/hwc-projects/xebplus\n\n" +
             "Rick Gaiser - neutrino - v1.3.1\n" +
@@ -40,6 +41,7 @@ namespace UDPBD_for_XEB_
         string convertLog = "";
         readonly List<string> gameList = [];
         string gamePath = "";
+        string? gameDrive;
 
         public MainWindow()
         {
@@ -50,6 +52,39 @@ namespace UDPBD_for_XEB_
             }
             TextBlockVersion.Text = version;
             LoadSettings();
+            if (!KillServer())
+            {
+                Application.Current.Shutdown();
+            }
+            if (!CheckForExFat())
+            {
+                Application.Current.Shutdown();
+            }
+        }
+
+        private bool CheckForExFat()
+        {
+            int numValidVolume = 0;
+            foreach (DriveInfo drive in DriveInfo.GetDrives())
+            {
+                if (drive.IsReady && drive.DriveFormat.Equals("exFAT", StringComparison.OrdinalIgnoreCase))
+                {
+                    string numGames = GetGameList(drive.ToString());
+
+                    ComboBoxGameVolume.Items.Add($"{drive}    {numGames}");
+                    numValidVolume++;
+                }
+            }
+            if (numValidVolume >= 1)
+            {
+                ComboBoxGameVolume.SelectedIndex = 0;
+                return true;
+            }
+            else
+            {
+                MessageBox.Show("The program was unable to find an exFAT volume or partition.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
         }
 
         private void SaveSettings()
@@ -64,15 +99,9 @@ namespace UDPBD_for_XEB_
         {
             if (!File.Exists(settingsCfg)) return;
             TextReader settings = new StreamReader(settingsCfg);
-            string? tempPath = settings.ReadLine();
+            _ = settings.ReadLine(); // ignore first line in vmc edition
             string? tempIP = settings.ReadLine();
             settings.Close();
-
-            if (tempPath != null && Directory.Exists(tempPath))
-            {
-                GetGameList(tempPath);
-                if (gameList.Count > 0) gamePath = tempPath;
-            }
             if (tempIP != null) TextBoxPS2IP.Text = tempIP;
         }
 
@@ -131,7 +160,7 @@ namespace UDPBD_for_XEB_
             GetGameList(gamePath);
         }
 
-        private void GetGameList(string testPath)
+        private string GetGameList(string testPath)
         {
             gameList.Clear();
             string[] scanFolders = [$"{testPath}\\CD", $"{testPath}\\DVD"];
@@ -143,21 +172,23 @@ namespace UDPBD_for_XEB_
                     foreach (string file in ISOFiles) gameList.Add(file.Replace(testPath + @"\", ""));
                 }
             }
-            if (gameList.Count == 0) return;
-            else if (gameList.Count == 1) TextBlockGameList.Text = gameList.Count + " Game Loaded";
-            else TextBlockGameList.Text = gameList.Count + " Games Loaded";
+            if (gameList.Count == 0) return "No Games";
+            else if (gameList.Count == 1) return $"{gameList.Count} Game";
+            else return $"{gameList.Count} Games";
         }
 
         private bool ValidateSync()
         {
+            gameDrive = ComboBoxGameVolume.SelectedItem.ToString();
+            if (gameDrive == null) return false;
             if (!TextBlockConnection.Text.Contains("Connected"))
             {
                 MessageBox.Show("Please first connect to the PS2.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            if (gameList.Count == 0)
+            if (gameDrive.Contains("No Games"))
             {
-                MessageBox.Show("Please first select the game folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Please select a volume with 1 or more games.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             if (!TestPS2Connection(TextBoxPS2IP.Text))
@@ -184,16 +215,25 @@ namespace UDPBD_for_XEB_
 
         private static void ResetSyncFolder(IPAddress address)
         {
-            string vmcFolder = $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/VMC";
-            if (FtpDirectoryExists(vmcFolder)) DeleteFTPFolderContents(vmcFolder);
             string syncFolder = $"ftp://{address}/mass/0/UDPBD-XEBP-Sync";
             if (!FtpDirectoryExists(syncFolder)) CreateFtpDirectory(syncFolder);
-            string[] folders = [$"ftp://{address}/mass/0/UDPBD-XEBP-Sync/DVD", $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/CD"];
+            string[] folders = [$"ftp://{address}/mass/0/UDPBD-XEBP-Sync/DVD", $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/CD", $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/VMC"];
             foreach (string folder in folders)
             {
                 if (!FtpDirectoryExists(folder)) CreateFtpDirectory(folder);
                 else if (GetFtpSize(folder) < 262144) DeleteFTPFolderContents(folder); // only delete the folder contents if less than 0.25MB. The dummy ISO files should only be 11 bytes each.
             }
+        }
+
+        private void SyncVMC(IPAddress address, string serialID)
+        {
+            string vmcSyncFolder = $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/VMC";
+            string vmcFullPath = $"{gamePath}VMC\\{serialID}_0.bin";
+            if (!File.Exists(vmcFullPath)) File.Copy(blankVMC, vmcFullPath);
+            
+            if (!File.Exists("tempDummyVMC.bin")) File.Create("tempDummyVMC.bin").Dispose();
+            if (!FtpDirectoryExists(vmcSyncFolder)) CreateFtpDirectory(vmcSyncFolder);
+            FtpUploadFile($"{vmcSyncFolder}/{serialID}_0.bin", "tempDummyVMC.bin");
         }
 
         private void Sync_Click(object sender, RoutedEventArgs e)
@@ -202,11 +242,16 @@ namespace UDPBD_for_XEB_
 
             _ = IPAddress.TryParse(TextBoxPS2IP.Text, out IPAddress? address);
             if (address == null) return;
+
+            if (!KillServer()) return;
             if (!FtpDirectoryExists($"ftp://{address}{udpbdConfigFolder}"))
             {
                 MessageBox.Show("Please install XtremeEliteBoot and the Neutrino UDPBD plugin first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            if (gameDrive == null) return;
+            gamePath = SelectedVolume().Replace(gameDrive, @"\");
+
             if (EnableBinConvert.IsChecked == true) ConvertBinFolders();
 
             GetGameList(gamePath);
@@ -229,6 +274,7 @@ namespace UDPBD_for_XEB_
                         FtpUploadFile($"ftp://{address}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png", "temp_ICO.png");
                     }
                 }
+                if (EnableVMC.IsChecked == true && serialID.Length == 11) SyncVMC(address, serialID);
             }
             SaveSettings();
             if (!string.IsNullOrEmpty(convertLog)) MessageBox.Show(convertLog);
@@ -302,11 +348,14 @@ namespace UDPBD_for_XEB_
 
         private void StartServer_Click(object sender, RoutedEventArgs e)
         {
-            if (gameList.Count == 0)
+            string? selectedItem = ComboBoxGameVolume.SelectedItem.ToString();
+            if (selectedItem == null) return;
+            if (selectedItem.Contains("No Games"))
             {
-                MessageBox.Show("Please first select the game folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Please select a volume with 1 or more games.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            gamePath = SelectedVolume().Replace(selectedItem, "");
             Process[] processes = Process.GetProcessesByName(serverName);
             if (!(processes.Length == 0))
             {
@@ -315,8 +364,10 @@ namespace UDPBD_for_XEB_
             }
             Process process = new();
             process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = $"/K {serverExe} {gamePath}";
+            process.StartInfo.Arguments = $"/K \"{Path.GetFullPath(serverExe)}\" \\\\.\\{gamePath}";
+            process.StartInfo.UseShellExecute = true;
             process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
+            process.StartInfo.Verb = "runas";
             process.Start();
         }
 
@@ -463,7 +514,7 @@ namespace UDPBD_for_XEB_
         private void ConvertBinFolders()
         {
             convertLog = "";
-            string[] scanFolders = [$"{gamePath}\\CD", $"{gamePath}\\DVD"];
+            string[] scanFolders = [$"{gamePath}CD", $"{gamePath}DVD"];
             foreach (var folder in scanFolders)
             {
                 string[] binFiles = Directory.GetFiles(folder, "*.bin", SearchOption.AllDirectories);
@@ -536,5 +587,7 @@ namespace UDPBD_for_XEB_
 
         [GeneratedRegex(@".*\\|;.*")]
         private static partial Regex SerialMask();
+        [GeneratedRegex(@"\\.*")]
+        private static partial Regex SelectedVolume();
     }
 }

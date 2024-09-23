@@ -331,3 +331,4 @@ __pycache__/
 *.xsd.cs
 
 !udpbd-vexfat.exe
+!udpbd-server.exe

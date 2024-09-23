@@ -33,13 +33,14 @@
             <RowDefinition Height="2*"/>
         </Grid.RowDefinitions>
         <TextBlock Text="PS2 IP address:" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="20" Grid.Column="0" Grid.Row="0"/>
-        <TextBlock Text="UDPBD for XEB+ Sync App" Width="200" TextWrapping="Wrap" FontSize="24" TextAlignment="Center" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="-16" Grid.Column="1" Grid.Row="0"/>
+        <TextBlock Text="UDPBD for XEB+ Sync App" Width="200" TextWrapping="Wrap" FontSize="24" TextAlignment="Center" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0" Grid.Column="1" Grid.Row="0"/>
         <TextBlock Name="TextBlockVersion" Text="Version" FontSize="12" TextAlignment="Center" VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Column="2" Grid.Row="0"/>
         <TextBox Name="TextBoxPS2IP" Text="192.168.0.10" TextAlignment="Center" HorizontalAlignment="Center" Width="180" VerticalAlignment="Bottom" Margin="-20" Grid.Column="0" Grid.Row="0"/>
         <Button Name="ButtonConnect"  Content="Connect to PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="0" Grid.Row="1" Click="Connect_Click"/>
         <TextBlock Name="TextBlockConnection" Text="Disconnected" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="40,20" Grid.Column="0" Grid.Row="1"/>
-        <Button Content="Select Game Path" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="1" Grid.Row="1" Click="SelectPath_Click"/>
-        <TextBlock Name="TextBlockGameList" Text="" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="40,20" Grid.Column="1" Grid.Row="1"/>
+        <TextBlock Text="Select the exFAT volume:" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10,30" Grid.Column="1" Grid.Row="1"/>
+        <ComboBox Name="ComboBoxGameVolume" Margin="30,60" Grid.Column="1" Grid.Row="1"/>
+        <CheckBox Name="EnableVMC" Content="Use Virtual Memory Cards" VerticalAlignment="Bottom" HorizontalAlignment="Center" Padding="4,-6,0,0" Margin="0,30" Grid.Column="1" Grid.Row="1"/>
         <CheckBox Name="EnableArtworkDownload" Content="Download Artwork" HorizontalAlignment="Left" Padding="4,-6,0,0" Margin="30, 5, 0, 0" Grid.Column="2" Grid.Row="1"/>
         <CheckBox Name="EnableBinConvert" Content="Convert CD Bin to ISO" HorizontalAlignment="Left" Padding="4,-6,0,0" Margin="30, 30, 0, 0" Grid.Column="2" Grid.Row="1"/>
         <Button Content="Sync with PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="2" Grid.Row="1" Click="Sync_Click"/>
