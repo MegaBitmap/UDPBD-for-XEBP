@@ -390,7 +390,7 @@ function NEUTRINO_CacheArt(Index)
 	end
 end
 --"mass:/DVD/" for hardware, System.currentDirectory().."DVD/" for emulation
-NEUTRINO_LocationPrefix="mass:/DVD/"
+NEUTRINO_LocationPrefix="mass:/UDPBD-XEBP-Sync/DVD/"
 --NEUTRINO_LocationPrefix=System.currentDirectory().."DVD/"
 
 if System.doesDirectoryExist(NEUTRINO_LocationPrefix) then
@@ -410,7 +410,7 @@ if System.doesDirectoryExist(NEUTRINO_LocationPrefix) then
 end
 
 --"mass:/CD/" for hardware, System.currentDirectory().."CD/" for emulation
-NEUTRINO_LocationPrefix="mass:/CD/"
+NEUTRINO_LocationPrefix="mass:/UDPBD-XEBP-Sync/CD/"
 --NEUTRINO_LocationPrefix=System.currentDirectory().."CD/"
 
 if System.doesDirectoryExist(NEUTRINO_LocationPrefix) then

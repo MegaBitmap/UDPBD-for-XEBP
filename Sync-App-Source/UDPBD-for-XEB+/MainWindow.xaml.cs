@@ -18,7 +18,7 @@ namespace UDPBD_for_XEB_
         const string serverName = "udpbd-vexfat";
         const string defaultUdpbdConfig = "bsd-udpbd.toml";
         const string serverExe = "udpbd-vexfat.exe";
-        readonly string[] neededFiles = [defaultUdpbdConfig , serverExe];
+        readonly string[] neededFiles = [defaultUdpbdConfig, serverExe];
 
         const string udpbdConfigXeb = "/mass/0/XEBPLUS/APPS/neutrinoUDPBD/config/bsd-udpbd.toml";
         const string udpbdConfigFolder = "/mass/0/XEBPLUS/APPS/neutrinoUDPBD/config/";
@@ -63,21 +63,13 @@ namespace UDPBD_for_XEB_
             string? tempPath = settings.ReadLine();
             string? tempIP = settings.ReadLine();
             settings.Close();
-            if (tempPath != null)
+
+            if (tempPath != null && Directory.Exists(tempPath))
             {
-                if (Directory.Exists(tempPath))
-                {
-                    GetGameList(tempPath);
-                    if (gameList.Count > 0)
-                    {
-                        gamePath = tempPath;
-                    }
-                }
+                GetGameList(tempPath);
+                if (gameList.Count > 0) gamePath = tempPath;
             }
-            if (tempIP != null)
-            {
-                TextBoxPS2IP.Text = tempIP;
-            }
+            if (tempIP != null) TextBoxPS2IP.Text = tempIP;
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -89,23 +81,22 @@ namespace UDPBD_for_XEB_
         {
             if (!IPAddress.TryParse(ps2ip, out IPAddress? address))
             {
-                MessageBox.Show($"{ps2ip} is not a valid IP address.");
+                MessageBox.Show($"{ps2ip} is not a valid IP address.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             Ping pingSender = new();
             PingReply reply = pingSender.Send(address);
-
             if (!(reply.Status == IPStatus.Success))
             {
-                MessageBox.Show($"Connection failed: {reply.Status}");
+                MessageBox.Show($"Connection failed: {reply.Status}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             try
             {
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create($"ftp://{address}");
                 request.Method = WebRequestMethods.Ftp.ListDirectory;
-
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+
                 TextBlockConnection.Text = "Connected";
                 TextBoxPS2IP.IsEnabled = false;
                 ButtonConnect.IsEnabled = false;
@@ -113,7 +104,7 @@ namespace UDPBD_for_XEB_
             }
             catch (WebException ex)
             {
-                MessageBox.Show($"Failed to connect to the PS2's FTP server.\n\n{ex.Message}");
+                MessageBox.Show($"Failed to connect to the PS2's FTP server.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
@@ -129,7 +120,7 @@ namespace UDPBD_for_XEB_
             if (!result == true) return;
             if (!dialog.FileName.Contains(@"\DVD\" + dialog.SafeFileName) && !dialog.FileName.Contains(@"\CD\" + dialog.SafeFileName))
             {
-                MessageBox.Show("Game ISOs need to be in a folder named DVD or CD");
+                MessageBox.Show("Game ISOs need to be in a folder named DVD or CD", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             gamePath = dialog.FileName.Replace(@"\DVD\" + dialog.SafeFileName, "").Replace(@"\CD\" + dialog.SafeFileName, "");
@@ -139,91 +130,87 @@ namespace UDPBD_for_XEB_
         private void GetGameList(string testPath)
         {
             gameList.Clear();
-            if (Directory.Exists(testPath + @"\CD"))
+            string[] scanFolders = [$"{testPath}\\CD", $"{testPath}\\DVD"];
+            foreach (var item in scanFolders)
             {
-                IEnumerable<string> CDFiles = Directory.EnumerateFiles(testPath + @"\CD", "*.iso", SearchOption.TopDirectoryOnly);
-                foreach (string file in CDFiles)
+                if (Directory.Exists(item))
                 {
-                    gameList.Add(file.Replace(testPath + @"\", ""));
-                }
-            }
-            if (Directory.Exists(testPath + @"\DVD"))
-            {
-                IEnumerable<string> DVDFiles = Directory.EnumerateFiles(testPath + @"\DVD", "*.iso", SearchOption.TopDirectoryOnly);
-                foreach (string file in DVDFiles)
-                {
-                    gameList.Add(file.Replace(testPath + @"\", ""));
+                    IEnumerable<string> ISOFiles = Directory.EnumerateFiles(item, "*.iso", SearchOption.TopDirectoryOnly);
+                    foreach (string file in ISOFiles) gameList.Add(file.Replace(testPath + @"\", ""));
                 }
             }
             if (gameList.Count == 0) return;
-            else if (gameList.Count == 1)
-            {
-                TextBlockGameList.Text = gameList.Count + " Game Loaded";
-            }
+            else if (gameList.Count == 1) TextBlockGameList.Text = gameList.Count + " Game Loaded";
             else TextBlockGameList.Text = gameList.Count + " Games Loaded";
         }
 
-        private void Sync_Click(object sender, RoutedEventArgs e)
+        private bool ValidateSync()
         {
             if (!TextBlockConnection.Text.Contains("Connected"))
             {
-                MessageBox.Show("Please first connect to the PS2.");
-                return;
+                MessageBox.Show("Please first connect to the PS2.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
             if (gameList.Count == 0)
             {
-                MessageBox.Show("Please first select the game folder.");
-                return;
+                MessageBox.Show("Please first select the game folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
             if (!TestPS2Connection(TextBoxPS2IP.Text))
             {
                 TextBlockConnection.Text = "Disconnected";
                 TextBoxPS2IP.IsEnabled = true;
                 ButtonConnect.IsEnabled = true;
-                return;
+                return false;
             }
+            if (!KillServer()) return false;
+            return true;
+        }
+
+        private static void UpdateUDPConfig(IPAddress address)
+        {
+            TextReader UDPCFG = new StreamReader(defaultUdpbdConfig);
+            string stringUDPCFG = UDPCFG.ReadToEnd().Replace("192.168.1.10", address.ToString());
+            UDPCFG.Close();
+            TextWriter tempUDPCFG = new StreamWriter(tempUdpbdConfig);
+            tempUDPCFG.Write(stringUDPCFG);
+            tempUDPCFG.Close();
+            FtpUploadFile($"ftp://{address}{udpbdConfigXeb}", tempUdpbdConfig);
+        }
+
+        private static void ResetSyncFolder(IPAddress address)
+        {
+            string[] folders = [$"ftp://{address}/mass/0/UDPBD-XEBP-Sync", $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/DVD", $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/CD"];
+            foreach (string folder in folders)
+            {
+                if (!FtpDirectoryExists(folder)) CreateFtpDirectory(folder);
+                else if (GetFtpSize(folder) < 262144) DeleteFTPFolderContents(folder); // only delete the folder contents if less than 0.25MB. The dummy ISO files should only be 11 bytes each.
+            }
+        }
+
+        private void Sync_Click(object sender, RoutedEventArgs e)
+        {
+            if (ValidateSync() != true) return;
+
             _ = IPAddress.TryParse(TextBoxPS2IP.Text, out IPAddress? address);
             if (address == null) return;
-            if (!KillServer())
-            {
-                return;
-            }
             if (!FtpDirectoryExists($"ftp://{address}{udpbdConfigFolder}"))
             {
-                MessageBox.Show("Please install XtremeEliteBoot and the Neutrino UDPBD plugin first.");
+                MessageBox.Show("Please install XtremeEliteBoot and the Neutrino UDPBD plugin first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             GetGameList(gamePath);
             if (gameList.Count == 0) return;
-            TextReader UDPCFG = new StreamReader(defaultUdpbdConfig);
-            string stringUDPCFG = UDPCFG.ReadToEnd().Replace("192.168.1.10", address.ToString());
-            UDPCFG.Close();
 
-            TextWriter tempUDPCFG = new StreamWriter(tempUdpbdConfig);
-            tempUDPCFG.Write(stringUDPCFG);
-            tempUDPCFG.Close();
-
-            FtpUploadFile($"ftp://{address}{udpbdConfigXeb}", tempUdpbdConfig);
-
-            string[] folders = [$"ftp://{address}/mass/0/DVD", $"ftp://{address}/mass/0/CD"];
-            foreach (string folder in folders)
-            {
-                if (!FtpDirectoryExists(folder))
-                {
-                    CreateFtpDirectory(folder);
-                }
-                else if (GetFtpSize(folder) < 50000)
-                {
-                    DeleteFtpDirectory(folder);
-                }
-            }
+            UpdateUDPConfig(address);
+            ResetSyncFolder(address);            
             foreach (string game in gameList)
             {
                 string serialID = GetSerialID(game);
                 TextWriter tempIso = new StreamWriter("tempIso.txt");
                 tempIso.Write(serialID);
                 tempIso.Close();
-                FtpUploadFile($"ftp://{address}/mass/0/{game.Replace(@"\", "/")}", "tempIso.txt");
+                FtpUploadFile($"ftp://{address}/mass/0/UDPBD-XEBP-Sync/{game.Replace(@"\", "/")}", "tempIso.txt");
                 if (EnableArtworkDownload.IsChecked == true)
                 {
                     if (GetArtwork(serialID) == true)
@@ -234,7 +221,7 @@ namespace UDPBD_for_XEB_
                 }
             }
             SaveSettings();
-            MessageBox.Show("Synchronization with the PS2 is now complete.");
+            MessageBox.Show("Synchronization with the PS2 is now complete!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private static bool KillServer()
@@ -242,7 +229,7 @@ namespace UDPBD_for_XEB_
             Process[] processes = Process.GetProcessesByName(serverName);
             if (!(processes.Length == 0))
             {
-                MessageBoxResult response = MessageBox.Show("The server is currently running.\nClick OK to stop the server and sync.", "The server is running", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                MessageBoxResult response = MessageBox.Show("The server is currently running.\nClick OK to stop the server and sync.", "The server is running", MessageBoxButton.OKCancel, MessageBoxImage.Question);
                 if (response == MessageBoxResult.OK)
                 {
                     foreach (var item in processes) item.Kill();
@@ -264,7 +251,7 @@ namespace UDPBD_for_XEB_
             }
             catch (Exception)
             {
-                MessageBox.Show($"Failed to download artwork for {serialID}.");
+                MessageBox.Show($"Failed to download artwork for {serialID}.", "Image Download Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
         }
@@ -280,7 +267,7 @@ namespace UDPBD_for_XEB_
                     CDReader cd = new(isoStream, true);
                     if (!cd.FileExists(@"SYSTEM.CNF"))
                     {
-                        MessageBox.Show(game + " Is not a valid PS2 game ISO.\nThe SYSTEM.CNF file is missing.");
+                        MessageBox.Show(game + " Is not a valid PS2 game ISO.\nThe SYSTEM.CNF file is missing.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         return "";
                     }
                     using Stream fileStream = cd.OpenFile(@"SYSTEM.CNF", FileMode.Open);
@@ -289,7 +276,7 @@ namespace UDPBD_for_XEB_
                 }
                 if (!content.Contains("BOOT2"))
                 {
-                    MessageBox.Show(game + " Is not a valid PS2 game ISO.\nThe SYSTEM.CNF file does not contain BOOT2.");
+                    MessageBox.Show(game + " Is not a valid PS2 game ISO.\nThe SYSTEM.CNF file does not contain BOOT2.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return "";
                 }
                 string serialID = SerialMask().Replace(content.Split("\n")[0], "");
@@ -297,7 +284,7 @@ namespace UDPBD_for_XEB_
             }
             catch (Exception)
             {
-                MessageBox.Show(game + " Is not a valid PS2 game ISO.\nThe ISO file may be corrupt.");
+                MessageBox.Show(game + " was unable to be read.\nThe ISO file may be corrupt.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return "";
             }
         }
@@ -306,13 +293,13 @@ namespace UDPBD_for_XEB_
         {
             if (gameList.Count == 0)
             {
-                MessageBox.Show("Please first select the game folder.");
+                MessageBox.Show("Please first select the game folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             Process[] processes = Process.GetProcessesByName(serverName);
             if (!(processes.Length == 0))
             {
-                MessageBox.Show("The server is already running.");
+                MessageBox.Show("The server is already running.", "Server is running", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             Process process = new();
@@ -349,10 +336,7 @@ namespace UDPBD_for_XEB_
                 }
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
             }
-            catch (WebException ex)
-            {
-                MessageBox.Show($"Failed to upload file {filePath} to the PS2 via FTP.\n\n{ex.Message}");
-            }
+            catch (WebException ex) { MessageBox.Show($"Failed to upload file {filePath} to the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
         private static bool FtpDirectoryExists(string directoryPath)
@@ -364,7 +348,7 @@ namespace UDPBD_for_XEB_
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
                 return true;
             }
-            catch {return false;}
+            catch { return false; }
         }
 
         private static long GetFtpSize(string ftpUrl)
@@ -374,9 +358,9 @@ namespace UDPBD_for_XEB_
             {
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(ftpUrl);
                 request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
                 using StreamReader reader = new(response.GetResponseStream());
+
                 string? line = reader.ReadLine();
                 while (!string.IsNullOrEmpty(line))
                 {
@@ -388,10 +372,7 @@ namespace UDPBD_for_XEB_
                     line = reader.ReadLine();
                 }
             }
-            catch (WebException ex)
-            {
-                MessageBox.Show($"Failed to get the size of file {ftpUrl} on the PS2 via FTP.\n\n{ex.Message}");
-            }
+            catch (WebException ex) { MessageBox.Show($"Failed to get the size of file {ftpUrl} on the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
             return totalSize;
         }
 
@@ -403,19 +384,15 @@ namespace UDPBD_for_XEB_
                 request.Method = WebRequestMethods.Ftp.MakeDirectory;
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
             }
-            catch (WebException ex)
-            {
-                MessageBox.Show($"Failed to create the directory {directoryPath} on the PS2 via FTP.\n\n{ex.Message}");
-            }
+            catch (WebException ex) { MessageBox.Show($"Failed to create the directory {directoryPath} on the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
-        private static void DeleteFtpDirectory(string url)
+        private static void DeleteFTPFolderContents(string url)
         {
             try
             {
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
                 request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
                 using System.IO.StreamReader reader = new(response.GetResponseStream());
                 while (!reader.EndOfStream)
@@ -426,23 +403,12 @@ namespace UDPBD_for_XEB_
                     string name = tokens[8];
                     string permissions = tokens[0];
                     string fileUrl = url + "/" + name;
-                    if (permissions[0] == 'd')
-                    {
-                        if (!fileUrl.EndsWith("/.") && !fileUrl.EndsWith("/.."))
-                        {
-                            DeleteFtpDirectory(fileUrl + "/");
-                        }
-                    }
-                    else
-                    {
-                        DeleteFtpFile(fileUrl);
-                    }
+
+                    if (permissions[0] == 'd' && !fileUrl.EndsWith("/.") && !fileUrl.EndsWith("/..")) DeleteFTPFolderContents(fileUrl + "/");
+                    else DeleteFtpFile(fileUrl);
                 }
             }
-            catch (WebException ex)
-            {
-                MessageBox.Show($"Failed to delete the directory {url} on the PS2 via FTP.\n\n{ex.Message}");
-            }
+            catch (WebException ex) { MessageBox.Show($"Failed to delete the directory {url} on the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
         static void DeleteFtpFile(string url)
@@ -455,10 +421,7 @@ namespace UDPBD_for_XEB_
             }
             catch (WebException ex)
             {
-                if (FtpFileExists(url)) // for some reason going from launchELF_isr(2023-10-23) to launchELF(2019-1-11) throws an error once per file then fixes itself ???
-                {
-                    MessageBox.Show($"Failed to delete the file {url} on the PS2 via FTP.\n\n{ex.Message}");
-                }
+                if (FtpFileExists(url)) MessageBox.Show($"Failed to delete the file {url} on the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); // for some reason going from launchELF_isr(2023-10-23) to launchELF(2019-1-11) throws an error once per file then fixes itself ???
             }
         }
 
@@ -471,16 +434,12 @@ namespace UDPBD_for_XEB_
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
                 return true;
             }
-            catch {return false;}
+            catch { return false; }
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = helpUrl,
-                UseShellExecute = true
-            });
+            Process.Start(new ProcessStartInfo { FileName = helpUrl, UseShellExecute = true });
         }
 
         private void About_Click(object sender, RoutedEventArgs e)
