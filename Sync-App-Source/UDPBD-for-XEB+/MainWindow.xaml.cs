@@ -180,9 +180,11 @@ namespace UDPBD_for_XEB_
 
         private static void ResetSyncFolder(IPAddress address)
         {
-            string[] folders = [$"ftp://{address}/mass/0/UDPBD-XEBP-Sync", $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/DVD", $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/CD"];
             string vmcFolder = $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/VMC";
             if (FtpDirectoryExists(vmcFolder)) DeleteFTPFolderContents(vmcFolder);
+            string syncFolder = $"ftp://{address}/mass/0/UDPBD-XEBP-Sync";
+            if (!FtpDirectoryExists(syncFolder)) CreateFtpDirectory(syncFolder);
+            string[] folders = [$"ftp://{address}/mass/0/UDPBD-XEBP-Sync/DVD", $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/CD"];
             foreach (string folder in folders)
             {
                 if (!FtpDirectoryExists(folder)) CreateFtpDirectory(folder);
