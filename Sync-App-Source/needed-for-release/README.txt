@@ -8,7 +8,9 @@ It is bundled with a windows app `UDPBD-for-XEB+.exe` to automate the setup proc
 ## Features
 
 - Load PlayStation 2 game backups straight from the Xtreme Elite Boot Plus dashboard.
-- Uses the vexfat (virtual exFAT) variant of the UDPBD server which includes support for NTFS and exFAT.
+- Two different editions:
+	- Standard edition for quick and easy setup. (udpbd-vexfat)
+	- VMC edition with support for virtual memory cards. (udpbd-server)
 - Quick navigation functions for browsing large game lists.
 - Remember last played game.
 - Display game-specific artwork on the menu.
@@ -22,8 +24,47 @@ It is bundled with a windows app `UDPBD-for-XEB+.exe` to automate the setup proc
 - A PlayStation 2 slim with built in Ethernet or a fat model with an OEM network adapter.
 - A MBR FAT32 formatted USB drive that is ready to be erased.  
 This is used for XEB+ and assorted files. Game ISOs are stored on the PC.
-- A Windows PC with enough free space to store ISOs.
-- A Ethernet cable to connect the PS2 to the PC.
+- A Windows PC with enough free space to store game ISOs.
+- An ethernet cable to connect the PS2 to the PC.  
+If your PC does not have an ethernet port available, a USB ethernet adapter will work.  
+
+## Standard Edition or VMC Edition
+
+In the [latest release](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases) there are two different editions to choose from.  
+The standard edition uses the udpbd-vexfat server which supports windows NTFS and exFAT partitions.
+This means that game ISOs can be put almost anywhere on your main C: drive or any secondary drive.
+The limitation of this edition is that virtual memory cards (VMCs) are not supported.  
+
+The VMC edition uses the original udpbd-server built for windows and includes support for virtual memory cards.
+This edition requires extra steps to setup as it only allows games to be stored on an exFAT partition specifically created with GParted/Linux.  
+
+### The Following Steps are needed for the VMC Edition ONLY!
+
+1. Open Disk Management and select a drive to store PS2 game ISOs.  
+
+2. Shrink or delete a partition so that there is enough unallocated space to store games.  
+WARNING Please back up any important files before deleting a partition.  
+
+3. Use [rufus](https://rufus.ie/en/) to flash a [GParted live ISO](https://gparted.org/download.php) onto a flash drive.  
+
+4. Restart the PC and enter the BIOS.  
+In boot options, select the flash drive with GParted and boot from it.  
+
+5. Select the default options with the enter key to start Gparted.  
+
+6. Select the unallocated space in the drive of choice and create a new exFAT partition.  
+It is recommended to label it as PS2.  
+
+7. Apply the changes, then restart back into windows.  
+
+8. Navigate to `This PC` and an empty drive labeled PS2 should show up.  
+Please note the drive letter for step 19.  
+
+9. In the drive create a folder named `DVD` and copy all game ISOs into it.  
+For games in a CUE+BIN format, create a folder named `CD` and copy the files into it.
+
+10. Now continue with the steps below.
+The VMC edition of the sync app is slightly different but mostly the same.
 
 ## Setup
 
@@ -42,6 +83,7 @@ This will include the UDPBD plugin bundled with neutrino.
 [OPL manager](https://www.psx-place.com/resources/opl-manager-tool-to-manage-your-games.663/) will do this conversion.
 10. Plug in the ethernet cable as shown:  
 ![ps2-slim-connected-to-laptop](images/ps2-slim-connected-to-laptop.jpg)
+Please note that it is possible to use a router but that is not covered in this guide.
 11. On the PC -> Settings -> Network -> Ethernet -> Use the following settings:  
 ![pc-ip-settings](images/pc-ip-settings.jpg)
 12. Plug the USB flash drive from step 5 into the PS2.
@@ -179,7 +221,6 @@ If this happens, the behavior will persist until the cache is refreshed manually
   * If enabled, the PlayStation 2 boot logo will display incorrectly for games that do not match the console's region.
   * Repeatedly closing and re-opening the Neutrino Loader plugin can cause the system to crash.
   * Scrolling through the list quickly may cause corrupted graphics to be displayed briefly.
-  * This plugin does not currently support virtual memory cards. Further development / testing is required to implement this feature.
 
 ## Compiling the Sync App
 
@@ -195,6 +236,9 @@ This only needs to be done once.
 ## Credits
 
 Big Thanks to these Devs!  
+
+Alex Parrado & El_isra & Rick Gaiser - udpbd-server - 2023-3-8  
+https://github.com/israpps/udpbd-server
 
 awaken1ng - udpbd-vexfat - v0.2.0  
 https://github.com/awaken1ng/udpbd-vexfat
