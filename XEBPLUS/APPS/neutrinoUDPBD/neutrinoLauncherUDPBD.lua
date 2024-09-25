@@ -1457,9 +1457,13 @@ while XEBKeepInSubMenu do
 					NEUTRINO_LaunchOptions = ""
 					NEUTRINO_LoadingText(neuLang[40])
 				end
-				
-
-				NEUTRINO_RadShellText = "run neutrino.elf -bsd=udpbd \"-dvd=mass:"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder.."/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name.."."..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Extension.."\" -mt="..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Media.." "..NEUTRINO_LaunchOptions.."\r\n                                                                                                                                                                                                                                                                      "
+				NEUTRINO_VMCParam = ""
+				if NEUTRINO_CurrentList[NEUTRINO_SelectedItem].TitleId ~= "" and NEUTRINO_CurrentList[NEUTRINO_SelectedItem].TitleId ~= nil then
+					if System.doesFileExist("mass:/UDPBD-XEBP-Sync/VMC/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].TitleId.."_0.bin") then
+						NEUTRINO_VMCParam = " \"-mc0=mass:/VMC/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].TitleId.."_0.bin\""
+					end
+				end
+				NEUTRINO_RadShellText = "run neutrino.elf -bsd=udpbd \"-dvd=mass:"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder.."/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name.."."..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Extension.."\""..NEUTRINO_VMCParam.." -mt="..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Media.." "..NEUTRINO_LaunchOptions.."\r\n                                                                                                                                                                                                                                                                      "
 				NEUTRINO_RadShellFile = System.openFile(xebLua_AppWorkingPath.."radshellmod.ios", FRDWR)
 				System.removeFile(NEUTRINO_RadShellFile)
 				System.closeFile(NEUTRINO_RadShellFile)
