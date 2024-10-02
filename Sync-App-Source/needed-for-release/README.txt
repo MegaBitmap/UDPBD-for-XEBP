@@ -79,8 +79,8 @@ This will include the UDPBD plugin bundled with neutrino.
 6. Somewhere on your PC, example `Documents`, create a new folder `PS2`.
 7. Inside the `PS2` folder, create `CD` and `DVD` folders.
 8. Rip/copy any PlayStation 2 ISOs you wish to load into the folder that corresponds with their original source media.
-9. All `.bin` + `.cue` games must be converted to `.iso` format.
-[OPL manager](https://www.psx-place.com/resources/opl-manager-tool-to-manage-your-games.663/) will do this conversion.
+9. All `.bin` + `.cue` CD games must be converted to `.iso` format.
+The sync app will convert them automatically if placed in the CD folder and check the `Convert CD Bin to ISO` box before synchronizing.
 10. Plug in the ethernet cable as shown:  
 ![ps2-slim-connected-to-laptop](images/ps2-slim-connected-to-laptop.jpg)
 Please note that it is possible to use a router but that is not covered in this guide.
