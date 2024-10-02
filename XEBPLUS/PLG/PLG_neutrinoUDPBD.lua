@@ -171,9 +171,9 @@ PluginData.ValueB = "NONE";
 PluginData.ValueC = "NONE";
 if theXEBPlusVersion == "XEBPLUS-2022-09" then -- If using the XEB+ Xmas showcase, an external icon will be loaded
 	PluginData.Icon = 88; -- Preventive, in case the game files' are missing
-	if System.doesFileExist(System.currentDirectory().."APPS/neutrinoUDPBD/image/ic_tool_neutrino_hdl.png") then
+	if System.doesFileExist(System.currentDirectory().."APPS/neutrinoUDPBD/image/ic_tool_neutrino_udpbd.png") then
 		AddneutrinohdlIcon=#themeInUse+1
-		themeInUse[AddneutrinohdlIcon] = Graphics.loadImage(System.currentDirectory().."APPS/neutrinoUDPBD/image/ic_tool_neutrino_hdl.png")
+		themeInUse[AddneutrinohdlIcon] = Graphics.loadImage(System.currentDirectory().."APPS/neutrinoUDPBD/image/ic_tool_neutrino_udpbd.png")
 		PluginData.Icon = AddneutrinohdlIcon;
 	end
 else -- Else, the icon will be loaded from XEB+'s theme
