@@ -221,7 +221,7 @@ namespace UDPBD_for_XEB_
                 tempIso.Write(serialID);
                 tempIso.Close();
                 FtpUploadFile($"ftp://{address}/mass/0/UDPBD-XEBP-Sync/{game.Replace(@"\", "/")}", "tempIso.txt");
-                if (EnableArtworkDownload.IsChecked == true)
+                if (EnableArtworkDownload.IsChecked == true && !string.IsNullOrEmpty(serialID))
                 {
                     if (GetArtwork(serialID) == true)
                     {
