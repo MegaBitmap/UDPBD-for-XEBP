@@ -34,9 +34,6 @@ namespace UDPBD_for_XEB_
             "sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v1.0.2\n" +
             "https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin";
 
-        readonly byte[] CDROMHeaderReference = [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00];
-        readonly int sector_raw_size = 2352;
-        readonly int sector_target_size = 2048;
         string convertLog = "";
         readonly List<string> gameList = [];
         string gamePath = "";
@@ -347,76 +344,14 @@ namespace UDPBD_for_XEB_
 
         private void ConvertBinFolders()
         {
+            CDBin cDBin = new();
             convertLog = "";
             string[] scanFolders = [$"{gamePath}\\CD", $"{gamePath}\\DVD"];
             foreach (var folder in scanFolders)
             {
                 string[] binFiles = Directory.GetFiles(folder, "*.bin", SearchOption.AllDirectories);
-                foreach (string binFile in binFiles) ConvertBin(binFile);
+                foreach (string binFile in binFiles) convertLog += cDBin.ConvertBin(binFile);
             }
-        }
-
-        private string ScanBin(FileStream fileIn)
-        {
-            int numSectors = (int)(fileIn.Length / sector_raw_size);
-            for (int sectorIndex = 0; sectorIndex < numSectors; sectorIndex++)
-            {
-                fileIn.Position = sectorIndex * sector_raw_size;
-                byte[] header = new byte[16];
-                fileIn.Read(header, 0, header.Length);
-                if (header[0..12].SequenceEqual(CDROMHeaderReference)) return "data";
-            }
-            return "";
-        }
-
-        private void GenerateISO(FileStream fileIn, string outputISO)
-        {
-            using FileStream fileOutISO = new(outputISO, FileMode.Create, FileAccess.Write);
-
-            int numSectors = (int)(fileIn.Length / sector_raw_size);
-            int sector_offset = 0;
-            for (int sectorIndex = 0; sectorIndex < numSectors; sectorIndex++)
-            {
-                fileIn.Position = sectorIndex * sector_raw_size;
-                byte[] header = new byte[16];
-                fileIn.Read(header, 0, header.Length);
-                if (header[0..12].SequenceEqual(CDROMHeaderReference))
-                {
-                    int mode = header[15];
-                    if (mode == 1) sector_offset = 16;
-                    else if (mode == 2) sector_offset = 24;
-                    else MessageBox.Show($"Unable to decode the file header for {fileIn.Name}");
-
-                    fileIn.Position = sectorIndex * sector_raw_size + sector_offset;
-                    byte[] dataOut = new byte[sector_target_size];
-                    fileIn.Read(dataOut, 0, dataOut.Length);
-                    fileOutISO.Write(dataOut, 0, dataOut.Length);
-                }
-            }
-        }
-
-        private void ConvertBin(string inputBin)
-        {
-            using FileStream fileIn = new(inputBin, FileMode.Open, FileAccess.Read);
-
-            string outputFile = $"{Path.GetDirectoryName(fileIn.Name)}\\{Path.GetFileNameWithoutExtension(fileIn.Name)}.iso";
-
-            if (ValidateBin(fileIn) != true || File.Exists(outputFile)) return;
-            if (ScanBin(fileIn).Contains("data"))
-            {
-                GenerateISO(fileIn, outputFile);
-                convertLog += $"{Path.GetFileName(outputFile)} was created.\n";
-            }
-        }
-
-        private bool ValidateBin(FileStream fileIn)
-        {
-            if (fileIn.Length == 0 || fileIn.Length % 2352 != 0)
-            {
-                convertLog += $"{Path.GetFileName(fileIn.Name)} is unreadable,\nthe length should be divisible by 2352 (0x930) bytes.\n";
-                return false;
-            }
-            return true;
         }
 
         [GeneratedRegex(@".*\\|;.*")]
