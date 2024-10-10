@@ -179,20 +179,20 @@ namespace UDPBD_for_XEB_
             TextWriter tempUDPCFG = new StreamWriter(tempUdpbdConfig);
             tempUDPCFG.Write(stringUDPCFG);
             tempUDPCFG.Close();
-            FtpUploadFile($"ftp://{address}{udpbdConfigXeb}", tempUdpbdConfig);
+            FTP.UploadFile($"ftp://{address}{udpbdConfigXeb}", tempUdpbdConfig);
         }
 
         private static void ResetSyncFolder(IPAddress address)
         {
             string vmcFolder = $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/VMC";
-            if (FtpDirectoryExists(vmcFolder)) DeleteFTPFolderContents(vmcFolder);
+            if (FTP.DirectoryExists(vmcFolder)) FTP.DeleteFolderContents(vmcFolder);
             string syncFolder = $"ftp://{address}/mass/0/UDPBD-XEBP-Sync";
-            if (!FtpDirectoryExists(syncFolder)) CreateFtpDirectory(syncFolder);
+            if (!FTP.DirectoryExists(syncFolder)) FTP.CreateDirectory(syncFolder);
             string[] folders = [$"ftp://{address}/mass/0/UDPBD-XEBP-Sync/DVD", $"ftp://{address}/mass/0/UDPBD-XEBP-Sync/CD"];
             foreach (string folder in folders)
             {
-                if (!FtpDirectoryExists(folder)) CreateFtpDirectory(folder);
-                else if (GetFtpSize(folder) < 262144) DeleteFTPFolderContents(folder); // only delete the folder contents if less than 0.25MB. The dummy ISO files should only be 11 bytes each.
+                if (!FTP.DirectoryExists(folder)) FTP.CreateDirectory(folder);
+                else if (FTP.GetSize(folder) < 262144) FTP.DeleteFolderContents(folder); // only delete the folder contents if less than 0.25MB. The dummy ISO files should only be 11 bytes each.
             }
         }
 
@@ -202,7 +202,7 @@ namespace UDPBD_for_XEB_
 
             _ = IPAddress.TryParse(TextBoxPS2IP.Text, out IPAddress? address);
             if (address == null) return;
-            if (!FtpDirectoryExists($"ftp://{address}{udpbdConfigFolder}"))
+            if (!FTP.DirectoryExists($"ftp://{address}{udpbdConfigFolder}"))
             {
                 MessageBox.Show("Please install XtremeEliteBoot and the Neutrino UDPBD plugin first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -220,13 +220,13 @@ namespace UDPBD_for_XEB_
                 TextWriter tempIso = new StreamWriter("tempIso.txt");
                 tempIso.Write(serialID);
                 tempIso.Close();
-                FtpUploadFile($"ftp://{address}/mass/0/UDPBD-XEBP-Sync/{game.Replace(@"\", "/")}", "tempIso.txt");
+                FTP.UploadFile($"ftp://{address}/mass/0/UDPBD-XEBP-Sync/{game.Replace(@"\", "/")}", "tempIso.txt");
                 if (EnableArtworkDownload.IsChecked == true && !string.IsNullOrEmpty(serialID))
                 {
                     if (GetArtwork(serialID) == true)
                     {
-                        FtpUploadFile($"ftp://{address}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png", "temp_BG.png");
-                        FtpUploadFile($"ftp://{address}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png", "temp_ICO.png");
+                        FTP.UploadFile($"ftp://{address}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png", "temp_BG.png");
+                        FTP.UploadFile($"ftp://{address}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png", "temp_ICO.png");
                     }
                 }
             }
@@ -331,121 +331,6 @@ namespace UDPBD_for_XEB_
                 }
             }
             return true;
-        }
-
-        private static void FtpUploadFile(string ftpUrl, string filePath)
-        {
-            try
-            {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(ftpUrl);
-                request.Method = WebRequestMethods.Ftp.UploadFile;
-
-                using (FileStream fileStream = File.OpenRead(filePath))
-                using (Stream requestStream = request.GetRequestStream())
-                {
-                    fileStream.CopyTo(requestStream);
-                }
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-            }
-            catch (WebException ex) { MessageBox.Show($"Failed to upload file {filePath} to the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
-        }
-
-        private static bool FtpDirectoryExists(string directoryPath)
-        {
-            try
-            {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(directoryPath);
-                request.Method = WebRequestMethods.Ftp.ListDirectory;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-                return true;
-            }
-            catch { return false; }
-        }
-
-        private static long GetFtpSize(string ftpUrl)
-        {
-            long totalSize = 0;
-            try
-            {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(ftpUrl);
-                request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-                using StreamReader reader = new(response.GetResponseStream());
-
-                string? line = reader.ReadLine();
-                while (!string.IsNullOrEmpty(line))
-                {
-                    string[] tokens = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-                    if (tokens.Length > 0 && long.TryParse(tokens[4], out long fileSize))
-                    {
-                        totalSize += fileSize;
-                    }
-                    line = reader.ReadLine();
-                }
-            }
-            catch (WebException ex) { MessageBox.Show($"Failed to get the size of file {ftpUrl} on the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
-            return totalSize;
-        }
-
-        private static void CreateFtpDirectory(string directoryPath)
-        {
-            try
-            {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(directoryPath);
-                request.Method = WebRequestMethods.Ftp.MakeDirectory;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-            }
-            catch (WebException ex) { MessageBox.Show($"Failed to create the directory {directoryPath} on the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
-        }
-
-        private static void DeleteFTPFolderContents(string url)
-        {
-            try
-            {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
-                request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-                using System.IO.StreamReader reader = new(response.GetResponseStream());
-                while (!reader.EndOfStream)
-                {
-                    string? line = reader.ReadLine();
-                    if (line == null) return;
-                    string[] tokens = line.Split(" ", 9, StringSplitOptions.RemoveEmptyEntries);
-                    string name = tokens[8];
-                    string permissions = tokens[0];
-                    string fileUrl = url + "/" + name;
-
-                    if (permissions[0] == 'd' && !fileUrl.EndsWith("/.") && !fileUrl.EndsWith("/..")) DeleteFTPFolderContents(fileUrl + "/");
-                    else DeleteFtpFile(fileUrl);
-                }
-            }
-            catch (WebException ex) { MessageBox.Show($"Failed to delete the directory {url} on the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
-        }
-
-        static void DeleteFtpFile(string url)
-        {
-            try
-            {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
-                request.Method = WebRequestMethods.Ftp.DeleteFile;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-            }
-            catch (WebException ex)
-            {
-                if (FtpFileExists(url)) MessageBox.Show($"Failed to delete the file {url} on the PS2 via FTP.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error); // for some reason going from launchELF_isr(2023-10-23) to launchELF(2019-1-11) throws an error once per file then fixes itself ???
-            }
-        }
-
-        static bool FtpFileExists(string url)
-        {
-            try
-            {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
-                request.Method = WebRequestMethods.Ftp.GetFileSize;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-                return true;
-            }
-            catch { return false; }
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)
