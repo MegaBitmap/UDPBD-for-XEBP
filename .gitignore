@@ -187,3 +187,8 @@ __pycache__/
 
 !udpbd-vexfat.exe
 !udpbd-server.exe
+
+.vs/
+bin/
+obj/
+*.user

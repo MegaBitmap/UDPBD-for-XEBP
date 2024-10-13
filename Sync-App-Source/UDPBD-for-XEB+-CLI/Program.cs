@@ -279,6 +279,7 @@ namespace UDPBD_for_XEB__CLI
         {
             Console.Write("Press any key to continue . . . ");
             Console.ReadKey();
+            Console.WriteLine();
             Environment.Exit(number);
         }
 
