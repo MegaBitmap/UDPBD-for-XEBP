@@ -330,6 +330,12 @@ namespace UDPBD_for_XEB__GUI
                 if (!CheckForExFat())
                 {
                     ComboBoxServer.SelectedIndex = 0;
+                    ButtonSelectGamePath.Visibility = Visibility.Visible;
+                    TextBlockGameList.Visibility = Visibility.Visible;
+                    TextBlockSelectExFAT.Visibility = Visibility.Hidden;
+                    ComboBoxGameVolume.Visibility = Visibility.Hidden;
+                    CheckBoxEnableVMC.Visibility = Visibility.Hidden;
+                    return;
                 }
                 ButtonSelectGamePath.Visibility = Visibility.Hidden;
                 TextBlockGameList.Visibility = Visibility.Hidden;

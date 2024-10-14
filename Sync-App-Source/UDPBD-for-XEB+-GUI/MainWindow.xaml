@@ -28,7 +28,7 @@
                 <RowDefinition Height="2*"/>
                 <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
-            <TextBlock Name="TextBlockSelectExFAT" Text="Select an exFAT volume created in Linux:" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0, 0, 0, 30" Visibility="Hidden" Grid.Row="1"/>
+            <TextBlock Name="TextBlockSelectExFAT" Text="Select an exFAT part made in GParted:" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0, 0, 0, 30" Visibility="Hidden" Grid.Row="1"/>
         </Grid>
         <Grid>
             <Grid.ColumnDefinitions>
