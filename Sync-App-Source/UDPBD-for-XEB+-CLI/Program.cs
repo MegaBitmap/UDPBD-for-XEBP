@@ -19,6 +19,7 @@ namespace UDPBD_for_XEB__CLI
             IPAddress ps2ip = IPAddress.Parse("192.168.0.10");
             bool enableArt = false;
             bool enableBin2ISO = false;
+            bool enableVMC = false;
             
             if (args.Length < 2 || !args.Contains("-path"))
             {
@@ -36,7 +37,7 @@ namespace UDPBD_for_XEB__CLI
                 {
                     ps2ip = IPAddress.Parse(args[argIndex + 1]);
                 }
-                else if (arg.Contains("-download-art"))
+                else if (arg.Contains("-downloadart"))
                 {
                     enableArt = true;
                 }
@@ -44,11 +45,15 @@ namespace UDPBD_for_XEB__CLI
                 {
                     enableBin2ISO = true;
                 }
+                else if (arg.Contains("-enablevmc"))
+                {
+                    enableVMC = true;
+                }
                 argIndex++;
             }
-            if (!File.Exists("bsd-udpbd.toml"))
+            if (!File.Exists("bsd-udpbd.toml") || !File.Exists("BlankVMC.bin"))
             {
-                Console.WriteLine("Missing file bsd-udpbd.toml");
+                Console.WriteLine("Missing file bsd-udpbd.toml or BlankVMC.bin");
                 PauseExit(1);
             }
             if (!KillServer())
@@ -98,9 +103,19 @@ namespace UDPBD_for_XEB__CLI
             }
             UpdateUDPConfig(ps2ip);
             FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list", "tempNeutrinoUDPBDList.txt");
+            Console.WriteLine("Updated game list at mass:/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list");
             if (enableArt)
             {
-                DownloadArtList(gameList, ps2ip, artUrl);
+                DownloadArtList(gamePath, gameList, ps2ip, artUrl);
+            }
+            if (enableVMC)
+            {
+                SyncVMC(gamePath, gameList);
+                FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list", "tempNeutrinoUDPBDList.txt");
+            }
+            else if (FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list"))
+            {
+                FTP.DeleteFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list");
             }
             Console.WriteLine("Synchronization with the PS2 is now complete!");
             PauseExit(9);
@@ -112,8 +127,9 @@ namespace UDPBD_for_XEB__CLI
             Console.WriteLine(@"dotnet UDPBD-for-XEB+-CLI.dll -path 'C:\PS2\' -ps2ip 192.168.0.10" + "\n");
             Console.WriteLine("-path is the file path to the CD and DVD folder that contain game ISOs.\n");
             Console.WriteLine("-ps2ip is the ip address for connecting to the PS2 with PS2Net.\n");
-            Console.WriteLine("-download-art enables automatic game artwork downloading.\n");
+            Console.WriteLine("-downloadart enables automatic game artwork downloading.\n");
             Console.WriteLine("-bin2iso enables automatic CD-ROM Bin to ISO conversion.\n");
+            Console.WriteLine("-enablevmc will assign a unique virtual memory card for each game.\n");
         }
 
         static List<string> ScanFolder(string scanPath)
@@ -128,7 +144,6 @@ namespace UDPBD_for_XEB__CLI
                     foreach (string file in ISOFiles)
                     {
                         tempList.Add(file.Replace(scanPath, "").Replace(@"\", "/"));
-                        //Console.WriteLine(file.Replace(scanPath, "").Replace(@"\", "/"));
                     }
                 }
             }
@@ -144,6 +159,7 @@ namespace UDPBD_for_XEB__CLI
                 if (!string.IsNullOrEmpty(serialGameID))
                 {
                     gameListWithID.Add($"{serialGameID} {game}");
+                    Console.WriteLine($"Loaded {game}");
                 }
                 else
                 {
@@ -170,15 +186,16 @@ namespace UDPBD_for_XEB__CLI
             return;
         }
 
-        static void DownloadArtList(List<string> gameList, IPAddress ps2ip, string artUrl)
+        static void DownloadArtList(string gamePath, List<string> gameList, IPAddress ps2ip, string artUrl)
         {
             foreach (var game in gameList)
             {
-                string serialID = GetSerialID(game);
-                if (!string.IsNullOrEmpty(serialID) && GetArtwork(artUrl, serialID) == true)
+                string serialID = GetSerialID(gamePath + game);
+                if (!string.IsNullOrEmpty(serialID) && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png") && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png") && GetArtwork(artUrl, serialID) == true)
                 {
                     FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png", "temp_BG.png");
                     FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png", "temp_ICO.png");
+                    Console.WriteLine($"Downloaded Artwork for {game}");
                 }
             }
         }
@@ -196,6 +213,27 @@ namespace UDPBD_for_XEB__CLI
             {
                 Console.WriteLine($"Failed to download artwork for {serialID}.\n{ex.Message}");
                 return false;
+            }
+        }
+
+        static void SyncVMC(string gamePath, List<string> gameList)
+        {
+            if (!Path.Exists($"{gamePath}/VMC"))
+            {
+                Directory.CreateDirectory($"{gamePath}/VMC");
+            }
+            foreach (var game in gameList)
+            {
+                string serialID = GetSerialID(gamePath + game);
+                if (!string.IsNullOrEmpty(serialID))
+                {
+                    string vmcFullPath = $"{gamePath}/VMC/{serialID}_0.bin";
+                    if (!File.Exists(vmcFullPath))
+                    {
+                        File.Copy("BlankVMC.bin", vmcFullPath);
+                        Console.WriteLine($"Created {vmcFullPath}");
+                    }
+                }
             }
         }
 
