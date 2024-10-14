@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows;
 
 namespace UDPBD_for_XEB__GUI
@@ -32,6 +33,8 @@ namespace UDPBD_for_XEB__GUI
             TextBlockVersion.Text = version;
             LoadIPSetting();
             LoadGamePathSetting();
+            CheckFiles();
+            KillServer();
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -60,10 +63,24 @@ namespace UDPBD_for_XEB__GUI
 
         private void Sync_Click(object sender, RoutedEventArgs e)
         {
+            KillServer();
             if (ValidateSync() != true) return;
+            string extraArgs = "";
+            if (CheckBoxArtworkDownload.IsChecked == true)
+            {
+                extraArgs += " -downloadart";
+            }
+            if (CheckBoxBinConvert.IsChecked == true)
+            {
+                extraArgs += " -bin2iso";
+            }
+            if (ComboBoxServer.SelectedIndex == 1 && CheckBoxEnableVMC.IsChecked == true)
+            {
+                extraArgs += " -enablevmc";
+            }
             Process process = new();
             process.StartInfo.FileName = "UDPBD-for-XEB+-CLI.exe";
-            process.StartInfo.Arguments = $"-path \"{gamePath}\" -ps2ip \"{TextBoxPS2IP.Text}\"";
+            process.StartInfo.Arguments = $"-path \"{gamePath}\" -ps2ip \"{TextBoxPS2IP.Text}\"{extraArgs}";
             process.Start();
         }
 
@@ -74,12 +91,21 @@ namespace UDPBD_for_XEB__GUI
 
         private void StartServer_Click(object sender, RoutedEventArgs e)
         {
+            string serverName;
+            if (ComboBoxServer.SelectedIndex == 0)
+            {
+                serverName = "udpbd-vexfat";
+            }
+            else
+            {
+                serverName = "udpbd-server";
+            }
             if (gameList.Count == 0)
             {
                 MessageBox.Show("Please first select the game folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            Process[] processes = Process.GetProcessesByName("udpbd-vexfat");
+            Process[] processes = Process.GetProcessesByName(serverName);
             if (!(processes.Length == 0))
             {
                 MessageBox.Show("The server is already running.", "Server is running", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -87,7 +113,16 @@ namespace UDPBD_for_XEB__GUI
             }
             Process process = new();
             process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = $"/K udpbd-vexfat \"{gamePath}\"";
+            if (serverName.Contains("vexfat"))
+            {
+                process.StartInfo.Arguments = $"/K {serverName} \"{gamePath}\"";
+            }
+            else
+            {
+                process.StartInfo.Arguments = $"/K \"{Path.GetFullPath(serverName)}\" \\\\.\\{gamePath}";
+                process.StartInfo.UseShellExecute = true;
+                process.StartInfo.Verb = "runas";
+            }
             process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
             process.Start();
         }
@@ -137,6 +172,13 @@ namespace UDPBD_for_XEB__GUI
 
         private bool ValidateSync()
         {
+            if (ComboBoxServer.SelectedIndex == 1)
+            {
+                string? tempGameDrive = ComboBoxGameVolume.SelectedItem.ToString();
+                if (tempGameDrive == null) return false;
+                gamePath = SelectedVolume().Replace(tempGameDrive, "");
+                GetGameList(gamePath);
+            }
             if (!TextBlockConnection.Text.Contains("Connected"))
             {
                 MessageBox.Show("Please first connect to the PS2.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -159,8 +201,10 @@ namespace UDPBD_for_XEB__GUI
 
         private void GetGameList(string testPath)
         {
+            KillServer();
+            TextBlockGameList.Text = "";
             gameList.Clear();
-            string[] scanFolders = [$"{testPath}\\CD", $"{testPath}\\DVD"];
+            string[] scanFolders = [$"{testPath}/CD", $"{testPath}/DVD"];
             foreach (var item in scanFolders)
             {
                 if (Directory.Exists(item))
@@ -206,5 +250,95 @@ namespace UDPBD_for_XEB__GUI
                 return false;
             }
         }
+
+        private bool CheckForExFat()
+        {
+            int numValidVolume = 0;
+            foreach (DriveInfo drive in DriveInfo.GetDrives())
+            {
+                if (drive.IsReady && drive.DriveFormat.Equals("exFAT", StringComparison.OrdinalIgnoreCase))
+                {
+                    GetGameList(drive.ToString());
+                    int numGames = gameList.Count;
+                    ComboBoxGameVolume.Items.Add($"{drive}    {TextBlockGameList.Text}");
+                    numValidVolume++;
+                }
+            }
+            if (numValidVolume >= 1)
+            {
+                ComboBoxGameVolume.SelectedIndex = 0;
+                return true;
+            }
+            else
+            {
+                MessageBox.Show("The program was unable to find an exFAT volume or partition.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+
+        private static void CheckFiles()
+        {
+            string[] files = ["BlankVMC.bin", "bsd-udpbd.toml", "UDPBD-for-XEB+-CLI.exe", "udpbd-server.exe", "udpbd-vexfat.exe"];
+            foreach (var file in files)
+            {
+                if (!File.Exists(file))
+                {
+                    MessageBox.Show($"The file {file} is missing.", "File Missing", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Environment.Exit(-1);
+                }
+            }
+        }
+
+        private static void KillServer()
+        {
+            string[] serverNames = ["udpbd-server", "udpbd-vexfat"];
+            foreach (var server in serverNames)
+            {
+                Process[] processes = Process.GetProcessesByName(server);
+                if (!(processes.Length == 0))
+                {
+                    MessageBoxResult response = MessageBox.Show("The server is currently running.\nClick OK to stop the server and sync.", "The server is running", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                    if (response == MessageBoxResult.OK)
+                    {
+                        foreach (var item in processes) item.Kill();
+                    }
+                    else Environment.Exit(-1);
+                }
+            }
+        }
+
+        private void ComboBoxGameVolume_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            gameList.Clear();
+            gamePath = "";
+            if (TextBlockGameList == null)
+            {
+                return;
+            }
+            ComboBoxGameVolume.Items.Clear();
+            TextBlockGameList.Text = "";
+            if (ComboBoxServer.SelectedIndex == 0)
+            {
+                ButtonSelectGamePath.Visibility = Visibility.Visible;
+                TextBlockGameList.Visibility = Visibility.Visible;
+                TextBlockSelectExFAT.Visibility = Visibility.Hidden;
+                ComboBoxGameVolume.Visibility = Visibility.Hidden;
+                CheckBoxEnableVMC.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                if (!CheckForExFat())
+                {
+                    ComboBoxServer.SelectedIndex = 0;
+                }
+                ButtonSelectGamePath.Visibility = Visibility.Hidden;
+                TextBlockGameList.Visibility = Visibility.Hidden;
+                TextBlockSelectExFAT.Visibility = Visibility.Visible;
+                ComboBoxGameVolume.Visibility = Visibility.Visible;
+                CheckBoxEnableVMC.Visibility = Visibility.Visible;
+            }
+        }
+        [GeneratedRegex(@"\\.*")]
+        private static partial Regex SelectedVolume();
     }
 }
