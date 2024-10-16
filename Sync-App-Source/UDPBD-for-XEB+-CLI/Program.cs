@@ -14,7 +14,6 @@ namespace UDPBD_for_XEB__CLI
         {
             Console.WriteLine($"UDPBD for XEB+ CLI Sync App {Assembly.GetExecutingAssembly().GetName().Version} by MegaBitmap");
 
-            const string artUrl = "https://archive.org/download/OPLM_ART_2024_09/OPLM_ART_2024_09.zip/PS2/SERIALID/SERIALID";
             string gamePath = "";
             IPAddress ps2ip = IPAddress.Parse("192.168.0.10");
             bool enableArt = false;
@@ -106,7 +105,12 @@ namespace UDPBD_for_XEB__CLI
             Console.WriteLine("Updated game list at mass:/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list");
             if (enableArt)
             {
-                DownloadArtList(gamePath, gameList, ps2ip, artUrl);
+                if (File.Exists("ArtworkURL.cfg"))
+                {
+                    string artUrl = File.ReadLines("ArtworkURL.cfg").First();
+                    DownloadArtList(gamePath, gameList, ps2ip, artUrl);
+                }
+                else Console.WriteLine("Missing the file ArtworkURL.cfg");
             }
             if (enableVMC)
             {
@@ -211,7 +215,7 @@ namespace UDPBD_for_XEB__CLI
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to download artwork for {serialID}.\n{ex.Message}");
+                Console.WriteLine($"Failed to download artwork for {serialID}.\n{artUrl.Replace("SERIALID", serialID)}_ICO.png\n{ex.Message}");
                 return false;
             }
         }
