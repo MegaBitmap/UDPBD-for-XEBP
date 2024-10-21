@@ -60,6 +60,7 @@
             <Button Content="Sync with PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="2" Grid.Row="1" Click="Sync_Click"/>
             <Button Content="View Help" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="0" Grid.Row="2" Click="Help_Click"/>
             <Button Content="Start Server" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="1" Grid.Row="2" Click="StartServer_Click"/>
+            <CheckBox Name="CheckBoxShowConsole" Content="Show Console" HorizontalAlignment="Center" VerticalAlignment="Bottom" Padding="4,-6,0,0" Margin="0, 0, 0, 30" Grid.Column="1" Grid.Row="2"/>
             <Button Content="About" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="2" Grid.Row="2" Click="About_Click"/>
         </Grid>
     </Grid>

@@ -95,10 +95,12 @@ namespace UDPBD_for_XEB__GUI
             if (ComboBoxServer.SelectedIndex == 0)
             {
                 serverName = "udpbd-vexfat";
+                if (CheckServer(serverName)) return;
             }
             else
             {
                 serverName = "udpbd-server";
+                if (CheckServer(serverName)) return;
                 string? tempGameDrive = ComboBoxGameVolume.SelectedItem.ToString();
                 if (tempGameDrive == null) return;
                 gamePath = SelectedVolume().Replace(tempGameDrive, "");
@@ -109,26 +111,35 @@ namespace UDPBD_for_XEB__GUI
                 MessageBox.Show("Please first select the game folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            Process[] processes = Process.GetProcessesByName(serverName);
-            if (!(processes.Length == 0))
-            {
-                MessageBox.Show("The server is already running.", "Server is running", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
             Process process = new();
             process.StartInfo.FileName = "cmd.exe";
             if (serverName.Contains("vexfat"))
             {
                 process.StartInfo.Arguments = $"/K {serverName} \"{gamePath}\"";
+                if (CheckBoxShowConsole.IsChecked != true)
+                {
+                    process.StartInfo.FileName = serverName;
+                    process.StartInfo.Arguments = $"\"{gamePath}\"";
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                }
             }
             else
             {
                 process.StartInfo.Arguments = $"/K \"{Path.GetFullPath(serverName)}\" \\\\.\\{gamePath}";
+                if (CheckBoxShowConsole.IsChecked != true)
+                {
+                    process.StartInfo.FileName = serverName;
+                    process.StartInfo.Arguments = $"\\\\.\\{gamePath}";
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                }
                 process.StartInfo.UseShellExecute = true;
                 process.StartInfo.Verb = "runas";
             }
-            process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
             process.Start();
+            if (CheckBoxShowConsole.IsChecked != true)
+            {
+                CheckServerStart(serverName);
+            }
         }
 
         private void About_Click(object sender, RoutedEventArgs e)
@@ -291,6 +302,28 @@ namespace UDPBD_for_XEB__GUI
                     Environment.Exit(-1);
                 }
             }
+        }
+
+        private static bool CheckServer(string serverName)
+        {
+            Process[] processes = Process.GetProcessesByName(serverName);
+            if (!(processes.Length == 0))
+            {
+                MessageBox.Show("The server is already running.", "Server is running", MessageBoxButton.OK, MessageBoxImage.Information);
+                return true;
+            }
+            return false;
+        }
+
+        private static void CheckServerStart(string serverName)
+        {
+            Thread.Sleep(500); //wait 0.5 seconds for the server to start before checking if it failed
+            Process[] processesStarted = Process.GetProcessesByName(serverName);
+            if (!(processesStarted.Length == 0))
+            {
+                MessageBox.Show("The server is now running and ready to Play!", "Server is running", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else MessageBox.Show("Failed to start the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private static void KillServer()
