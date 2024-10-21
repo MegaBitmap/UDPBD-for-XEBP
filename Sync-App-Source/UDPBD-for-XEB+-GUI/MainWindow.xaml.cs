@@ -99,6 +99,10 @@ namespace UDPBD_for_XEB__GUI
             else
             {
                 serverName = "udpbd-server";
+                string? tempGameDrive = ComboBoxGameVolume.SelectedItem.ToString();
+                if (tempGameDrive == null) return;
+                gamePath = SelectedVolume().Replace(tempGameDrive, "");
+                GetGameList(gamePath);
             }
             if (gameList.Count == 0)
             {
