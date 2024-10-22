@@ -269,6 +269,44 @@ Making any changes to the *.list* files in the `CFG/neutrinoLauncher`, or modify
 A refresh can also be triggered manually from the plugin settings.  
 Cache refreshes take much less time than initial creation, so long as the cache folder has not been moved or deleted.
 
+## Troubleshooting 
+
+Here are some common issues that can easily be resolved:
+
+### Game File Integrity Validation
+
+If there is a particular game that is not working right, the first thing to do is check the file hash.  
+The easiest way to do so is to use [an online hashing tool](https://emn178.github.io/online-tools/md5_checksum.html)  
+
+After selecting a file, copy the MD5 hash and paste it into the *Quick search* at http://redump.org  
+If you are redirected to the game page then the selected game file is verified good.  
+If the search results in *No discs found.* then the game file is most likely corrupted.  
+Please note that CD-ROM based games converted to ISO will not be found in the redump database.  
+
+### Manually Reset Plugin Configuration
+
+If the neutrino Launcher plugin freezes or becomes unresponsive, you may need to manually erase the configuration files.  
+To do so, first open LaunchELF.  
+Then navigate to `mass:/XEBPLUS/CFG/` and highlight the `neutrinoLauncher/` folder.  
+Hit *R1* on the controller then choose *Delete*.  
+This will completely reset the neutrino Launcher plugin's settings to default.  
+After doing so, you will need to re-sync the game list.  
+
+### Network Testing
+
+When using UDPBD it is very important that the network connection is fast and stable.  
+The easiest way to test this is by using the `ping` command.  
+On the PS2 open LaunchELF then PS2Net, this will initialize the network so that the PS2 will receive the pings.  
+On the PC run the following command, please note that your IP address may be different.  
+```
+cmd /K ping 192.168.0.10 -n 50 -l 512
+```
+This will send 50 pings to the PS2, after about a minute it will finish.  
+The statistics will tell you basic information about the network performance.  
+There should be 0 lost packets (0% loss).  
+The maximum approximate round trip time should be 3ms or less.  
+If your network does not meet these performance metrics then problems may occur.
+
 ## Usage
 
 ### Controls
