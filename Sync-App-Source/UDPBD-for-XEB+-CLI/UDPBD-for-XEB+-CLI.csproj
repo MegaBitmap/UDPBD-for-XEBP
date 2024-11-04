@@ -6,7 +6,7 @@
     <RootNamespace>UDPBD_for_XEB__CLI</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>2.1.0.2</AssemblyVersion>
+    <AssemblyVersion>2.1.0.3</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

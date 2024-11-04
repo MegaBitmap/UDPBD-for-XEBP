@@ -114,12 +114,27 @@ namespace UDPBD_for_XEB__CLI
             }
             if (enableVMC)
             {
-                SyncVMC(gamePath, gameList);
-                FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list", "tempNeutrinoUDPBDList.txt");
+                if (SyncVMC(gamePath, gameList))
+                {
+                    FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list", "tempNeutrinoUDPBDList.txt");
+                    Console.WriteLine("Updated VMC list at mass:/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list");
+                }
+                else
+                {
+                    if (FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list"))
+                    {
+                        FTP.DeleteFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list");
+                    }
+                    Console.WriteLine("Virtual Memory Cards are now disabled.");
+                }
             }
-            else if (FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list"))
+            else
             {
-                FTP.DeleteFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list");
+                if (FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list"))
+                {
+                    FTP.DeleteFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list");
+                }
+                Console.WriteLine("Virtual Memory Cards are now disabled.");
             }
             Console.WriteLine("Synchronization with the PS2 is now complete!");
             PauseExit(9);
@@ -171,7 +186,6 @@ namespace UDPBD_for_XEB__CLI
                 }
             }
             string hash = ComputeMD5(string.Join("\n", gameListWithID));
-            //Console.WriteLine(hash);
             gameListWithID.Add(hash);
             File.WriteAllLines("tempNeutrinoUDPBDList.txt", gameListWithID);
         }
@@ -184,10 +198,19 @@ namespace UDPBD_for_XEB__CLI
                 if (Directory.Exists(folder))
                 {
                     string[] binFiles = Directory.GetFiles(folder, "*.bin", SearchOption.TopDirectoryOnly);
-                    foreach (string binFile in binFiles) CDBin.ConvertBin(binFile);
+                    foreach (string binFile in binFiles)
+                    {
+                        if (CheckSpace(binFile, folder))
+                        {
+                            CDBin.ConvertBin(binFile);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"There is not enough space to convert {binFile} to ISO.");
+                        }
+                    }
                 }
             }
-            return;
         }
 
         static void DownloadArtList(string gamePath, List<string> gameList, IPAddress ps2ip, string artUrl)
@@ -220,8 +243,9 @@ namespace UDPBD_for_XEB__CLI
             }
         }
 
-        static void SyncVMC(string gamePath, List<string> gameList)
+        static bool SyncVMC(string gamePath, List<string> gameList)
         {
+            bool enable = true;
             if (!Path.Exists($"{gamePath}/VMC"))
             {
                 Directory.CreateDirectory($"{gamePath}/VMC");
@@ -234,10 +258,37 @@ namespace UDPBD_for_XEB__CLI
                     string vmcFullPath = $"{gamePath}/VMC/{serialID}_0.bin";
                     if (!File.Exists(vmcFullPath))
                     {
-                        File.Copy("BlankVMC.bin", vmcFullPath);
-                        Console.WriteLine($"Created {vmcFullPath}");
+                        if (CheckSpace("BlankVMC.bin", vmcFullPath))
+                        {
+                            File.Copy("BlankVMC.bin", vmcFullPath);
+                            Console.WriteLine($"Created {vmcFullPath}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Not enough space to create a new VMC file.");
+                            enable = false;
+                        }
                     }
                 }
+            }
+            return enable;
+        }
+
+        static bool CheckSpace(string source, string destination)
+        {
+            FileInfo fileInfo = new FileInfo(source);
+            long fileSize = fileInfo.Length;
+            string? dest = Path.GetPathRoot(destination);
+            if (dest == null) return false;
+            DriveInfo driveInfo = new(dest);
+            long availableSpace = driveInfo.AvailableFreeSpace;
+            if (availableSpace > fileSize)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 

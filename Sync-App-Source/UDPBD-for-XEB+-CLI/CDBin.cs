@@ -44,7 +44,7 @@ namespace UDPBD_for_XEB__CLI
                     int mode = header[15];
                     if (mode == 1) sector_offset = 16;
                     else if (mode == 2) sector_offset = 24;
-                    else Console.WriteLine($"Unable to decode the file header for {fileIn.Name}\n");
+                    else Console.WriteLine($"Unable to decode the file header for {fileIn.Name}");
 
                     fileIn.Position = sectorIndex * sector_raw_size + sector_offset;
                     byte[] dataOut = new byte[sector_target_size];
@@ -64,7 +64,7 @@ namespace UDPBD_for_XEB__CLI
             if (ScanBin(fileIn).Contains("data"))
             {
                 GenerateISO(fileIn, outputFile);
-                Console.WriteLine($"{Path.GetFileName(outputFile)} was created.\n");
+                Console.WriteLine($"{Path.GetFileName(outputFile)} was created.");
             }
             return;
         }
@@ -73,7 +73,7 @@ namespace UDPBD_for_XEB__CLI
         {
             if (fileIn.Length == 0 || fileIn.Length % 2352 != 0)
             {
-                Console.WriteLine($"{Path.GetFileName(fileIn.Name)} is unreadable,\nthe length should be divisible by 2352 (0x930) bytes.\n");
+                Console.WriteLine($"{Path.GetFileName(fileIn.Name)} is unreadable,\nthe length should be divisible by 2352 (0x930) bytes.");
                 return false;
             }
             return true;
