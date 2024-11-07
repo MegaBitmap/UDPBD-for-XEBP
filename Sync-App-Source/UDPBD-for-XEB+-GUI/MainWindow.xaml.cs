@@ -91,6 +91,14 @@ namespace UDPBD_for_XEB__GUI
 
         private void StartServer_Click(object sender, RoutedEventArgs e)
         {
+            string? currentState = ServerButton.Content.ToString();
+            if (String.IsNullOrEmpty(currentState) == true) return;
+            if (currentState.Contains("Stop"))
+            {
+                QuickKillServer();
+                ServerButton.Content = "Start Server";
+                return;
+            }
             string serverName;
             if (ComboBoxServer.SelectedIndex == 0)
             {
@@ -140,6 +148,7 @@ namespace UDPBD_for_XEB__GUI
             {
                 CheckServerStart(serverName);
             }
+            ServerButton.Content = "Stop Server";
         }
 
         private void About_Click(object sender, RoutedEventArgs e)
@@ -342,6 +351,26 @@ namespace UDPBD_for_XEB__GUI
                     else Environment.Exit(-1);
                 }
             }
+        }
+
+        private static void QuickKillServer()
+        {
+            bool hasKilled = false;
+            string[] serverNames = ["udpbd-server", "udpbd-vexfat"];
+            foreach (var server in serverNames)
+            {
+                Process[] processes = Process.GetProcessesByName(server);
+                if (!(processes.Length == 0))
+                {
+                    hasKilled = true;
+                    foreach (var item in processes) item.Kill();
+                }
+            }
+            if (!hasKilled)
+            {
+                MessageBox.Show("The server was not running.", "Server is stopped", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else MessageBox.Show("The server was stopped.", "Server is stopped", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void ComboBoxGameVolume_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
