@@ -50,9 +50,9 @@ namespace UDPBD_for_XEB__CLI
                 }
                 argIndex++;
             }
-            if (!File.Exists("bsd-udpbd.toml") || !File.Exists("BlankVMC.bin"))
+            if (!File.Exists("bsd-udpbd.toml"))
             {
-                Console.WriteLine("Missing file bsd-udpbd.toml or BlankVMC.bin");
+                Console.WriteLine("Missing file bsd-udpbd.toml");
                 PauseExit(1);
             }
             if (!KillServer())
@@ -101,8 +101,6 @@ namespace UDPBD_for_XEB__CLI
                 FTP.CreateDirectory($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/");
             }
             UpdateUDPConfig(ps2ip);
-            FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list", "tempNeutrinoUDPBDList.txt");
-            Console.WriteLine("Updated game list at mass:/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list");
             if (enableArt)
             {
                 if (File.Exists("ArtworkURL.cfg"))
@@ -116,27 +114,23 @@ namespace UDPBD_for_XEB__CLI
             {
                 if (SyncVMC(gamePath, gameList))
                 {
-                    FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list", "tempNeutrinoUDPBDList.txt");
-                    Console.WriteLine("Updated VMC list at mass:/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list");
+                    Console.WriteLine("Virtual Memory Cards are now enabled.");
                 }
-                else
-                {
-                    if (FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list"))
-                    {
-                        FTP.DeleteFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list");
-                    }
-                    Console.WriteLine("Virtual Memory Cards are now disabled.");
-                }
+                else Console.WriteLine("Virtual Memory Cards are now disabled.");
             }
-            else
-            {
-                if (FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list"))
-                {
-                    FTP.DeleteFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/enable-VMC-UDPBD.list");
-                }
-                Console.WriteLine("Virtual Memory Cards are now disabled.");
-            }
+            else  Console.WriteLine("Virtual Memory Cards are now disabled.");
+            FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list", "tempNeutrinoUDPBDList.txt");
+            Console.WriteLine("Updated game list at mass:/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list");
+            Console.WriteLine(@" ________       ___    ___ ________   ________  _______   ________     
+|\   ____\     |\  \  /  /|\   ___  \|\   ____\|\  ___ \ |\   ___ \    
+\ \  \___|_    \ \  \/  / | \  \\ \  \ \  \___|\ \   __/|\ \  \_|\ \   
+ \ \_____  \    \ \    / / \ \  \\ \  \ \  \    \ \  \_|/_\ \  \ \\ \  
+  \|____|\  \    \/  /  /   \ \  \\ \  \ \  \____\ \  \_|\ \ \  \_\\ \ 
+    ____\_\  \ __/  / /      \ \__\\ \__\ \_______\ \_______\ \_______\
+   |\_________\\___/ /        \|__| \|__|\|_______|\|_______|\|_______|
+   \|_________\|___|/");
             Console.WriteLine("Synchronization with the PS2 is now complete!");
+            Console.WriteLine("Please make sure to start the server before launching a game.");
             PauseExit(9);
         }
 
@@ -245,38 +239,95 @@ namespace UDPBD_for_XEB__CLI
 
         static bool SyncVMC(string gamePath, List<string> gameList)
         {
-            bool enable = true;
+            List<string> gameListVMC = [];
             if (!Path.Exists($"{gamePath}/VMC"))
             {
                 Directory.CreateDirectory($"{gamePath}/VMC");
             }
+            string[] neededFiles = ["vmc_groups.list", "BlankVMC8.bin", "BlankVMC32.bin"];
+            foreach (string file in neededFiles)
+            {
+                if (!File.Exists(file))
+                {
+                    Console.WriteLine($"Missing file {file}");
+                    return false;
+                }
+            }
+            string[] groupsVMC = File.ReadAllLines("vmc_groups.list");
+            string crossSaveIDs = String.Join("", groupsVMC);
             foreach (var game in gameList)
             {
                 string serialID = GetSerialID(gamePath + game);
-                if (!string.IsNullOrEmpty(serialID))
+                if (string.IsNullOrEmpty(serialID))
                 {
-                    string vmcFullPath = $"{gamePath}/VMC/{serialID}_0.bin";
-                    if (!File.Exists(vmcFullPath))
+                    Console.WriteLine($"Failed to get serial ID for {gamePath + game}");
+                    continue;
+                }
+                string vmcRelativePath;
+                string vmcFullPath;
+                int currentVmcSize = 8;
+                if (crossSaveIDs.Contains(serialID))
+                {
+                    string vmcFile = "";
+                    bool checkSize = false;
+                    string currentGroup = "";
+                    
+                    foreach (string line in groupsVMC)
                     {
-                        if (CheckSpace("BlankVMC.bin", vmcFullPath))
+                        if (checkSize)
                         {
-                            File.Copy("BlankVMC.bin", vmcFullPath);
-                            Console.WriteLine($"Created {vmcFullPath}");
+                            checkSize = false;
+                            if (line == "32") currentVmcSize = 32;
+                            else currentVmcSize = 8;
                         }
-                        else
+                        if (line.Contains("XEBP"))
                         {
-                            Console.WriteLine("Not enough space to create a new VMC file.");
-                            enable = false;
+                            currentGroup = line;
+                            checkSize = true;
                         }
+                        else if (line == serialID && !string.IsNullOrEmpty(currentGroup))
+                        {
+                            vmcFile = $"{currentGroup}_0.bin";
+                            break;
+                        }
+                    }
+                    if (string.IsNullOrEmpty(vmcFile))
+                    {
+                        Console.Write($"Failed to find a group for {serialID}");
+                        return false;
+                    }
+                    vmcRelativePath = $"/VMC/{vmcFile}";
+                    vmcFullPath = $"{gamePath}{vmcRelativePath}";
+                }
+                else
+                {
+                    vmcRelativePath = $"/VMC/{serialID}_0.bin";
+                    vmcFullPath = $"{gamePath}{vmcRelativePath}";
+                }
+                gameListVMC.Add($"{serialID} {game} {vmcRelativePath}");
+                if (!File.Exists(vmcFullPath))
+                {
+                    if (CheckSpace($"BlankVMC{currentVmcSize}.bin", vmcFullPath))
+                    {
+                        File.Copy($"BlankVMC{currentVmcSize}.bin", vmcFullPath);
+                        Console.WriteLine($"Created {vmcRelativePath} for {game}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Not enough space to create a new VMC file.");
+                        return false;
                     }
                 }
             }
-            return enable;
+            string hash = ComputeMD5(string.Join("\n", gameListVMC));
+            gameListVMC.Add(hash);
+            File.WriteAllLines("tempNeutrinoUDPBDList.txt", gameListVMC);
+            return true;
         }
 
         static bool CheckSpace(string source, string destination)
         {
-            FileInfo fileInfo = new FileInfo(source);
+            FileInfo fileInfo = new(source);
             long fileSize = fileInfo.Length;
             string? dest = Path.GetPathRoot(destination);
             if (dest == null) return false;

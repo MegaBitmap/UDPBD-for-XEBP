@@ -21,6 +21,7 @@ namespace UDPBD_for_XEB__CLI
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
 
                 Console.WriteLine("Connected to the PS2's FTP server Successfully!");
+                Thread.Sleep(100);
                 return true;
             }
             catch (WebException ex)
@@ -37,6 +38,7 @@ namespace UDPBD_for_XEB__CLI
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(directoryPath);
                 request.Method = WebRequestMethods.Ftp.ListDirectory;
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                Thread.Sleep(100);
                 return true;
             }
             catch { return false; }
@@ -49,6 +51,7 @@ namespace UDPBD_for_XEB__CLI
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(directoryPath);
                 request.Method = WebRequestMethods.Ftp.MakeDirectory;
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                Thread.Sleep(200);
             }
             catch (WebException ex)
             {
@@ -70,6 +73,7 @@ namespace UDPBD_for_XEB__CLI
                     fileStream.CopyTo(requestStream);
                 }
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                Thread.Sleep(200);
             }
             catch (WebException ex)
             {
@@ -85,29 +89,10 @@ namespace UDPBD_for_XEB__CLI
                 var request = (FtpWebRequest)WebRequest.Create(ftpUrl);
                 request.Method = WebRequestMethods.Ftp.GetFileSize;
                 using var response = (FtpWebResponse)request.GetResponse();
+                Thread.Sleep(100);
                 return true;
             }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public static void DeleteFile(string url)
-        {
-            try
-            {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
-                request.Method = WebRequestMethods.Ftp.DeleteFile;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-            }
-            catch (WebException ex)
-            {
-                if (FileExists(url))
-                {
-                    Console.WriteLine($"Failed to delete the file {url} on the PS2 via FTP.\n{ex.Message}"); // for some reason going from launchELF_isr(2023-10-23) to launchELF(2019-1-11) throws an error once per file then fixes itself ???
-                }
-            }
+            catch { return false; }
         }
     }
 }

@@ -92,7 +92,7 @@ namespace UDPBD_for_XEB__GUI
         private void StartServer_Click(object sender, RoutedEventArgs e)
         {
             string? currentState = ServerButton.Content.ToString();
-            if (String.IsNullOrEmpty(currentState) == true) return;
+            if (string.IsNullOrEmpty(currentState)) return;
             if (currentState.Contains("Stop"))
             {
                 QuickKillServer();
@@ -302,7 +302,7 @@ namespace UDPBD_for_XEB__GUI
 
         private static void CheckFiles()
         {
-            string[] files = ["BlankVMC.bin", "bsd-udpbd.toml", "UDPBD-for-XEB+-CLI.exe", "udpbd-server.exe", "udpbd-vexfat.exe"];
+            string[] files = ["bsd-udpbd.toml", "UDPBD-for-XEB+-CLI.exe", "udpbd-server.exe", "udpbd-vexfat.exe"];
             foreach (var file in files)
             {
                 if (!File.Exists(file))
@@ -335,7 +335,7 @@ namespace UDPBD_for_XEB__GUI
             else MessageBox.Show("Failed to start the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        private static void KillServer()
+        private void KillServer()
         {
             string[] serverNames = ["udpbd-server", "udpbd-vexfat"];
             foreach (var server in serverNames)
@@ -347,6 +347,7 @@ namespace UDPBD_for_XEB__GUI
                     if (response == MessageBoxResult.OK)
                     {
                         foreach (var item in processes) item.Kill();
+                        ServerButton.Content = "Start Server";
                     }
                     else Environment.Exit(-1);
                 }
@@ -377,10 +378,7 @@ namespace UDPBD_for_XEB__GUI
         {
             gameList.Clear();
             gamePath = "";
-            if (TextBlockGameList == null)
-            {
-                return;
-            }
+            if (TextBlockGameList == null) return;
             ComboBoxGameVolume.Items.Clear();
             TextBlockGameList.Text = "";
             if (ComboBoxServer.SelectedIndex == 0)

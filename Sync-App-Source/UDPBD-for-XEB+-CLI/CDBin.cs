@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UDPBD_for_XEB__CLI
+﻿namespace UDPBD_for_XEB__CLI
 {
     internal class CDBin
     {
