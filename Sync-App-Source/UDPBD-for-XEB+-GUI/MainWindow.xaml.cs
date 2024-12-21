@@ -39,7 +39,10 @@ namespace UDPBD_for_XEB__GUI
 
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
-            TestPS2Connection(TextBoxPS2IP.Text);
+            ButtonConnect.IsEnabled = false;
+            TextBlockConnection.Text = "Please Wait . . .";
+            string tempIP = TextBoxPS2IP.Text;
+            Task.Run(() => { TestPS2Connection(tempIP); });
         }
 
         private void SelectPath_Click(object sender, RoutedEventArgs e)
@@ -246,6 +249,11 @@ namespace UDPBD_for_XEB__GUI
         {
             if (!IPAddress.TryParse(ps2ip, out IPAddress? address))
             {
+                Dispatcher.Invoke(() =>
+                {
+                    TextBlockConnection.Text = "Disconnected";
+                    ButtonConnect.IsEnabled = true;
+                });
                 MessageBox.Show($"{ps2ip} is not a valid IP address.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
@@ -253,6 +261,11 @@ namespace UDPBD_for_XEB__GUI
             PingReply reply = pingSender.Send(address);
             if (!(reply.Status == IPStatus.Success))
             {
+                Dispatcher.Invoke(() =>
+                {
+                    TextBlockConnection.Text = "Disconnected";
+                    ButtonConnect.IsEnabled = true;
+                });
                 MessageBox.Show($"Connection failed: {reply.Status}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
@@ -262,14 +275,22 @@ namespace UDPBD_for_XEB__GUI
                 request.Method = WebRequestMethods.Ftp.ListDirectory;
                 using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
 
-                TextBlockConnection.Text = "Connected";
-                TextBoxPS2IP.IsEnabled = false;
-                ButtonConnect.IsEnabled = false;
-                SaveIPSetting();
+                Dispatcher.Invoke(() =>
+                {
+                    TextBlockConnection.Text = "Connected";
+                    TextBoxPS2IP.IsEnabled = false;
+                    ButtonConnect.IsEnabled = false;
+                    SaveIPSetting();
+                });
                 return true;
             }
             catch (WebException ex)
             {
+                Dispatcher.Invoke(() =>
+                {
+                    TextBlockConnection.Text = "Disconnected";
+                    ButtonConnect.IsEnabled = true;
+                });
                 MessageBox.Show($"Failed to connect to the PS2's FTP server.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
