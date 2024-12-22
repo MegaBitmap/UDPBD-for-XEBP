@@ -439,5 +439,8 @@ https://www.psx-place.com/threads/xtremeeliteboot-s-dashboard-special-xmas-showc
 Rick Gaiser - neutrino - v1.3.1  
 https://github.com/rickgaiser/neutrino
 
-sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.1  
+sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.3  
 https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin
+
+Wes Castro & El_isra - CheatDevice - 2024-10-4  
+https://github.com/israpps/CheatDevicePS2
