@@ -17,6 +17,7 @@ The sync app automates the setup process.
   * Display game-specific artwork on the menu.
   * Display metadata for each game.
   * Set neutrino compatibility flags and other options on a global or per-game basis.
+  * Cheat support.
   * Favorites list.
   * Custom theme integration.
 
@@ -24,7 +25,7 @@ The sync app automates the setup process.
 
   * A PlayStation 2 console with a memory card that has either FreeMCBoot or PS2BBL installed.  
 [PS2BBL](https://israpps.github.io/PlayStation2-Basic-BootLoader/) is the recommended option.
-  * A computer with a recent version of [Python](https://www.python.org/) installed.
+  * If using ListBuilder, a computer with a recent version of [Python](https://www.python.org/) installed.
   * All of the requirements specific to the device you want to load games from.
 
 ### UDPBD
@@ -40,8 +41,9 @@ If your PC does not have an ethernet port available, a USB ethernet adapter will
 
   * A fat PlayStation 2 console.
   * A PlayStation 2 network adapter or hard drive add-on.
-  * A hard drive or SSD that is compatible with your PlayStaion 2 network or hard drive adapter.
-  * A FAT32 or exFAT formatted USB drive 1GB or larger.
+  * A hard drive or SSD that is compatible with your Playstaion 2 network or hard drive adapter.  
+  * A FAT32 or exFAT formatted USB drive 1GB or larger.  
+  This is used for XEB+ and assorted files.
   * A PC hard drive dock or USB adapter (optional)
     
 ### MX4SIO
@@ -49,7 +51,8 @@ If your PC does not have an ethernet port available, a USB ethernet adapter will
   * An MX4SIO adapter
   * An exFAT formatted SD card no less than 4GB in size.  
 32GB or larger is recommended.
-  * A FAT32 or exFAT formatted USB drive 1GB or larger.
+  * A FAT32 or exFAT formatted USB drive 1GB or larger.  
+  This is used for XEB+ and assorted files.
   * A USB SD card reader (optional)
     
 ### USB
@@ -249,25 +252,40 @@ Repeat steps 9-12 to add or remove games on the USB drive.
 
 The neutrino Launcher plugin can display game-specific artwork in the selection menu.  
 This feature uses the same file type and naming conventions as Open PS2 Loader, which allows the plugin to take advantage of existing PS2 artwork libraries designed for OPL.  
-The UDPDB Sync app will automatically install artwork if you check the box `Download Artwork` before clicking sync.  
+The UDPBD Sync app will automatically install artwork if you check the box `Download Artwork` before clicking sync.  
 This will download artwork from the [OPLM art backup on archive.org](https://oplmanager.com/site/?backups).
 
  For manual artwork installation, the following additional steps are required:
 
 1. Prepare or acquire artwork files with the same file format and naming conventions as those used by OPL.
     * Only background art (*_BG*) and disc icon (*_ICO*) files are used by this plugin.
-    * Some recent versions of OPL have added support for 128x128 disc icons. It is strongly recommended to only use the older 64x64 icons.
+    * Some recent versions of OPL have added support for 128x128 disc icons. These are not supported, and it is recommended to only use the older 64x64 icons.
 2. Copy the artwork files you wish to use to `/ART` or `/XEBPLUS/GME/ART` on your USB drive.
     * If it exists, the `ART` directory on the USB root will always take priority over `/XEBPLUS/GME/ART`.
 3. Launch XEB+ and select one of the neutrino Launcher plugins.  
-If the plugin detects files in one of the artwork directories, it will automatically create an artwork cache in the `CFG/neutrinoLauncher` folder.
-4.  * This is necessary to maintain a usable level of performance while displaying artwork in the menu.
+4. If the plugin detects files in one of the artwork directories, it will automatically create an artwork cache in the `CFG/neutrinoLauncher` folder.  
+This is necessary to maintain a usable level of performance while displaying artwork in the menu.
 
-The caching process can take a long time to complete the first time it runs, potentially up to an hour if you have a very large game library.  
+The caching process can take a long time to complete the first time it runs, potentially over an hour if you have a very large game library.  
 
-Making any changes to the *.list* files in the `CFG/neutrinoLauncher`, or modifying the cache folder, will trigger a refresh of the artwork cache the next time the plugin is launched.  
+Making any changes to any of the *.list* files in the `CFG/neutrinoLauncher` folder, or modifying the cache folder, will trigger a refresh of the artwork cache the next time the plugin is launched.  
 A refresh can also be triggered manually from the plugin settings.  
 Cache refreshes take much less time than initial creation, so long as the cache folder has not been moved or deleted.
+
+
+### Adding Cheats
+
+The neutrino Launcher can be set to load [Cheat Device](https://israpps.github.io/CheatDevicePS2/) prior to starting a game. This allows for the use of Action Replay / Gameshark style cheat codes.  
+To make use of this feature, the following additional steps are required. 
+
+1. Create or acquire cheat database (*.cht*) files in Cheat Device format.
+    * Database files should only contain cheats for a single game.
+    * Database files must be named by PlayStation 2 title ID using this format: `SLUS_123.45.cht`
+2. Create a directory called `CHT` on the root of the USB drive containing your XEB+ install.
+3. Copy your *.cht* files to the `CHT` directory.
+
+A collection widescreen patch codes in the correct format can be found [here](https://github.com/sync-on-luma/PS2-widescreen-cheats). Other cheat codes will need to be converted from other collections or added by hand.
+
 
 ## Troubleshooting 
 
@@ -319,8 +337,8 @@ DOWN -          **scroll down**
 UP -            **scroll up**  
 R1 -            **scroll down 5 items**  
 L1 -            **scroll up 5 items**  
-R2 -            **jump to next letter**  
-L2 -            **jump to previous letter**  
+R2 -            **scroll down 15 items**  
+L2 -            **scroll up 15 items**  
 R3 -            **jump to bottom of list**  
 L3 -            **jump to top of list**  
 SELECT -        **view control map**
@@ -341,7 +359,9 @@ Context menu options apply to the currently highlighted game by default, and are
   * **Global / Per-Game Settings** - This option toggles between Global and Per-Game settings modes.  
 When set to Global Settings, options shown below this one will apply to all games.  
 When set to Per-Game Settings, options shown below this one will apply only to the current game.
-  * **Enable Boot Logo** - When enabled, the PlayStation 2 logo will be shown on screen when starting a game. This slightly increases the start time.
+  * **Enable Cheat Device** - When enabled, Cheat Device will be injected into the game load sequence.  
+  To start the selected game from within Cheat Device, press START, select *Start Game*, and choose the option below *==Disc==*.
+  * **Enable Boot Logo** - When enabled, the PlayStation 2 logo will be shown on screen when starting a game. This setting can affect compatibly, particularly for games that do not match your console's region.
   * **Enable Debug Colors** - When enabled, a series of colors will flash on screen when starting a game. This can be used to help diagnose games that will not start.
   * **Accurate Reads** - When enabled, the data transfer rate for games will be limited to that of the PlayStation 2 DVD drive.  
   This will increase load times if using a hard drive, but can fix compatibility issues with some titles.
@@ -350,13 +370,14 @@ When set to Per-Game Settings, options shown below this one will apply only to t
   * **Emulate DVD-DL**- When enabled, neutrino will emulate the data structure of a dual-layer DVD. This option is required for DVD9 images that have been modified to fit a DVD5.
   * **Refresh Artwork** - Immediately delete and re-copy cached artwork for the current game. This option is not affected by the current settings mode.
 
-Closing the context menu will automatically save the currently selected options. 
+Closing the context menu will automatically save the currently selected options.  
+Refer to the [compatibility list](https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin/wiki/Compatibility-List) to find known-working configurations for specific games.
 
 ### Favorites
 
 Games can be added to a favorites list for easy organization and quicker access.  
 
-The favorites list is shared between all three drive types, however only titles present on the currently selected drive will be displayed.  
+The favorites list is shared between all four drive types, however only titles present on the currently selected drive will be displayed.  
 
 To add a game to the favorites list, open the context menu and select "Add To Favorites", as described in the previous section. Repeat this process to remove a game from the favorites list.  
 When a game is in the favorites list, it's title will be flanked by "●" on either side.  
@@ -372,15 +393,17 @@ This contains a settings menu whose options apply to the main neutrino Launcher 
    * **Enable HDD** - When enabled, *neutrino Launcher (HDD)* will be available on the XEB+ dashboard.*
    * **Enable MX4SIO** - When enabled, *neutrino Launcher (MX4SIO)* will be available on the XEB+ dashboard.*
    * **Enable USB** - When enabled, *neutrino Launcher (USB)* will be available on the XEB+ dashboard.*
+   * **Enable UDPBD** - When enabled, *neutrino Launcher (UDPBD)* will be available on the XEB+ dashboard.*
    * **Disable Artwork** - When enabled, game specific artwork will not be shown on the menu. This can prevent the cache from auto-refreshing in some cases.
   * **Disable Status Messages** - When enabled, the text that appears at the bottom of the screen to indicate loading and other behavior will not be shown.
-  * **Disable Fade Effect** - When enabled, background artwork will not fade in/out when the image changes.
+  * **Disable Background Fading** - When enabled, background artwork will not fade in/out when the image changes.
   * **Disable Icon Animation** - When enabled, the disc icon for the currently highlighted game will not spin.
   *  **Show Title ID** - When enabled, each game's PlayStation 2 title ID will be shown under it's title.
   *  **Show Media** - When enabled, each game's media type will be shown under it's title.
-  * **Refresh Artwork Cache** - Sets artwork cache to refresh next time one of the neutrino Launcher plugins is loaded. 
+  * **Refresh Artwork Cache** - Sets artwork cache to refresh next time one of the neutrino Launcher plugins is loaded.
+  * **Clean Artwork Cache** - Immediately scan the artwork cache for unused files and remove them.
 
-    *An XEB+ reboot/refresh is required for changes made to this setting to take effect.
+*An XEB+ reboot/refresh is required for changes made to this setting to take effect.
 
 Returning to the dashboard will automatically save the currently selected options.
 
@@ -388,27 +411,28 @@ Returning to the dashboard will automatically save the currently selected option
 
 The four neutrino Launcher plugins and the settings plugin each use their own custom dashboard icon that is not normally present in XEB+.  
 Versions of these icons that are visually consistent with the default XEB+ theme are included and will be loaded by default.  
-Alternate icons will be used instead, if icon files with the correct names are present in the current XEB+ theme folder.  
+Alternate icons will be used instead if icon files with the correct names are present in the current XEB+ theme folder.  
 
 The filenames each plugin looks for are as follows:
 
-  * *ic_tool_neutrino_udpbd.png* - neutrino Luancher (UDPBD)
-  * *ic_tool_neutrino_hdl.png* - neutrino Luancher (HDD)
-  * *ic_tool_neutrino_mx4.png* - neutrino Luancher (MX4SIO)
-  * *ic_tool_neutrino_usb.png* - neutrino Luancher (USB)
-  * *ic_set_neutrino_cfg.png* - neutrino Luancher Settings
+  * *ic_tool_neutrino_udpbd.png* - neutrino Launcher (UDPBD)
+  * *ic_tool_neutrino_hdl.png* - neutrino Launcher (HDD)
+  * *ic_tool_neutrino_mx4.png* - neutrino Launcher (MX4SIO)
+  * *ic_tool_neutrino_usb.png* - neutrino Launcher (USB)
+  * *ic_set_neutrino_cfg.png* - neutrino Launcher Settings
 
 If you wish to reference the included versions of these icons, they are located at `XEBPLUS/APPS/neutrinoLauncher/image/`.
 
 ## Known Issues and Limitations
 
   * Artwork cannot be refreshed from the context menu while in the favorites list.
+  * The plugin may crash when switching to the favorites list for some users. The cause of this issue is currently unknown.
   * The plugin may need to be closed and re-opened for refreshed artwork to be shown.
   * If an artwork cache build / refresh is interrupted, the system may crash the next time the plugin is loaded.  
 If this happens, the behavior will persist until the cache is refreshed manually.
-  * The *neutrino Launcher* plugins can take up to 30 seconds to load, and may appear to hang if there are a large number of games present.
+  * The *neutrino Launcher* plugin can take up to 30 seconds to load, and may appear to hang if there are a large number of games present.
   * If enabled, the PlayStation 2 boot logo will display incorrectly for games that do not match the console's region.
-  * If installed, the PlayStation 2 hard drive will spin up when loading games from MX4SIO.
+  * If installed, the PlayStation 2 hard drive will spin up when loading games from MX4SIO or UDPBD.
   * Repeatedly closing and re-opening the *neutrino Launcher* plugin can cause the system to crash.
   * Scrolling through the list quickly may cause corrupted graphics to be displayed briefly.
 
