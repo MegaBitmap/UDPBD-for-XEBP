@@ -1228,7 +1228,7 @@ function NEUTRINO_ContextMenu()
 			ContextMenu_GlobalSettings = (NEUTRINO_TempFile:read())
 			io.close(NEUTRINO_TempFile)
 		else
-			ContextMenu_GlobalSettings = ""
+			ContextMenu_GlobalSettings = "1"
 		end
 		if	NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Favorite == true then
 			ContextMenu[1].Name = neuLang[29]
