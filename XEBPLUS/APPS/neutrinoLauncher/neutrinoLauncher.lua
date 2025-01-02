@@ -192,15 +192,15 @@ function NEUTRINO_DrawUnderlay(Animate)
 	elseif NEUTRINO_CurrentList == NEUTRINO_Favorites then
 		Font.ftPrint(fontMid, 495, plusYValue+45, 0, 400, 64, neuLang[11]..NEUTRINO_SelectedItem..neuLang[9]..NEUTRINO_FavoritesTotal, baseColorFull)
 	elseif NEUTRINO_CurrentList == NEUTRINO_Recents then
-		Font.ftPrint(fontMid, NEUTRINO_RecentPos, plusYValue+45, 0, 400, 64, neuLang[68]..NEUTRINO_SelectedItem..neuLang[9]..NEUTRINO_GamesTotal, baseColorFull)
+		Font.ftPrint(fontMid, NEUTRINO_RecentPos, plusYValue+45, 0, 400, 64, neuLang[68]..NEUTRINO_SelectedItem..neuLang[9]..NEUTRINO_RecentsTotal, baseColorFull)
 	end
 	Graphics.drawImage(themeInUse[-95], 500, plusYValue+400)
 	Graphics.drawImage(themeInUse[-93], 506, plusYValue+400)
 	Font.ftPrint(fontSmall, 543, plusYValue+405, 0, 400, 64, neuLang[12], baseColorFull)
 
-	if NEUTRINO_Debug ~= nil then
-		Font.ftPrint(fontBig, 280, plusYValue+390, 11, 620, 64, NEUTRINO_Debug, baseColorFull)
-	end
+	--if NEUTRINO_Debug ~= nil then
+	--	Font.ftPrint(fontBig, 280, plusYValue+390, 11, 620, 64, NEUTRINO_Debug, baseColorFull)
+	--end
 end
 
 function NEUTRINO_DrawMenu(Animate)
@@ -622,11 +622,11 @@ if NEUTRINO_TempFile then
 			NEUTRINO_Games[NEUTRINO_GamesTotal] = {};
 			NEUTRINO_Games[NEUTRINO_GamesTotal].TitleId = string.sub(line, 1, 11)
 			line = string.gsub(line, NEUTRINO_Games[NEUTRINO_GamesTotal].TitleId.." ", "")
-			if string.match(line, "(.*)/VMC/(.*)") then
+			if string.match(line, "(.*)/VMC/(.*)") or string.match(line, "(.*)0000000000000000000000(.*)") then
 				NEUTRINO_Games[NEUTRINO_GamesTotal].Vmc = string.sub(line, string.len(line)-21, string.len(line))
 				line = string.sub(line, 1, string.len(line)-23)
 			else
-				NEUTRINO_Games[NEUTRINO_GamesTotal].Vmc = ""
+				NEUTRINO_Games[NEUTRINO_GamesTotal].Vmc = "0000000000000000000000"
 			end
 			NEUTRINO_Games[NEUTRINO_GamesTotal].Folder, line = string.match(line, "(.*)/(.*)")
 			NEUTRINO_Games[NEUTRINO_GamesTotal].Folder = string.sub(NEUTRINO_Games[NEUTRINO_GamesTotal].Folder, 2, 4)
@@ -1682,7 +1682,7 @@ while XEBKeepInSubMenu do
 
 			if string.match(NEUTRINO_LaunchOptions, "(.*)vmc(.*)") then
 				NEUTRINO_LaunchOptions = string.sub(NEUTRINO_LaunchOptions, 5, string.len(NEUTRINO_LaunchOptions))
-				if NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Vmc ~= "" and NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Vmc ~= nil then
+				if NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Vmc ~= "0000000000000000000000" and NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Vmc ~= nil then
 					NEUTRINO_Vmc = " -mc0=mass:"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Vmc
 				end
 			end

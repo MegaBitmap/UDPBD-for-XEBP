@@ -12,11 +12,13 @@ The sync app automates the setup process.
   * Load PlayStation 2 game backups straight from the Xtreme Elite Boot Plus dashboard.
   * Supports game loading from UDPBD, HDD, MX4SIO, and USB.
   * Supports high capacity exFAT drives (currently tested with drives up to 4TB).
+  * Works with fragmented game files.
   * Quick navigation functions for browsing large game lists.
-  * Remember last played game.
+  * Remember last 10 games played.
   * Display game-specific artwork on the menu.
   * Display metadata for each game.
   * Set neutrino compatibility flags and other options on a global or per-game basis.
+  * Virtual Memory Cards
   * Cheat support.
   * Favorites list.
   * Custom theme integration.
@@ -41,7 +43,7 @@ If your PC does not have an ethernet port available, a USB ethernet adapter will
 
   * A fat PlayStation 2 console.
   * A PlayStation 2 network adapter or hard drive add-on.
-  * A hard drive or SSD that is compatible with your Playstaion 2 network or hard drive adapter.  
+  * A hard drive or SSD that is compatible with your PlayStation 2 network or hard drive adapter.  
   * A FAT32 or exFAT formatted USB drive 1GB or larger.  
   This is used for XEB+ and assorted files.
   * A PC hard drive dock or USB adapter (optional)
@@ -64,8 +66,9 @@ PS2BBL supports this by default. exFAT support can be added to FreeMcBoot with [
 
 ## Setup
 
-*Note: This setup process is for version 2 of this plugin. If you have previously installed version 1, you will need to remove the old version of neutrino Launcher from your XEB+ install before continuing.  
-This includes all neutrino Launcher files in the `APPS`, `PLG`, and `CFG` folders, as well as the `CD` and `DVD` folders on the root of your USB drive.*
+*Note: This setup process is for version 2.4 of this plugin.  
+If you are updating from version 2.3 or earlier, you will need to rebuild all of your game lists.  
+If you are updating from version 1.x, you will need to remove the old version of neutrino Launcher from your XEB+ install before continuing. This includes all neutrino Launcher files in the `APPS`, `PLG`, and `CFG` folders, as well as the `CD` and `DVD` folders on the root of your USB drive.*
 
 1. If you have not already done so, download the Xtreme Elite Boot Plus Xmas 2021 showcase.  
 http://www.hwc.nat.cu/ps2-vault/hwc-projects/xebplus/  
@@ -78,7 +81,7 @@ Note that if you are using an exFAT formatted USB drive, you will need to use PS
 3. (optional) Configure your PS2 exploit of choice to autorun XEB+ on startup.
 4. Download the latest version of this plugin from the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases).  
 Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders if prompted.
-5. Extract the Extract the UDPBD Sync app or List Builder app to a known location on your computer.
+5. Extract the Extract the UDPBD Sync app or List Builder script to a known location on your computer.
 6. Complete setup by following the steps specific to the device you want to load games from.
 
 
@@ -209,11 +212,12 @@ All disc images must be in *.iso* format.
 10. Run `GUI.py` from the included `List Builder` folder, and select *PS2 HDD* under *Drive Type*.  
 11. Click the *Choose Directory* button under *XEBPLUS Location* and navigate to the root of the USB drive containing your XEB+ install.  
 12. Click the *Choose Directory* button under *Games Location* and navigate to the root of your hard drive.  
-13. Click *Build List* and wait for the process to complete.  
-14. Eject both drives from the computer. Connect the hard drive / SSD to the PlayStation 2 via the network adapter, and plug the USB drive into either of the front USB ports.  
-15. Launch XEB+ on the PS2, and use *neutrino Launcher (HDD)* to load games from the hard drive.  
+13. Click the *Create VMCs* checkbox if you wish to use virtual memory cards.  
+14. Click *Build List* and wait for the process to complete.  
+15. Eject both drives from the computer. Connect the hard drive / SSD to the PlayStation 2 via the network adapter, and plug the USB drive into either of the front USB ports.  
+16. Launch XEB+ on the PS2, and use *neutrino Launcher (HDD)* to load games from the hard drive.  
 
-Repeat steps 9-13 to add or remove games on the hard drive.
+Repeat steps 9-14 to add or remove games on the hard drive.
 
 
 ### MX4SIO
@@ -225,11 +229,12 @@ All disc images must be in *.iso* format.
 10. Run `GUI.py` from the included `List Builder` folder, and select *MX4SIO* under *Drive Type*.  
 11. Click the *Choose Directory* button under *XEBPLUS Location* and navigate to the root of the USB drive containing your XEB+ install.  
 12. Click the *Choose Directory* button under *Games Location* and navigate to the root of your SD card.  
-13. Click *Build List* and wait for the process to complete.  
-14. Eject both drives from the computer. Insert the SD card into an MX4SIO adapter and connect it to memory card slot 2 on the PlayStation 2. Plug the USB drive into either of the front USB ports.  
-15. Launch XEB+ on the PS2, and use *neutrino Launcher (MX4SIO)* to load games from the SD card.  
+13. Click the *Create VMCs* checkbox if you wish to use virtual memory cards.  
+14. Click *Build List* and wait for the process to complete.  
+15. Eject both drives from the computer. Insert the SD card into an MX4SIO adapter and connect it to memory card slot 2 on the PlayStation 2. Plug the USB drive into either of the front USB ports.  
+16. Launch XEB+ on the PS2, and use *neutrino Launcher (MX4SIO)* to load games from the SD card.  
 
-Repeat steps 9-13 to add or remove games on the SD card.
+Repeat steps 9-14 to add or remove games on the SD card.
 
 
 ### USB
@@ -241,11 +246,12 @@ All disc images must be in *.iso* format.
 10. Run `GUI.py` from the included `List Builder` folder, and select *USB* under *Drive Type*.  
 11. Click the *Choose Directory* button under *XEBPLUS Location* and navigate to the root of your USB drive.  
 The *Games Location* will automatically be set to the same folder.  
-12. Click *Build List* and wait for the process to complete.  
-13. Eject the USB drive and plug it into either of the front USB ports on the PlayStation 2.  
-14. Launch XEB+ on the PS2, and use *neutrino Launcher (USB)* to load games from the USB drive.  
+12. Click the *Create VMCs* checkbox if you wish to use virtual memory cards.  
+13. Click *Build List* and wait for the process to complete.  
+14. Eject the USB drive and plug it into either of the front USB ports on the PlayStation 2.  
+15. Launch XEB+ on the PS2, and use *neutrino Launcher (USB)* to load games from the USB drive.  
 
-Repeat steps 9-12 to add or remove games on the USB drive.
+Repeat steps 9-13 to add or remove games on the USB drive.
 
 
 ### Adding Artwork
@@ -332,7 +338,7 @@ If your network does not meet these performance metrics then problems may occur.
 CROSS -         **confirm / launch game**  
 CIRCLE / LEFT - **cancel / close plugin**  
 SQUARE -        **open context menu**  
-TRIANGLE -      **show favorites / show all**  
+TRIANGLE -      **show favorites / show recents / show all**  
 DOWN -          **scroll down**  
 UP -            **scroll up**  
 R1 -            **scroll down 5 items**  
@@ -348,7 +354,7 @@ SELECT -        **view control map**
 Launch the XEB+ dashboard on your PlayStation 2 console, and select the appropriate *neutrino Launcher* entry from the menu.  
 Wait a moment for the plugin to load. If there are artwork files present, you may need to wait for the artwork cache to build or refresh.  
 Select a game from the list to launch it with neutrino, or press back to close the plugin.  
-Repeat steps 9-14 of the setup process for your drive type each time you want to add or remove games.
+Repeat steps 9-14 of the setup process for your drive type each time you wish to add or remove games.
 
 ### Game Options
 
@@ -360,11 +366,15 @@ Context menu options apply to the currently highlighted game by default, and are
 When set to Global Settings, options shown below this one will apply to all games.  
 When set to Per-Game Settings, options shown below this one will apply only to the current game.
   * **Enable Cheat Device** - When enabled, Cheat Device will be injected into the game load sequence.  
-  To start the selected game from within Cheat Device, press START, select *Start Game*, and choose the option below *==Disc==*.
-  * **Enable Boot Logo** - When enabled, the PlayStation 2 logo will be shown on screen when starting a game. This setting can affect compatibly, particularly for games that do not match your console's region.
+  To start the selected game from within Cheat Device, press START, select *Start Game*, and choose the first option below *==Disc==*.
+  * **Enable VMC** - When enabled, the selected game will save data to a virtual memory card image instead of the memory card in Slot 1 of the PS2.
+  *  **Use Unique VMC** - If the selected game is in a memory card group, enabling this option will force it to use a dedicated VMC instead of the default group one.  
+    More info on memory card groups can be found [here](https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin/wiki/Memory-Card-Groups).
+  * **Enable Boot Logo** - When enabled, the PlayStation 2 logo will be shown on screen when starting a game. This setting can affect compatibility, particularly for games that do not match your console's region.
   * **Enable Debug Colors** - When enabled, a series of colors will flash on screen when starting a game. This can be used to help diagnose games that will not start.
   * **Accurate Reads** - When enabled, the data transfer rate for games will be limited to that of the PlayStation 2 DVD drive.  
-  This will increase load times if using a hard drive, but can fix compatibility issues with some titles.
+  This will increase load times if using a hard drive, but can fix compatibility issues with some titles.  
+  This option is enabled by default for better compatibility.
   * **Synchronous Reads** - When enabled, asynchronous (background) loading will not be used. This can affect load times, and fixes compatibility issues with some titles.
   * **Unhook Syscalls** - When enabled, neutrino Syscalls will be removed from memory after starting a game. This fixes compatibility issues with some titles.
   * **Emulate DVD-DL**- When enabled, neutrino will emulate the data structure of a dual-layer DVD. This option is required for DVD9 images that have been modified to fit a DVD5.
@@ -372,6 +382,12 @@ When set to Per-Game Settings, options shown below this one will apply only to t
 
 Closing the context menu will automatically save the currently selected options.  
 Refer to the [compatibility list](https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin/wiki/Compatibility-List) to find known-working configurations for specific games.
+
+### Recent Games
+
+The neutrino Launcher plugin keeps track of the ten most recently played games for each drive type. Recent games are stored in the recent games list in reverse chronological order.  
+
+To access the recent games list, press TRIANGLE while on the game selection menu. Press TRIANGLE again to advance to the favorites list. 
 
 ### Favorites
 
@@ -382,7 +398,7 @@ The favorites list is shared between all four drive types, however only titles p
 To add a game to the favorites list, open the context menu and select "Add To Favorites", as described in the previous section. Repeat this process to remove a game from the favorites list.  
 When a game is in the favorites list, it's title will be flanked by "●" on either side.  
 
-To access the favorites list, press TRIANGLE while on the game selection menu. Press TRIANGLE again to show all games.  
+To access the favorites list, press TRIANGLE while on the recent games list. Press TRIANGLE again to show all games.  
 The plugin will always start up to the all games list, even if it was previously closed while viewing the favorites list.
 
 ### Neutrino Launcher Settings
@@ -398,7 +414,7 @@ This contains a settings menu whose options apply to the main neutrino Launcher 
   * **Disable Status Messages** - When enabled, the text that appears at the bottom of the screen to indicate loading and other behavior will not be shown.
   * **Disable Background Fading** - When enabled, background artwork will not fade in/out when the image changes.
   * **Disable Icon Animation** - When enabled, the disc icon for the currently highlighted game will not spin.
-  *  **Show Title ID** - When enabled, each game's PlayStation 2 title ID will be shown under it's title.
+  *  **Show Title ID** - When enabled, each game's PlayStation 2 title ID will be shown under its title.
   *  **Show Media** - When enabled, each game's media type will be shown under it's title.
   * **Refresh Artwork Cache** - Sets artwork cache to refresh next time one of the neutrino Launcher plugins is loaded.
   * **Clean Artwork Cache** - Immediately scan the artwork cache for unused files and remove them.
@@ -426,6 +442,7 @@ If you wish to reference the included versions of these icons, they are located 
 ## Known Issues and Limitations
 
   * Artwork cannot be refreshed from the context menu while in the favorites list.
+  * It is not currently possible to mount VMCs in Slot 2.
   * The plugin may crash when switching to the favorites list for some users. The cause of this issue is currently unknown.
   * The plugin may need to be closed and re-opened for refreshed artwork to be shown.
   * If an artwork cache build / refresh is interrupted, the system may crash the next time the plugin is loaded.  
