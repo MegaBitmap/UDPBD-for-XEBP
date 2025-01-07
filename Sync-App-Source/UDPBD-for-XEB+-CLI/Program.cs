@@ -142,7 +142,7 @@ namespace UDPBD_for_XEB__CLI
             Console.WriteLine("-ps2ip is the ip address for connecting to the PS2 with PS2Net.\n");
             Console.WriteLine("-downloadart enables automatic game artwork downloading.\n");
             Console.WriteLine("-bin2iso enables automatic CD-ROM Bin to ISO conversion.\n");
-            Console.WriteLine("-enablevmc will assign a unique virtual memory card for each game.\n");
+            Console.WriteLine("-enablevmc will assign a virtual memory card for each game or group of games in 'vmc_groups.list'.\n");
         }
 
         static List<string> ScanFolder(string scanPath)
@@ -209,14 +209,25 @@ namespace UDPBD_for_XEB__CLI
 
         static void DownloadArtList(string gamePath, List<string> gameList, IPAddress ps2ip, string artUrl)
         {
+            Console.WriteLine("Checking for Game Artwork . . .");
+            int failCount = 0;
             foreach (var game in gameList)
             {
                 string serialID = GetSerialID(gamePath + game);
-                if (!string.IsNullOrEmpty(serialID) && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png") && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png") && GetArtwork(artUrl, serialID) == true)
+                if (!string.IsNullOrEmpty(serialID) && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png") && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png"))
                 {
-                    FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png", "temp_BG.png");
-                    FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png", "temp_ICO.png");
-                    Console.WriteLine($"Downloaded Artwork for {game}");
+                    if (GetArtwork(artUrl, serialID))
+                    {
+                        FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png", "temp_BG.png");
+                        FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png", "temp_ICO.png");
+                        Console.WriteLine($"Downloaded Artwork for {game}");
+                    }
+                    else failCount++;
+                }
+                if (failCount > 4)
+                {
+                    Console.WriteLine("Automatic Artwork Download has been skipped as it has failed 5 times.");
+                    return;
                 }
             }
         }
@@ -228,6 +239,11 @@ namespace UDPBD_for_XEB__CLI
                 using WebClient client = new();
                 client.DownloadFile(new Uri(artUrl.Replace("SERIALID", serialID) + "_BG_00.png"), "temp_BG.png");
                 client.DownloadFile(new Uri(artUrl.Replace("SERIALID", serialID) + "_ICO.png"), "temp_ICO.png");
+                if (!File.Exists("temp_BG.png") || !File.Exists("temp_ICO.png"))
+                {
+                    Console.WriteLine($"Failed to download artwork for {serialID}.\nThe downloaded png images are missing.");
+                    return false;
+                }
                 return true;
             }
             catch (Exception ex)
