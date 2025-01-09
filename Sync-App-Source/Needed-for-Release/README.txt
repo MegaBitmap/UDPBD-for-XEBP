@@ -81,7 +81,7 @@ Note that if you are using an exFAT formatted USB drive, you will need to use PS
 3. (optional) Configure your PS2 exploit of choice to autorun XEB+ on startup.
 4. Download the latest version of this plugin from the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases).  
 Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders if prompted.
-5. Extract the Extract the UDPBD Sync app or List Builder script to a known location on your computer.
+5. Extract the UDPBD Sync app or List Builder script to a known location on your computer.
 6. Complete setup by following the steps specific to the device you want to load games from.
 
 
@@ -480,7 +480,7 @@ https://www.psx-place.com/threads/xtremeeliteboot-s-dashboard-special-xmas-showc
 Rick Gaiser - neutrino - v1.3.1  
 https://github.com/rickgaiser/neutrino
 
-sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.4.2  
+sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.4.3  
 https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin
 
 Wes Castro & El_isra - CheatDevice - 2024-10-4  
