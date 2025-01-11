@@ -31,10 +31,10 @@ namespace UDPBD_for_XEB__GUI
         {
             InitializeComponent();
             TextBlockVersion.Text = version;
+            KillServer();
             LoadIPSetting();
             LoadGamePathSetting();
             CheckFiles();
-            KillServer();
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -61,13 +61,13 @@ namespace UDPBD_for_XEB__GUI
             }
             gamePath = dialog.FileName.Replace(@"\DVD\" + dialog.SafeFileName, "").Replace(@"\CD\" + dialog.SafeFileName, "");
             GetGameList(gamePath);
-            SaveGamePathSetting();
         }
 
         private void Sync_Click(object sender, RoutedEventArgs e)
         {
             KillServer();
             if (ValidateSync() != true) return;
+            SaveGamePathSetting();
             string extraArgs = "";
             if (CheckBoxArtworkDownload.IsChecked == true)
             {
@@ -166,11 +166,29 @@ namespace UDPBD_for_XEB__GUI
             if (!File.Exists("GamePathSetting.cfg")) return;
             TextReader settings = new StreamReader("GamePathSetting.cfg");
             string? tempPath = settings.ReadLine();
+            string? serveVMC = settings.ReadLine();
             settings.Close();
             if (tempPath != null && Directory.Exists(tempPath))
             {
                 GetGameList(tempPath);
                 if (gameList.Count > 0) gamePath = tempPath;
+
+                if (!string.IsNullOrEmpty(serveVMC) && serveVMC.Contains("VMCServer"))
+                {
+                    ComboBoxServer.SelectedIndex = 1;
+                    CheckBoxEnableVMC.IsChecked = true;
+                    int itemNum = 0;
+                    foreach (var item in ComboBoxGameVolume.Items)
+                    {
+                        string? tempItem = item.ToString();
+                        if (tempItem != null && tempItem.Contains(tempPath))
+                        {
+                            ComboBoxGameVolume.SelectedIndex = itemNum;
+                            return;
+                        }
+                        itemNum++;
+                    }
+                }
             }
         }
 
@@ -178,6 +196,10 @@ namespace UDPBD_for_XEB__GUI
         {
             TextWriter settings = new StreamWriter("GamePathSetting.cfg");
             settings.WriteLine(gamePath);
+            if (CheckBoxEnableVMC.IsChecked == true && ComboBoxServer.SelectedIndex == 1)
+            {
+                settings.WriteLine("VMCServer");
+            }
             settings.Close();
         }
 
