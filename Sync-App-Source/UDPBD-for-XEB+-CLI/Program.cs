@@ -1,10 +1,10 @@
-﻿using DiscUtils.Iso9660;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using DiscUtils.Iso9660;
 
 namespace UDPBD_for_XEB__CLI
 {
@@ -216,11 +216,18 @@ namespace UDPBD_for_XEB__CLI
                 string serialID = GetSerialID(gamePath + game);
                 if (!string.IsNullOrEmpty(serialID) && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png") && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png"))
                 {
-                    if (GetArtwork(artUrl, serialID))
+                    if (GetArtBG(artUrl, serialID))
                     {
                         FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png", "temp_BG.png");
+                        Console.WriteLine($"Downloaded Background Artwork for {game}");
+                        failCount = 0;
+                    }
+                    else failCount++;
+                    if (GetArtICO(artUrl, serialID))
+                    {
                         FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png", "temp_ICO.png");
-                        Console.WriteLine($"Downloaded Artwork for {game}");
+                        Console.WriteLine($"Downloaded Disc Artwork for {game}");
+                        failCount = 0;
                     }
                     else failCount++;
                 }
@@ -232,23 +239,36 @@ namespace UDPBD_for_XEB__CLI
             }
         }
 
-        static bool GetArtwork(string artUrl, string serialID)
+        static bool GetArtBG(string artUrl, string serialID)
         {
             try
             {
                 using WebClient client = new();
                 client.DownloadFile(new Uri(artUrl.Replace("SERIALID", serialID) + "_BG_00.png"), "temp_BG.png");
-                client.DownloadFile(new Uri(artUrl.Replace("SERIALID", serialID) + "_ICO.png"), "temp_ICO.png");
-                if (!File.Exists("temp_BG.png") || !File.Exists("temp_ICO.png"))
-                {
-                    Console.WriteLine($"Failed to download artwork for {serialID}.\nThe downloaded png images are missing.");
-                    return false;
-                }
-                return true;
+                if (File.Exists("temp_BG.png")) return true;
+                Console.WriteLine($"Failed to download artwork for {serialID}.\nThe downloaded png image is missing.");
+                return false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to download artwork for {serialID}.\n{artUrl.Replace("SERIALID", serialID)}_ICO.png\n{ex.Message}");
+                Console.WriteLine($"Failed to download background artwork for {serialID}.\n{artUrl.Replace("SERIALID", serialID)}_BG.png\n{ex.Message}");
+                return false;
+            }
+        }
+
+        static bool GetArtICO(string artUrl, string serialID)
+        {
+            try
+            {
+                using WebClient client = new();
+                client.DownloadFile(new Uri(artUrl.Replace("SERIALID", serialID) + "_ICO.png"), "temp_ICO.png");
+                if (File.Exists("temp_ICO.png")) return true;
+                Console.WriteLine($"Failed to download artwork for {serialID}.\nThe downloaded png image is missing.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to download disc artwork for {serialID}.\n{artUrl.Replace("SERIALID", serialID)}_ICO.png\n{ex.Message}");
                 return false;
             }
         }
