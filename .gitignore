@@ -42,3 +42,10 @@ __pycache__
 .vscode
 XEBPLUS/boot.lua
 XEBPLUS/THM
+!udpbd-vexfat.exe
+!udpbd-server.exe
+
+.vs/
+bin/
+obj/
+*.user
