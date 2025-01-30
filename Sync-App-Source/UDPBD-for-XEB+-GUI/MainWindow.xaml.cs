@@ -19,9 +19,9 @@ namespace UDPBD_for_XEB__GUI
             "https://github.com/awaken1ng/udpbd-vexfat\n\n" +
             "Howling Wolf & Chelsea - XtremeEliteBoot+\n" +
             "https://web.archive.org/web/*/hwc.nat.cu/ps2-vault/hwc-projects/xebplus\n\n" +
-            "Rick Gaiser - neutrino - v1.3.1\n" +
+            "Rick Gaiser - neutrino - v1.5.0\n" +
             "https://github.com/rickgaiser/neutrino\n\n" +
-            "sync-on-luma - neutrino plugin for XEB+ - forked from v2.4.3\n" +
+            "sync-on-luma - neutrino plugin for XEB+ - forked from v2.5.1\n" +
             "https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin";
 
         readonly List<string> gameList = [];
