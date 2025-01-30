@@ -1,0 +1,67 @@
+﻿<Window x:Class="UDPBD_for_XEB__GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UDPBD_for_XEB__GUI"
+        mc:Ignorable="d"
+        Title="UDPBD for XEB+" Height="450" Width="800" MinHeight="450" MinWidth="800" FontSize="18" FontWeight="Bold">
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="RoundButton">
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="10" />
+                </Style>
+            </Style.Resources>
+        </Style>
+    </Window.Resources>
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF2ABB5B" Offset="1"/>
+            <GradientStop Color="#FFACF57C" Offset="0"/>
+        </LinearGradientBrush>
+    </Window.Background>
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="2*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Name="TextBlockSelectExFAT" Text="Select an exFAT part made in GParted:" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0, 0, 0, 30" Visibility="Hidden" Grid.Row="1"/>
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="2*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="PS2 IP address:" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="20" Grid.Column="0" Grid.Row="0"/>
+            <TextBlock Text="UDPBD for XEB+ Sync App" Width="200" TextWrapping="Wrap" FontSize="24" TextAlignment="Center" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0" Grid.Column="1" Grid.Row="0"/>
+            <TextBlock Name="TextBlockVersion" Text="Version" FontSize="12" TextAlignment="Center" VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Column="2" Grid.Row="0"/>
+            <TextBox Name="TextBoxPS2IP" Text="192.168.0.10" TextAlignment="Center" HorizontalAlignment="Center" Width="180" VerticalAlignment="Bottom" Margin="-20" Grid.Column="0" Grid.Row="0"/>
+            <Button Name="ButtonConnect"  Content="Connect to PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="0" Grid.Row="1" Click="Connect_Click"/>
+            <TextBlock Name="TextBlockConnection" Text="Disconnected" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="40,20" Grid.Column="0" Grid.Row="1"/>
+            <ComboBox Name="ComboBoxServer" Margin="0, 10, 0, 0" SelectedIndex="0" VerticalAlignment="Top" Height="40" Grid.Column="1" Grid.Row="1" SelectionChanged="ComboBoxGameVolume_SelectionChanged">
+                <ComboBoxItem Name="udpbdVexfat" Content="UDPBD-VexFAT (Beginner)"/>
+                <ComboBoxItem Name="udpbdServer" Content="UDPBD-Server (Advanced)"/>
+            </ComboBox>
+            <ComboBox Name="ComboBoxGameVolume" Margin="0, 50, 0, 0" Height="40" Visibility="Hidden" Grid.Column="1" Grid.Row="1"/>
+            <CheckBox Name="CheckBoxEnableVMC" Content="Use Virtual Memory Cards" VerticalAlignment="Bottom" HorizontalAlignment="Center" Padding="4,-6,0,0" Margin="0,10" Visibility="Hidden" Grid.Column="1" Grid.Row="1"/>
+            <Button Name="ButtonSelectGamePath" Content="Select Game Path" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="1" Grid.Row="1" Click="SelectPath_Click"/>
+            <TextBlock Name="TextBlockGameList" Text="" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="40,20" Grid.Column="1" Grid.Row="1"/>
+            <CheckBox Name="CheckBoxArtworkDownload" Content="Download Artwork" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="4,-6,0,0" Margin="30, 5, 0, 0" Grid.Column="2" Grid.Row="1"/>
+            <CheckBox Name="CheckBoxBinConvert" Content="Convert CD Bin to ISO" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="4,-6,0,0" Margin="30, 30, 0, 0" Grid.Column="2" Grid.Row="1"/>
+            <Button Content="Sync with PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="2" Grid.Row="1" Click="Sync_Click"/>
+            <Button Content="View Help" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="0" Grid.Row="2" Click="Help_Click"/>
+            <Button Name="ServerButton" Content="Start Server" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="1" Grid.Row="2" Click="StartServer_Click"/>
+            <CheckBox Name="CheckBoxShowConsole" Content="Show Console" HorizontalAlignment="Center" VerticalAlignment="Bottom" Padding="4,-6,0,0" Margin="0, 0, 0, 30" Grid.Column="1" Grid.Row="2"/>
+            <Button Content="About" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="2" Grid.Row="2" Click="About_Click"/>
+        </Grid>
+    </Grid>
+</Window>
