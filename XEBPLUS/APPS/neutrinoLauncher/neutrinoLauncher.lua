@@ -1763,7 +1763,7 @@ while XEBKeepInSubMenu do
 		if NEUTRINO_ShowHelp == false then
 		if Pads.check(pad, PAD_ACCEPT) and not Pads.check(oldpad, PAD_ACCEPT) then
 			spinStep = (1 - spinSpeed)/25
-			for NEUTRINO_WaveByeBye = 1, 25 do
+			for NEUTRINO_WaveByeBye = 1, 1 do
 				Screen.clear()
 				spinSpeed = spinSpeed + spinStep
 				if backgroundFilter then
@@ -1788,7 +1788,7 @@ while XEBKeepInSubMenu do
 				Screen.waitVblankStart()
 				Screen.flip()
 			end
-			for NEUTRINO_WaveByeBye = 1, 25 do
+			for NEUTRINO_WaveByeBye = 1, 1 do
 				Screen.clear()
 				NEUTRINO_DrawItem(NEUTRINO_CurrentList[NEUTRINO_SelectedItem], 152, 206, false)
 				spinDisc()
@@ -1796,7 +1796,7 @@ while XEBKeepInSubMenu do
 				Screen.waitVblankStart()
 				Screen.flip()
 			end
-			for NEUTRINO_WaveByeBye = 1, 25 do
+			for NEUTRINO_WaveByeBye = 1, 1 do
 				Screen.clear()
 				NEUTRINO_ColorToDraw=NEUTRINO_WaveByeBye*10
 				NEUTRINO_ColorToDraw=255-NEUTRINO_ColorToDraw
@@ -1809,7 +1809,7 @@ while XEBKeepInSubMenu do
 				Screen.waitVblankStart()
 				Screen.flip()
 			end
-			for NEUTRINO_WaveByeBye = 1, 30 do
+			for NEUTRINO_WaveByeBye = 1, 1 do
 				Screen.clear()
 				Font.ftPrint(fontBig, 352, plusYValue+223, 11, 512, 64, "neutrino", Color.new(255,255,255,128))
 				Font.ftPrint(fontSmall, 352, plusYValue+240, 11, 512, 64, neuLang[36], Color.new(255,255,255,128))
@@ -1819,7 +1819,7 @@ while XEBKeepInSubMenu do
 				Screen.waitVblankStart()
 				Screen.flip()
 			end
-			for NEUTRINO_WaveByeBye = 1, 25 do
+			for NEUTRINO_WaveByeBye = 1, 1 do
 				Screen.clear()
 				Font.ftPrint(fontBig, 352, plusYValue+223, 11, 512, 64, "neutrino", Color.new(255,255,255,128))
 				Font.ftPrint(fontSmall, 352, plusYValue+240, 11, 512, 64, neuLang[36], Color.new(255,255,255,128))
@@ -1830,7 +1830,7 @@ while XEBKeepInSubMenu do
 				Screen.waitVblankStart()
 				Screen.flip()
 			end
-			for NEUTRINO_WaveByeBye = 1, 2 do
+			for NEUTRINO_WaveByeBye = 1, 1 do
 				Screen.clear()
 				Screen.waitVblankStart()
 				Screen.flip()
