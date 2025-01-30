@@ -39,3 +39,11 @@ luac.out
 *.hex
 
 /List Builder/__pycache__
+
+!udpbd-vexfat.exe
+!udpbd-server.exe
+
+.vs/
+bin/
+obj/
+*.user
