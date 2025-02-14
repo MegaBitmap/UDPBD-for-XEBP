@@ -118,7 +118,9 @@ namespace UDPBD_for_XEB__CLI
                 }
                 else Console.WriteLine("Virtual Memory Cards are now disabled.");
             }
-            else  Console.WriteLine("Virtual Memory Cards are now disabled.");
+            else Console.WriteLine("Virtual Memory Cards are now disabled.");
+            ValidateList();
+            Thread.Sleep(200);
             FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list", "tempNeutrinoUDPBDList.txt");
             Console.WriteLine("Updated game list at mass:/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list");
             Console.WriteLine(@" ________       ___    ___ ________   ________  _______   ________     
@@ -131,7 +133,7 @@ namespace UDPBD_for_XEB__CLI
    \|_________\|___|/");
             Console.WriteLine("Synchronization with the PS2 is now complete!");
             Console.WriteLine("Please make sure to start the server before launching a game.");
-            PauseExit(9);
+            PauseExit(10);
         }
 
         static void PrintHelp()
@@ -143,6 +145,17 @@ namespace UDPBD_for_XEB__CLI
             Console.WriteLine("-downloadart enables automatic game artwork downloading.\n");
             Console.WriteLine("-bin2iso enables automatic CD-ROM Bin to ISO conversion.\n");
             Console.WriteLine("-enablevmc will assign a virtual memory card for each game or group of games in 'vmc_groups.list'.\n");
+        }
+		
+        static void ValidateList()
+        {
+            string combinedList = File.ReadAllText("tempNeutrinoUDPBDList.txt");
+            if (combinedList.Length < 50)
+            {
+                Console.WriteLine("Failed to save game list to tempNeutrinoUDPBDList.txt");
+                Console.WriteLine("The sync was not able to be completed.");
+                PauseExit(9);
+            }
         }
 
         static List<string> ScanFolder(string scanPath)
@@ -182,6 +195,7 @@ namespace UDPBD_for_XEB__CLI
             string hash = ComputeMD5(string.Join("\n", gameListWithID));
             gameListWithID.Add(hash);
             File.WriteAllLines("tempNeutrinoUDPBDList.txt", gameListWithID);
+            Thread.Sleep(200);
         }
 
         static void BinConvertFolder(string scanPath)
@@ -358,6 +372,7 @@ namespace UDPBD_for_XEB__CLI
             string hash = ComputeMD5(string.Join("\n", gameListVMC));
             gameListVMC.Add(hash);
             File.WriteAllLines("tempNeutrinoUDPBDList.txt", gameListVMC);
+            Thread.Sleep(200);
             return true;
         }
 
@@ -383,6 +398,7 @@ namespace UDPBD_for_XEB__CLI
         {
             string udpConf = File.ReadAllText("bsd-udpbd.toml").Replace("192.168.1.10", $"{ps2ip}");
             File.WriteAllText("tempbsd-udpbd.toml", udpConf);
+            Thread.Sleep(200);
             FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/APPS/neutrinoLauncher/config/bsd-udpbd.toml", "tempbsd-udpbd.toml");
             Console.WriteLine($"Updated bsd-udpbd.toml with the IP address {ps2ip}");
         }
