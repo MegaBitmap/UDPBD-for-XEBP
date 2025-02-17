@@ -35,7 +35,7 @@ It automates the setup process when using UDPBD.
 
 ### UDPBD
 
-  * An OEM network adapter if using a fat PS2.
+  * A PS2 slim (built-in ethernet) or a fat PS2 with an original Sony network/HDD adapter.
   * A PC with enough free space to store game ISOs.
   * A MBR FAT32 or exFAT formatted USB drive 1GB or larger.  
   This is used for XEB+ and assorted files, game ISOs are stored on the PC.
@@ -87,18 +87,29 @@ This includes all neutrino Launcher files in the `APPS`, `PLG`, and `CFG` folder
 [Archive.org Mirror (recommended)](https://web.archive.org/web/*/hwc.nat.cu/ps2-vault/hwc-projects/xebplus)  
 or  
 [Howling Wolf & Chelsea's PS2-Vault](http://www.hwc.nat.cu/ps2-vault/hwc-projects/xebplus/)  
-2. Extract the `XEBPLUS` folder to the root of your USB drive, and ensure that you can load into the XEB+ dashboard on your PlayStation 2.  
+2. Extract the `XEBPLUS` folder to the root of your MBR FAT32 or MBR exFAT USB drive, and ensure that you can load into the XEB+ dashboard on your PlayStation 2.  
 Use [7-zip](https://7-zip.org/) to extract the `XEBPLUS` folder to the root of your USB drive. (Windows does not natively support `.rar` with passwords.)  
 The password is at the bottom of `xebplus_xmas_showcase.rar\Distribution License.txt`.  
-Note that if you are using an exFAT formatted USB drive, you will need to use PS2BBL and [this version](https://github.com/israpps/wLaunchELF_ISR) of wLaunchELF. 
-3. (optional) Configure your PS2 exploit of choice to autorun XEB+ on startup.
+Note that if you are using an MBR exFAT formatted USB drive, you will need to use PS2BBL and [this version](https://github.com/israpps/wLaunchELF_ISR) of wLaunchELF.  
+3. (optional) Configure your PS2 exploit of choice to autorun XEB+ on startup.  
 4. Download the latest version of this plugin from the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases).  
-Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders if prompted.
-5. Extract the UDPBD Sync app or List Builder script to a known location on your computer.
-6. Complete setup by following the steps specific to the device you want to load games from.
+Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders if prompted.  
+5. Extract the UDPBD Sync app or List Builder script to somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
+6. Complete setup by following the steps specific to the device you want to load games from.  
 
 
 ### UDPBD on Windows
+
+**If you plan to use virtual memory cards please read this:**  
+To make use of virtual memory cards please follow these steps:  
+Make sure you are using the latest release of the neutrino plugin and sync app (2.3.0.1 or newer).  
+On step 17 of this section change vexfat to udpbd-server then check "use vmcs" then sync to the PS2.  
+You must use udpbd-server when using VMCs, udpbd-vexfat does NOT support VMCs.  
+AFAIK udpbd-server only works with exFAT partitions made with Linux/exfatprogs/GParted.  
+The beginning of a [previous tutorial](https://www.youtube.com/watch?v=F6Ffg5DlKC4) that I made shows how to do this.  
+After opening neutrino Launcher in XEBP with a game in view, press the ⏹ square button to open the context menu.  
+In the context menu you can enable or disable VMCs globally or individually per game.  
+For transferring, importing, or exporting saves from VMC files you can use [PS2-VMC-GUI](https://github.com/MegaBitmap/PS2-VMC-GUI).  
 
 7. Somewhere on your PC, for example `Documents`, create a new folder `PS2`.
 
@@ -109,16 +120,28 @@ Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders 
 10. All `.bin` + `.cue` CD games must be converted to `.iso` format.  
 The sync app will convert them automatically if placed in the CD folder and check the `Convert CD Bin to ISO` box before synchronizing.
 
-11. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), extract the `UDPBD-for-XEB+ Sync App` folder.
+11. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), extract the `UDPBD-for-XEB+ Sync App` folder somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
 
-12. Plug in the ethernet cable as shown:  
-![ps2-slim-connected-to-laptop](readme-images/ps2-slim-connected-to-laptop.jpg)
+12. **Direct Connection** - Plug in the ethernet cable as shown: ↓  
+![ps2-slim-connected-to-laptop](readme-images/ps2-slim-connected-to-laptop.jpg)  
+**Router Connection** - Plug in the ethernet cables as shown: ↓  
+![ps2-slim-connected-to-router-and-laptop](readme-images/ps2-slim-connected-to-router-and-laptop.jpg)  
 
 13. For a direct connection, as seen in the previous step, set a manual IPv4 address and subnet mask.  
 ![pc-ip-settings](readme-images/pc-ip-settings.jpg)  
 For using a router instead of a direct connection, set the PC's IP assignment to *Automatic (DHCP)*.  
+On the PC go into network connections or run `ncpa.cpl`.  
+Right click the Ethernet adapter and select properties, then select IPv4 properties.  
+Enable "Obtain an IP address automatically".  
 Then [follow this guide](http://ps2ulaunchelf.pbworks.com/w/page/19520139/ps2ftp) for assigning a proper IP address on the PS2.  
-LaunchELF defaults to *192.168.0.10* and needs to be changed manually to work on your network.
+The ps2 IP address settings for launchELF need to be changed.  
+For the first IP address, the first three parts must match the default gateway of the router or switch.  
+For example: 192.168.1.?  
+The last part (?) needs to be a unique number between 2 and 254, example: `192.168.1.147`  
+Set the middle number, subnet mask, to `255.255.255.0`  
+The third IP address or default gateway, must match the default gateway of the router or switch.  
+Most likely it will be `192.168.0.1` or `192.168.1.1`  
+
 14. Hold *R1* on the controller during FreeMCBoot/PS2BBL startup to open LaunchELF.  
 Open MISC -> PS2Net  
 ![launchelf-ps2net](readme-images/launchelf-ps2net.jpg)  
@@ -146,7 +169,23 @@ It's recommended to set FreeMCBoot or PS2BBL to autorun the `.ELF` file.
 21. Play!  
 ![xeb-game-list](readme-images/xeb-game-list.jpg)  
 
-Repeat steps 14-21 of the setup process after adding or removing games.
+Repeat steps 14-21 of the setup process after adding or renaming/removing games.
+
+If you want the server to start automatically when the PC is turned on follow these steps:
+
+- Create a shortcut to `udpbd-vexfat.exe`
+- Right click the shortcut then select properties
+- In the `Target` text box add a space the location of the DVD and CD folders in quotes.  
+Here is an example:
+```
+"C:\Users\%USERNAME%\Documents\UDPBD-for-XEB+ Sync App\udpbd-vexfat.exe" "C:\Users\%USERNAME%\Documents\PS2 Games"
+```
+- Now test the shortcut and check if the server is able to find games.  
+If the server exits immediately then there is most likely a typo in the shortcut's target.  
+- Move the vexfat shortcut to this folder:  
+`C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`  
+Now the server will start automatically.  
+
 
 ### UDPBD on Linux
 
@@ -179,14 +218,22 @@ Example:  `/mnt/ps2/DVD/Grand Theft Auto III.iso`
 
 12. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), extract the `UDPBD-for-XEB+ Sync App` folder.
 
-13. Plug in the ethernet cable as shown:  
-![ps2-slim-connected-to-laptop](readme-images/ps2-slim-connected-to-laptop.jpg)
+13. **Direct Connection** - Plug in the ethernet cable as shown: ↓  
+![ps2-slim-connected-to-laptop](readme-images/ps2-slim-connected-to-laptop.jpg)  
+**Router Connection** - Plug in the ethernet cables as shown: ↓  
+![ps2-slim-connected-to-router-and-laptop](readme-images/ps2-slim-connected-to-router-and-laptop.jpg)  
 
 14. For a direct connection, as seen in the previous step, set a manual IPv4 address and subnet mask.  
 ![ubuntu-ip-settings](readme-images/ubuntu-ip-settings.jpg)  
 For using a router instead of a direct connection, set the PC's IP assignment to *Automatic (DHCP)*.  
 Then [follow this guide](http://ps2ulaunchelf.pbworks.com/w/page/19520139/ps2ftp) for assigning a proper IP address on the PS2.  
-LaunchELF defaults to *192.168.0.10* and needs to be changed manually to work on your network.
+The ps2 IP address settings for launchELF need to be changed.  
+For the first IP address, the first three parts must match the default gateway of the router or switch.  
+For example: 192.168.1.?  
+The last part (?) needs to be a unique number between 2 and 254, example: `192.168.1.147`  
+Set the middle number, subnet mask, to `255.255.255.0`  
+The third IP address or default gateway, must match the default gateway of the router or switch.  
+Most likely it will be `192.168.0.1` or `192.168.1.1`  
 
 15. Hold *R1* on the controller during FreeMCBoot/PS2BBL startup to open LaunchELF.  
 Open MISC -> PS2Net  
@@ -199,6 +246,13 @@ Open MISC -> PS2Net
 ```
 dotnet UDPBD-for-XEB+-CLI.dll -path /mnt/ps2 -ps2ip 192.168.0.10 -bin2iso
 ```
+Here is a list of all parameters:  
+`-path ?` is the file path to the CD and DVD folder that contain game ISOs.  
+`-ps2ip ?` is the ip address for connecting to the PS2 with PS2Net.  
+`-downloadart` enables automatic game artwork downloading.  
+`-bin2iso` enables automatic CD-ROM Bin to ISO conversion.  
+`-enablevmc` will assign a virtual memory card for each game or group of games in 'vmc_groups.list'.  
+
 18. Unmount the exFAT partition then Start the udpbd-server.
 ```
 sudo umount /mnt/ps2
@@ -208,7 +262,7 @@ The server needs to be open and running for the entire play session.
 
 19. Launch XEB+ then Play!
 
-To add or remove games, stop the server then mount the exFAT storage device to `/mnt/ps2`  
+To add or rename/remove games, stop the server then mount the exFAT storage device to `/mnt/ps2`  
 ```
 sudo mount /dev/nvme0n1p6 /mnt/ps2/ -o uid=$USER
 ```
@@ -438,12 +492,12 @@ For a permanent fix, the offending artwork file must be removed or replaced.
 
 ### Controls
 
-CROSS -         **confirm / launch game**  
-CIRCLE / LEFT - **cancel / close plugin**  
-SQUARE -        **open context menu**  
-TRIANGLE -      **add/remove favorite**  
-DOWN -          **scroll down**  
-UP -            **scroll up**  
+❎ CROSS -         **confirm / launch game**  
+⏺ CIRCLE / LEFT - **cancel / close plugin**  
+⏹ SQUARE -        **open context menu**  
+🔼 TRIANGLE -      **add/remove favorite**  
+↑ UP -            **scroll up**  
+↓ DOWN -          **scroll down**  
 R1 -            **show next list**  
 L1 -            **show previous list**  
 R2 -            **quick scroll down**  
@@ -461,7 +515,7 @@ Repeat steps 9-14 of the setup process for your drive type each time you wish to
 
 ### Game Options
 
-Press SQUARE while in the game selection menu, and the context menu will open.  
+Press ⏹ SQUARE while in the game selection menu, and the context menu will open.  
 Context menu options apply to the currently highlighted game by default, and are as follows:
 
   * **Add To Favorites** - Adds the current game to the favorites list. If the current game is already in the favorites list, this option will remove it.
@@ -498,7 +552,7 @@ Refer to the [compatibility list](https://github.com/sync-on-luma/xebplus-neutri
 
 The neutrino Launcher plugin keeps track of the ten most recently played games for each drive type. Recent games are stored in the recent games list in reverse chronological order.  
 
-To access the recent games list, press TRIANGLE while on the game selection menu. Press TRIANGLE again to advance to the favorites list. 
+To access the recent games list, press 🔼 TRIANGLE while on the game selection menu. Press 🔼 TRIANGLE again to advance to the favorites list. 
 
 ### Favorites
 
@@ -509,7 +563,7 @@ The favorites list is shared between all four drive types, however only titles p
 To add a game to the favorites list, open the context menu and select "Add To Favorites", as described in the previous section. Repeat this process to remove a game from the favorites list.  
 When a game is in the favorites list, it's title will be flanked by "●" on either side.  
 
-To access the favorites list, press TRIANGLE while on the recent games list. Press TRIANGLE again to show all games.  
+To access the favorites list, press 🔼 TRIANGLE while on the recent games list. Press 🔼 TRIANGLE again to show all games.  
 The plugin will always start up to the all games list, even if it was previously closed while viewing the favorites list.
 
 ### Neutrino Launcher Settings
@@ -534,9 +588,9 @@ This contains a settings menu whose options apply to the main neutrino Launcher 
   * **Refresh Artwork Cache** - Sets artwork cache to refresh next time one of the neutrino Launcher plugins is loaded.
   * **Clean Artwork Cache** - Immediately scan the artwork cache for unused files and remove them.
 
-*An XEB+ reboot/refresh is required for changes made to this setting to take effect.
+Returning to the dashboard will automatically save the currently selected options.  
+An XEB+ reboot/refresh is required for changes made to this setting to take effect.  
 
-Returning to the dashboard will automatically save the currently selected options.
 
 ## Integrating With Custom Themes
 
