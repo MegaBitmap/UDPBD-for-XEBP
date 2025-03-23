@@ -268,7 +268,7 @@ sudo mount /dev/nvme0n1p6 /mnt/ps2/ -o uid=$USER
 ```
 Then add your games and repeat steps 15-19 of the Linux setup process.
 
-### HDD
+### HDD (exFAT format)
 
 7. Connect your hard drive or SSD to a computer, and format it as an exFAT partition.  
 8. Create folders named `CD` and `DVD` on the root of the hard drive.  
@@ -278,13 +278,44 @@ All disc images must be in *.iso* format.
 11. Click the *Choose Directory* button under *XEBPLUS Location* and navigate to the root of the USB drive containing your XEB+ install.  
 12. Click the *Choose Directory* button under *Games Location* and navigate to the root of your hard drive.  
 13. Click the *Create VMCs* checkbox if you wish to use virtual memory cards.  
-14. Click *Build List* and wait for the process to complete.  
-15. Eject both drives from the computer.  
+13. Click *Build List* and wait for the process to complete.  
+14. Eject both drives from the computer. Connect the hard drive / SSD to the PlayStation 2 via the network adapter, and plug the USB drive into either of the front USB ports.  
+15. Launch XEB+ on the PS2, and use *neutrino Launcher (HDD)* to load games from the hard drive.  
+
+Repeat steps 9-13 to add or remove games on the hard drive.
+
+### HDL (APA PlayStation 2 format)
+Please note:  
+APA PlayStation 2 format drives cannot be larger than 2.2 TB.  
+Virtual memory cards are not supported for this device.  
+
+7. Connect your PS2's hard drive or SSD to a computer.  
+The drive must have HDLoader format games installed.  
+This can easily be done with [HDL Batch Installer](https://israpps.github.io/HDL-Batch-installer/).  
+8. Download and extract [HDL Dump](https://github.com/ps2homebrew/hdl-dump/releases) into the `List Builder` folder.
+9. Create the list file:  
+a. For windows:  
+Run `HDL-List-Builder-1.ps1` with powershell from the included `List Builder` folder.  
+This will create a text file named `hdl_toc.txt`.  
+Run `HDL-List-Builder-2.py` with python.  
+This will read `hdl_toc.txt` and then create the file `neutrinoHDL.list`.  
+b. For Linux:  
+Open a terminal in the `List Builder` folder.  
+Run this command to list which drive to use in the next step.  
+`lsblk -fp`  
+In the next command change the `?` according the previous command (example: `/dev/sda`).  
+`sudo ./hdl_dump hdl_toc /dev/? > hdl_toc.txt`  
+`python3 ./HDL-List-Builder-2.py`  
+There should now be a file named `neutrinoHDL.list`.  
+10. Copy neutrinoHDL.list to the XEBPLUS USB drive in this location:  
+`XEBPLUS/CFG/neutrinoLauncher/neutrinoHDL.list`
+11. Eject both drives from the computer.  
 Connect the hard drive / SSD to the PlayStation 2 via the network adapter, and plug the USB drive into either of the front USB ports.  
-16. Launch XEB+ on the PS2, and use *neutrino Launcher (HDD)* to load games from the hard drive.  
+12. Launch XEB+ on the PS2 then open `neutrino Launcher Settings` and enable `neutrino Launcher (HDL)`  
+An XEB+ reboot/refresh is required for changes made to this setting to take effect.  
+13. Launch XEB+ on the PS2, and use *neutrino Launcher (HDL)* to load games from the hard drive.  
 
-Repeat steps 9-14 to add or remove games on the hard drive.
-
+Repeat steps 9-13 to add or remove games on the hard drive.  
 
 ### MX4SIO
 
@@ -296,14 +327,28 @@ All disc images must be in *.iso* format.
 11. Click the *Choose Directory* button under *XEBPLUS Location* and navigate to the root of the USB drive containing your XEB+ install.  
 12. Click the *Choose Directory* button under *Games Location* and navigate to the root of your SD card.  
 13. Click the *Create VMCs* checkbox if you wish to use virtual memory cards.  
-14. Click *Build List* and wait for the process to complete.  
-15. Eject both drives from the computer.  
-Insert the SD card into an MX4SIO adapter and connect it to memory card slot 2 on the PlayStation 2.  
-Plug the USB drive into either of the front USB ports.  
-16. Launch XEB+ on the PS2, and use *neutrino Launcher (MX4SIO)* to load games from the SD card.  
+13. Click *Build List* and wait for the process to complete.  
+14. Eject both drives from the computer. Insert the SD card into an MX4SIO adapter and connect it to memory card slot 2 on the PlayStation 2. Plug the USB drive into either of the front USB ports.  
+15. Launch XEB+ on the PS2, and use *neutrino Launcher (MX4SIO)* to load games from the SD card.  
 
 Repeat steps 9-14 to add or remove games on the SD card.
 
+### MMCE
+
+7. Ensure you have completed the initial setup of your MMCE device according to it's instructions and that it's firmware has been updated to the latest version.
+8. Insert your micro SD card into your MMCE device and format using the device firmware if you did not do this as part of the initial setup.
+9. Connect the micro SD card to your computer and create folders named `CD` and `DVD` in it's root directory.
+10. Rip/copy any PlayStation 2 disc images you wish to load into the folder that corresponds with their original source media.  
+All disc images must be in *.iso* format.
+11. Run `GUI.py` from the included `List Builder` folder, and select *MMCE* under *Drive Type*.  
+12. Click the *Choose Directory* button under *XEBPLUS Location* and navigate to the root of the USB drive containing your XEB+ install.  
+13. Click the *Choose Directory* button under *Games Location* and navigate to the root of your micro SD card.  
+14. Click the *Create VMCs* checkbox if you wish to use virtual memory cards.  
+15. Click *Build List* and wait for the process to complete.
+14. Eject both drives from the computer. Insert the SD card into an MMCE adapter and connect it to memory card slot 1 on the PlayStation 2. Plug the USB drive into either of the front USB ports.  
+15. Launch XEB+ on the PS2, and use *neutrino Launcher (MMCE)* to load games from the SD card.
+
+Repeat steps 9-15 to add or remove games on the micro SD card.
 
 ### USB
 
@@ -313,14 +358,13 @@ Repeat steps 9-14 to add or remove games on the SD card.
 All disc images must be in *.iso* format.  
 10. Run `GUI.py` from the included `List Builder` folder, and select *USB* under *Drive Type*.  
 11. Click the *Choose Directory* button under *XEBPLUS Location* and navigate to the root of your USB drive.  
-The *Games Location* will automatically be set to the same folder.  
+The *Games Location* will automatically be set to the same folder. 
 12. Click the *Create VMCs* checkbox if you wish to use virtual memory cards.  
 13. Click *Build List* and wait for the process to complete.  
 14. Eject the USB drive and plug it into either of the front USB ports on the PlayStation 2.  
 15. Launch XEB+ on the PS2, and use *neutrino Launcher (USB)* to load games from the USB drive.  
 
 Repeat steps 9-13 to add or remove games on the USB drive.
-
 
 ### Adding Artwork
 
@@ -411,11 +455,10 @@ This behavior occurs when the *.iso* file for the selected game cannot be found.
 The console may hang on a black screen for up to 30 seconds before rebooting.  
 Some things to check if you encounter this issue:  
 * Ensure your game drive is properly connected to the console.  
-MX4SIO adapters must be in Memory Cart Slot 2, and MMCE devices in Memory Card Slot 1.  
+MX4SIO adapters must be in Memory Card Slot 2, and MMCE devices in Memory Card Slot 1.  
 Neither device type will work if connected through a multitap.  
 * Ensure the game you are trying to load is present on your game drive.  
-* Ensure your game drive is formatted as eXFAT.  
-If using an MMCE device, ensure the SD card has been formatted with the device firmware.  
+* Ensure your game drive is formatted as exFAT. If using a hard drive, you must use an MBR partition table.
 * Ensure the plugin is trying to load the correct file.  
 This can be accomplished by rebuilding the game list.  
 * If using UDPBD, ensure the server software is running and that both the PS2 and server are connected to the same network and properly configured.
@@ -492,10 +535,10 @@ When set to Per-Game Settings, options shown below this one will apply only to t
   * **Emulate DVD-DL**- When enabled, neutrino will emulate the data structure of a dual-layer DVD. This option is required for DVD9 images that have been modified to fit a DVD5.
   * **Fix Buffer Overrun**- Fixes a compatibility issue present in a very small number of games.
   * **GSM Field Mode**- Force the Graphics Synthesizer to use a specific field scanning mode.
-    * Defualt - Use the game's default video mode.
+    * Default - Use the game's default video mode.
     * Progressive - Use the progressive scan equivalent of the game's default video mode. This is 480p for NTSC titles and 576p for PAL.
   * **GSM Frame Mode**- Force the Graphics Synthesizer to use a specific frame height.
-    * Defualt - Use the game's default video mode.
+    * Default - Use the game's default video mode.
     * 240p/288p - Use native 240p.
     * 480p/576p - Use line-doubled 240p in progressive scan.
   * **GSM Frame Mode**- Select between three different field-flipping types.  
@@ -530,10 +573,11 @@ This contains a settings menu whose options apply to the main neutrino Launcher 
    
   * **Enable HDD** - When enabled, *neutrino Launcher (HDD)* will be available on the XEB+ dashboard.
   * **Enable MX4SIO** - When enabled, *neutrino Launcher (MX4SIO)* will be available on the XEB+ dashboard.
-  * **Eanable MMCE** - When enabled, *neutrino Launcher (MMCE)* will be available on the XEB+ dashboard.
+  * **Enable MMCE** - When enabled, *neutrino Launcher (MMCE)* will be available on the XEB+ dashboard.
   * **Enable USB** - When enabled, *neutrino Launcher (USB)* will be available on the XEB+ dashboard.
   * **Enable UDPBD** - When enabled, *neutrino Launcher (UDPBD)* will be available on the XEB+ dashboard.
   * **Enable iLINK** - When enabled, *neutrino Launcher (iLink)* will be available on the XEB+ dashboard.
+  * **Enable HDL** - When enabled, *neutrino Launcher (HDL)* will be available on the XEB+ dashboard.
   * **Disable Disc Art** - When enabled, game specific disc icons will not be shown on the menu. This can decrease lag when browsing the list.
   * **Disable Background Art** - When enabled, game specific backgrounds will not be shown on the menu. This can improve performance when browsing the list.
   * **Disable Status Messages** - When enabled, the text that appears at the bottom of the screen to indicate loading and other behavior will not be shown.
@@ -608,8 +652,8 @@ https://www.psx-place.com/threads/xtremeeliteboot-s-dashboard-special-xmas-showc
 Rick Gaiser - neutrino - v1.6.1  
 https://github.com/rickgaiser/neutrino
 
-sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.7.3  
+sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.7.4  
 https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin
 
-Wes Castro & El_isra & sync-on-luma - CheatDevice - 2025-2-25  
+Wes Castro & El_isra & sync-on-luma - CheatDevice - 2025-3-4  
 https://github.com/sync-on-luma/CheatDevice-for-neutrino-Laucnher
