@@ -8,7 +8,7 @@ namespace UDPBD_for_XEB__CLI
         public static bool TestConnection(IPAddress ps2ip)
         {
             Ping pingSender = new();
-            PingReply reply = pingSender.Send(ps2ip);
+            PingReply reply = pingSender.Send(ps2ip, 6000);
             if (!(reply.Status == IPStatus.Success))
             {
                 Console.WriteLine($"Connection to {ps2ip} failed: {reply.Status}");
