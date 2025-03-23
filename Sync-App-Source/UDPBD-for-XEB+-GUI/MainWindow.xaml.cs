@@ -21,7 +21,7 @@ namespace UDPBD_for_XEB__GUI
             "https://web.archive.org/web/*/hwc.nat.cu/ps2-vault/hwc-projects/xebplus\n\n" +
             "Rick Gaiser - neutrino - v1.6.1\n" +
             "https://github.com/rickgaiser/neutrino\n\n" +
-            "sync-on-luma - neutrino plugin for XEB+ - forked from v2.7.3\n" +
+            "sync-on-luma - neutrino plugin for XEB+ - forked from v2.7.4\n" +
             "https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin";
 
         readonly List<string> gameList = [];
@@ -280,7 +280,7 @@ namespace UDPBD_for_XEB__GUI
                 return false;
             }
             Ping pingSender = new();
-            PingReply reply = pingSender.Send(address);
+            PingReply reply = pingSender.Send(address, 6000);
             if (!(reply.Status == IPStatus.Success))
             {
                 Dispatcher.Invoke(() =>
