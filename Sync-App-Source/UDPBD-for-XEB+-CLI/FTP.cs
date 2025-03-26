@@ -7,11 +7,19 @@ namespace UDPBD_for_XEB__CLI
     {
         public static bool TestConnection(IPAddress ps2ip)
         {
-            Ping pingSender = new();
-            PingReply reply = pingSender.Send(ps2ip, 6000);
-            if (!(reply.Status == IPStatus.Success))
+            try
             {
-                Console.WriteLine($"Connection to {ps2ip} failed: {reply.Status}");
+                Ping pingSender = new();
+                PingReply reply = pingSender.Send(ps2ip, 6000);
+                if (!(reply.Status == IPStatus.Success))
+                {
+                    Console.WriteLine($"\nCONNECTION FAILED\n\nFailed to receive a ping reply:\nPlease verify that your network settings are configured properly and all cables are connected.\nTry adjusting the IP address settings in launchELF.\n{reply.Status}");
+                    return false;
+                }
+            }
+            catch (PingException ex)
+            {
+                Console.WriteLine($"\nCONNECTION FAILED\n\nThe network location cannot be reached:\nPlease verify that your network settings are configured properly and all cables are connected.\nTry manually assigning an IPv4 address and subnet mask to this PC.\n{ex.Message}");
                 return false;
             }
             try
@@ -26,7 +34,7 @@ namespace UDPBD_for_XEB__CLI
             }
             catch (WebException ex)
             {
-                Console.WriteLine($"Failed to connect to the PS2's FTP server.\n{ex.Message}");
+                Console.WriteLine($"\nCONNECTION FAILED\n\nFailed to connect to the PS2's FTP server.\n{ex.Message}");
                 return false;
             }
         }
