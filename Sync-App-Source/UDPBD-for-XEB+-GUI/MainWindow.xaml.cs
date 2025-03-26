@@ -275,20 +275,33 @@ namespace UDPBD_for_XEB__GUI
                 {
                     TextBlockConnection.Text = "Disconnected";
                     ButtonConnect.IsEnabled = true;
+                    MessageBox.Show($"{ps2ip} is not a valid IP address.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 });
-                MessageBox.Show($"{ps2ip} is not a valid IP address.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            Ping pingSender = new();
-            PingReply reply = pingSender.Send(address, 6000);
-            if (!(reply.Status == IPStatus.Success))
+            try
+            {
+                Ping pingSender = new();
+                PingReply reply = pingSender.Send(address, 6000);
+                if (!(reply.Status == IPStatus.Success))
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        TextBlockConnection.Text = "Disconnected";
+                        ButtonConnect.IsEnabled = true;
+                        MessageBox.Show($"Failed to receive a ping reply:\n\nPlease verify that your network settings are configured properly and all cables are connected. Try adjusting the IP address settings in launchELF.\n\n{reply.Status}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
+                    return false;
+                }
+            }
+            catch (PingException ex)
             {
                 Dispatcher.Invoke(() =>
                 {
                     TextBlockConnection.Text = "Disconnected";
                     ButtonConnect.IsEnabled = true;
+                    MessageBox.Show($"The network location cannot be reached:\n\nPlease verify that your network settings are configured properly and all cables are connected. Try manually assigning an IPv4 address and subnet mask to this PC.\n\n{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 });
-                MessageBox.Show($"Connection failed: {reply.Status}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             try
@@ -312,8 +325,8 @@ namespace UDPBD_for_XEB__GUI
                 {
                     TextBlockConnection.Text = "Disconnected";
                     ButtonConnect.IsEnabled = true;
+                    MessageBox.Show($"Failed to connect to the PS2's FTP server.\n\n{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 });
-                MessageBox.Show($"Failed to connect to the PS2's FTP server.\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
