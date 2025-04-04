@@ -1832,57 +1832,57 @@ while XEBKeepInSubMenu do
 				end
 			end
 			
-			if System.doesFileExist("mc0:/BADATA-SYSTEM/history") then
-				NEUTRINO_TempFile = System.openFile("mc0:/BADATA-SYSTEM/history", FREAD)
-				if System.sizeFile(NEUTRINO_TempFile) > 22 then
-					System.copyFile("mc0:/BADATA-SYSTEM/history", "mc0:/BADATA-SYSTEM/history.bak")
-					System.closeFile(NEUTRINO_TempFile)
-					System.removeFile("mc0:/BADATA-SYSTEM/history")
-					NEUTRINO_PlayCount = 1
-				else
-					System.closeFile(NEUTRINO_TempFile)
+			-- if System.doesFileExist("mc0:/BADATA-SYSTEM/history") then
+				-- NEUTRINO_TempFile = System.openFile("mc0:/BADATA-SYSTEM/history", FREAD)
+				-- if System.sizeFile(NEUTRINO_TempFile) > 22 then
+					-- System.copyFile("mc0:/BADATA-SYSTEM/history", "mc0:/BADATA-SYSTEM/history.bak")
+					-- System.closeFile(NEUTRINO_TempFile)
+					-- System.removeFile("mc0:/BADATA-SYSTEM/history")
+					-- NEUTRINO_PlayCount = 1
+				-- else
+					-- System.closeFile(NEUTRINO_TempFile)
 					
-					NEUTRINO_TempFile = io.open("mc0:/BADATA-SYSTEM/history", "r")
-					NEUTRINO_PlayCount = NEUTRINO_TempFile:read()
-					io.close(NEUTRINO_TempFile)
-					NEUTRINO_PlayCount = string.sub(NEUTRINO_PlayCount, 17, 17)
-					NEUTRINO_PlayCount = string.byte(NEUTRINO_PlayCount)
+					-- NEUTRINO_TempFile = io.open("mc0:/BADATA-SYSTEM/history", "r")
+					-- NEUTRINO_PlayCount = NEUTRINO_TempFile:read()
+					-- io.close(NEUTRINO_TempFile)
+					-- NEUTRINO_PlayCount = string.sub(NEUTRINO_PlayCount, 17, 17)
+					-- NEUTRINO_PlayCount = string.byte(NEUTRINO_PlayCount)
 					
-					NEUTRINO_PlayCount = tonumber(NEUTRINO_PlayCount) + 1
-					if NEUTRINO_PlayCount >= 64 then
-						NEUTRINO_PlayCount = 1
-					end
-				end
-			else
-				NEUTRINO_PlayCount = 1
-			end
-			if not System.doesDirectoryExist("mc0:/BADATA-SYSTEM") then
-				System.createDirectory("mc0:/BADATA-SYSTEM")
-			end
-			if System.doesDirectoryExist("mc0:/BADATA-SYSTEM") then
-				NEUTRINO_MemCard = true
-			end
+					-- NEUTRINO_PlayCount = tonumber(NEUTRINO_PlayCount) + 1
+					-- if NEUTRINO_PlayCount >= 64 then
+						-- NEUTRINO_PlayCount = 1
+					-- end
+				-- end
+			-- else
+				-- NEUTRINO_PlayCount = 1
+			-- end
+			-- if not System.doesDirectoryExist("mc0:/BADATA-SYSTEM") then
+				-- System.createDirectory("mc0:/BADATA-SYSTEM")
+			-- end
+			-- if System.doesDirectoryExist("mc0:/BADATA-SYSTEM") then
+				-- NEUTRINO_MemCard = true
+			-- end
 			
-			if NEUTRINO_MemCard then
-				NEUTRINO_PlayCount = NEUTRINO_ByteCodes[NEUTRINO_PlayCount]
+			-- if NEUTRINO_MemCard then
+				-- NEUTRINO_PlayCount = NEUTRINO_ByteCodes[NEUTRINO_PlayCount]
 
-				NEUTRINO_TempFile = io.open("mc0:/BADATA-SYSTEM/history", "w")
-				io.output(NEUTRINO_TempFile)
-			end
-			if string.match(NEUTRINO_LaunchOptions, "(.*)unique(.*)") then
-				NEUTRINO_LaunchOptions = string.sub(NEUTRINO_LaunchOptions, 9, string.len(NEUTRINO_LaunchOptions))
-				if NEUTRINO_Vmc ~= "" then
-					NEUTRINO_Vmc = " -mc0="..NEUTRINO_PathPrefix..":/VMC/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].TitleId.."_0.bin"
-				end
+				-- NEUTRINO_TempFile = io.open("mc0:/BADATA-SYSTEM/history", "w")
+				-- io.output(NEUTRINO_TempFile)
+			-- end
+			-- if string.match(NEUTRINO_LaunchOptions, "(.*)unique(.*)") then
+				-- NEUTRINO_LaunchOptions = string.sub(NEUTRINO_LaunchOptions, 9, string.len(NEUTRINO_LaunchOptions))
+				-- if NEUTRINO_Vmc ~= "" then
+					-- NEUTRINO_Vmc = " -mc0="..NEUTRINO_PathPrefix..":/VMC/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].TitleId.."_0.bin"
+				-- end
 				
-				if NEUTRINO_MemCard then
-					io.write(NEUTRINO_Games[NEUTRINO_SelectedItem].TitleId.."\x00\x00\x00\x00\x00"..NEUTRINO_PlayCount.."\x01\x00\x00\x21\x00")
-					io.close(NEUTRINO_TempFile)
-				end
-			elseif NEUTRINO_MemCard then
-				io.write(NEUTRINO_CheckGroups(NEUTRINO_Games[NEUTRINO_SelectedItem].TitleId).."\x00\x00\x00\x00\x00"..NEUTRINO_PlayCount.."\x01\x00\x00\x21\x00")
-				io.close(NEUTRINO_TempFile)
-			end
+				-- if NEUTRINO_MemCard then
+					-- io.write(NEUTRINO_Games[NEUTRINO_SelectedItem].TitleId.."\x00\x00\x00\x00\x00"..NEUTRINO_PlayCount.."\x01\x00\x00\x21\x00")
+					-- io.close(NEUTRINO_TempFile)
+				-- end
+			-- elseif NEUTRINO_MemCard then
+				-- io.write(NEUTRINO_CheckGroups(NEUTRINO_Games[NEUTRINO_SelectedItem].TitleId).."\x00\x00\x00\x00\x00"..NEUTRINO_PlayCount.."\x01\x00\x00\x21\x00")
+				-- io.close(NEUTRINO_TempFile)
+			-- end
 			
 			if string.match(NEUTRINO_LaunchOptions, "(.*)cheat(.*)") then
 				NEUTRINO_LaunchOptions = string.sub(NEUTRINO_LaunchOptions, 8, string.len(NEUTRINO_LaunchOptions))
