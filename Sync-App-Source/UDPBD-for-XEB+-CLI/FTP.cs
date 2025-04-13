@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.NetworkInformation;
+using FluentFTP;
 
 namespace UDPBD_for_XEB__CLI
 {
@@ -24,81 +25,90 @@ namespace UDPBD_for_XEB__CLI
             }
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create($"ftp://{ps2ip}");
-                request.Method = WebRequestMethods.Ftp.ListDirectory;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-
+                FtpClient client = new(ps2ip.ToString());
+                client.Connect();
+                client.GetListing();
+                client.Disconnect();
                 Console.WriteLine("Connected to the PS2's FTP server Successfully!");
                 Thread.Sleep(100);
                 return true;
             }
-            catch (WebException ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"\nCONNECTION FAILED\n\nFailed to connect to the PS2's FTP server.\n{ex.Message}");
                 return false;
             }
         }
 
-        public static bool DirectoryExists(string directoryPath)
+        public static bool DirectoryExists(IPAddress ps2ip, string directoryPath)
         {
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(directoryPath);
-                request.Method = WebRequestMethods.Ftp.ListDirectory;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                FtpClient client = new(ps2ip.ToString());
+                client.Connect();
+                client.GetListing(directoryPath);
+                client.Disconnect();
                 Thread.Sleep(100);
                 return true;
             }
             catch { return false; }
         }
 
-        public static void CreateDirectory(string directoryPath)
+        public static void CreateDirectory(IPAddress ps2ip, string directoryPath)
         {
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(directoryPath);
-                request.Method = WebRequestMethods.Ftp.MakeDirectory;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                FtpClient client = new(ps2ip.ToString());
+                client.Connect();
+                client.CreateDirectory(directoryPath);
+                client.Disconnect();
                 Thread.Sleep(200);
             }
-            catch (WebException ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to create the directory {directoryPath} on the PS2 via FTP.\n{ex.Message}");
                 Program.PauseExit(10);
             }
         }
 
-        public static void UploadFile(string ftpUrl, string filePath)
+        public static void UploadFile(IPAddress ps2ip, string filePath, string ftpPath)
         {
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create(ftpUrl);
-                request.Method = WebRequestMethods.Ftp.UploadFile;
-
-                using (FileStream fileStream = File.OpenRead(filePath))
-                using (Stream requestStream = request.GetRequestStream())
-                {
-                    fileStream.CopyTo(requestStream);
-                }
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
+                FtpClient client = new(ps2ip.ToString());
+                client.Connect();
+                client.UploadFile(filePath, ftpPath);
                 Thread.Sleep(200);
+                var fileExists = client.FileExists(ftpPath);
+                client.Disconnect();
+                Thread.Sleep(100);
+                if (!fileExists)
+                {
+                    Console.WriteLine($"Failed to upload file {filePath} to the PS2 via FTP.\nNo exceptions raised.");
+                    Program.PauseExit(11);
+                }
             }
-            catch (WebException ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Failed to upload file {filePath} to the PS2 via FTP.\n{ex.Message}");
                 Program.PauseExit(11);
             }
         }
 
-        public static bool FileExists(string ftpUrl)
+        public static bool FileExists(IPAddress ps2ip, string ftpPath)
         {
             try
             {
-                var request = (FtpWebRequest)WebRequest.Create(ftpUrl);
-                request.Method = WebRequestMethods.Ftp.GetFileSize;
-                using var response = (FtpWebResponse)request.GetResponse();
+                FtpClient client = new(ps2ip.ToString());
+                client.Connect();
+                var fileExists = client.FileExists(ftpPath);
+                client.Disconnect();
                 Thread.Sleep(100);
-                return true;
+                if (fileExists)
+                {
+                    return true;
+                }
+                return false;
             }
             catch { return false; }
         }

@@ -10,7 +10,7 @@ namespace UDPBD_for_XEB__CLI
 {
     internal partial class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine($"UDPBD for XEB+ CLI Sync App {Assembly.GetExecutingAssembly().GetName().Version} by MegaBitmap");
 
@@ -86,19 +86,19 @@ namespace UDPBD_for_XEB__CLI
             {
                 PauseExit(6);
             }
-            if (!FTP.DirectoryExists($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/"))
+            if (!FTP.DirectoryExists(ps2ip, "/mass/0/XEBPLUS/CFG/"))
             {
                 Console.WriteLine($"Unable to detect XtremeEliteBoot+ on the PS2's USB flash drive.");
                 PauseExit(7);
             }
-            if (!FTP.DirectoryExists($"ftp://{ps2ip}/mass/0/XEBPLUS/APPS/neutrinoLauncher/config"))
+            if (!FTP.DirectoryExists(ps2ip, "/mass/0/XEBPLUS/APPS/neutrinoLauncher/config"))
             {
                 Console.WriteLine($"Unable to detect the neutrino launcher plugin on the PS2's USB flash drive.");
                 PauseExit(8);
             }
-            if (!FTP.DirectoryExists($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/"))
+            if (!FTP.DirectoryExists(ps2ip, "/mass/0/XEBPLUS/CFG/neutrinoLauncher/"))
             {
-                FTP.CreateDirectory($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/");
+                FTP.CreateDirectory(ps2ip, "/mass/0/XEBPLUS/CFG/neutrinoLauncher/");
             }
             UpdateUDPConfig(ps2ip);
             if (enableArt)
@@ -106,7 +106,7 @@ namespace UDPBD_for_XEB__CLI
                 if (File.Exists("ArtworkURL.cfg"))
                 {
                     string artUrl = File.ReadLines("ArtworkURL.cfg").First();
-                    DownloadArtList(gamePath, gameList, ps2ip, artUrl);
+                    await DownloadArtList(gamePath, gameList, ps2ip, artUrl);
                 }
                 else Console.WriteLine("Missing the file ArtworkURL.cfg");
             }
@@ -121,7 +121,7 @@ namespace UDPBD_for_XEB__CLI
             else Console.WriteLine("Virtual Memory Cards are now disabled.");
             ValidateList();
             Thread.Sleep(200);
-            FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list", "tempNeutrinoUDPBDList.txt");
+            FTP.UploadFile(ps2ip, "tempNeutrinoUDPBDList.txt", "/mass/0/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list");
             Console.WriteLine("Updated game list at mass:/XEBPLUS/CFG/neutrinoLauncher/neutrinoUDPBD.list");
             Console.WriteLine(@" ________       ___    ___ ________   ________  _______   ________     
 |\   ____\     |\  \  /  /|\   ___  \|\   ____\|\  ___ \ |\   ___ \    
@@ -221,25 +221,25 @@ namespace UDPBD_for_XEB__CLI
             }
         }
 
-        static void DownloadArtList(string gamePath, List<string> gameList, IPAddress ps2ip, string artUrl)
+        static async Task DownloadArtList(string gamePath, List<string> gameList, IPAddress ps2ip, string artUrl)
         {
             Console.WriteLine("Checking for Game Artwork . . .");
             int failCount = 0;
             foreach (var game in gameList)
             {
                 string serialID = GetSerialID(gamePath + game);
-                if (!string.IsNullOrEmpty(serialID) && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png") && !FTP.FileExists($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png"))
+                if (!string.IsNullOrEmpty(serialID) && !FTP.FileExists(ps2ip, $"/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png") && !FTP.FileExists(ps2ip, $"/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png"))
                 {
-                    if (GetArtBG(artUrl, serialID))
+                    if (await GetArtBG(artUrl, serialID))
                     {
-                        FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png", "temp_BG.png");
+                        FTP.UploadFile(ps2ip, "temp_BG.png", $"/mass/0/XEBPLUS/GME/ART/{serialID}_BG.png");
                         Console.WriteLine($"Downloaded Background Artwork for {game}");
                         failCount = 0;
                     }
                     else failCount++;
-                    if (GetArtICO(artUrl, serialID))
+                    if (await GetArtICO(artUrl, serialID))
                     {
-                        FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png", "temp_ICO.png");
+                        FTP.UploadFile(ps2ip, "temp_ICO.png", $"/mass/0/XEBPLUS/GME/ART/{serialID}_ICO.png");
                         Console.WriteLine($"Downloaded Disc Artwork for {game}");
                         failCount = 0;
                     }
@@ -253,12 +253,13 @@ namespace UDPBD_for_XEB__CLI
             }
         }
 
-        static bool GetArtBG(string artUrl, string serialID)
+        static async Task<bool> GetArtBG(string artUrl, string serialID)
         {
             try
             {
-                using WebClient client = new();
-                client.DownloadFile(new Uri(artUrl.Replace("SERIALID", serialID) + "_BG_00.png"), "temp_BG.png");
+                using HttpClient client = new();
+                byte[] fileDownload = await client.GetByteArrayAsync(new Uri(artUrl.Replace("SERIALID", serialID) + "_BG_00.png"));
+                File.WriteAllBytes("temp_BG.png", fileDownload);
                 if (File.Exists("temp_BG.png")) return true;
                 Console.WriteLine($"Failed to download artwork for {serialID}.\nThe downloaded png image is missing.");
                 return false;
@@ -270,12 +271,13 @@ namespace UDPBD_for_XEB__CLI
             }
         }
 
-        static bool GetArtICO(string artUrl, string serialID)
+        static async Task<bool> GetArtICO(string artUrl, string serialID)
         {
             try
             {
-                using WebClient client = new();
-                client.DownloadFile(new Uri(artUrl.Replace("SERIALID", serialID) + "_ICO.png"), "temp_ICO.png");
+                using HttpClient client = new();
+                byte[] fileDownload = await client.GetByteArrayAsync(new Uri(artUrl.Replace("SERIALID", serialID) + "_ICO.png"));
+                File.WriteAllBytes("temp_ICO.png", fileDownload);
                 if (File.Exists("temp_ICO.png")) return true;
                 Console.WriteLine($"Failed to download artwork for {serialID}.\nThe downloaded png image is missing.");
                 return false;
@@ -399,7 +401,7 @@ namespace UDPBD_for_XEB__CLI
             string udpConf = File.ReadAllText("bsd-udpbd.toml").Replace("192.168.1.10", $"{ps2ip}");
             File.WriteAllText("tempbsd-udpbd.toml", udpConf);
             Thread.Sleep(200);
-            FTP.UploadFile($"ftp://{ps2ip}/mass/0/XEBPLUS/APPS/neutrinoLauncher/config/bsd-udpbd.toml", "tempbsd-udpbd.toml");
+            FTP.UploadFile(ps2ip, "tempbsd-udpbd.toml", "/mass/0/XEBPLUS/APPS/neutrinoLauncher/config/bsd-udpbd.toml");
             Console.WriteLine($"Updated bsd-udpbd.toml with the IP address {ps2ip}");
         }
 

@@ -1,11 +1,12 @@
-﻿using Microsoft.Win32;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
+using FluentFTP;
+using Microsoft.Win32;
 
 namespace UDPBD_for_XEB__GUI
 {
@@ -37,12 +38,12 @@ namespace UDPBD_for_XEB__GUI
             CheckFiles();
         }
 
-        private void Connect_Click(object sender, RoutedEventArgs e)
+        private async void Connect_Click(object sender, RoutedEventArgs e)
         {
             ButtonConnect.IsEnabled = false;
             TextBlockConnection.Text = "Please Wait . . .";
             string tempIP = TextBoxPS2IP.Text;
-            Task.Run(() => { TestPS2Connection(tempIP); });
+            await PS2ConnectAsync(tempIP);
         }
 
         private void SelectPath_Click(object sender, RoutedEventArgs e)
@@ -63,10 +64,10 @@ namespace UDPBD_for_XEB__GUI
             GetGameList(gamePath);
         }
 
-        private void Sync_Click(object sender, RoutedEventArgs e)
+        private async void Sync_Click(object sender, RoutedEventArgs e)
         {
             KillServer();
-            if (ValidateSync() != true) return;
+            if (await ValidateSyncAsync() != true) return;
             SaveGamePathSetting();
             string extraArgs = "";
             if (CheckBoxArtworkDownload.IsChecked == true)
@@ -219,7 +220,7 @@ namespace UDPBD_for_XEB__GUI
             settings.Close();
         }
 
-        private bool ValidateSync()
+        private async Task<bool> ValidateSyncAsync()
         {
             if (ComboBoxServer.SelectedIndex == 1)
             {
@@ -238,7 +239,7 @@ namespace UDPBD_for_XEB__GUI
                 MessageBox.Show("Please first select the game folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            if (!TestPS2Connection(TextBoxPS2IP.Text))
+            if (!await PS2ConnectAsync(TextBoxPS2IP.Text))
             {
                 TextBlockConnection.Text = "Disconnected";
                 TextBoxPS2IP.IsEnabled = true;
@@ -267,68 +268,64 @@ namespace UDPBD_for_XEB__GUI
             else TextBlockGameList.Text = gameList.Count + " Games Loaded";
         }
 
-        private bool TestPS2Connection(string ps2ip)
+        private async Task<bool> PS2ConnectAsync(string ps2ip)
         {
             if (!IPAddress.TryParse(ps2ip, out IPAddress? address))
             {
-                Dispatcher.Invoke(() =>
-                {
-                    TextBlockConnection.Text = "Disconnected";
-                    ButtonConnect.IsEnabled = true;
-                    MessageBox.Show($"{ps2ip} is not a valid IP address.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                });
+                TextBlockConnection.Text = "Disconnected";
+                ButtonConnect.IsEnabled = true;
+                MessageBox.Show($"{ps2ip} is not a valid IP address.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             try
             {
                 Ping pingSender = new();
-                PingReply reply = pingSender.Send(address, 6000);
+                PingReply reply = await pingSender.SendPingAsync(address, 6000);
                 if (!(reply.Status == IPStatus.Success))
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        TextBlockConnection.Text = "Disconnected";
-                        ButtonConnect.IsEnabled = true;
-                        MessageBox.Show($"Failed to receive a ping reply:\n\nPlease verify that your network settings are configured properly and all cables are connected. Try adjusting the IP address settings in launchELF.\n\n{reply.Status}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
-                    });
-                    return false;
-                }
-            }
-            catch (PingException ex)
-            {
-                Dispatcher.Invoke(() =>
                 {
                     TextBlockConnection.Text = "Disconnected";
                     ButtonConnect.IsEnabled = true;
-                    MessageBox.Show($"The network location cannot be reached:\n\nPlease verify that your network settings are configured properly and all cables are connected. Try manually assigning an IPv4 address and subnet mask to this PC.\n\n{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
-                });
+                    MessageBox.Show($"Failed to receive a ping reply:\n\nPlease verify that your network settings are configured properly and all cables are connected. Try adjusting the IP address settings in launchELF.\n\n{reply.Status}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                TextBlockConnection.Text = "Disconnected";
+                ButtonConnect.IsEnabled = true;
+                MessageBox.Show($"The network location cannot be reached:\n\nPlease verify that your network settings are configured properly and all cables are connected. Try manually assigning an IPv4 address and subnet mask to this PC.\n\n{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
+            FtpListItem[] ftpList;
             try
             {
-                FtpWebRequest request = (FtpWebRequest)WebRequest.Create($"ftp://{address}");
-                request.Method = WebRequestMethods.Ftp.ListDirectory;
-                using FtpWebResponse response = (FtpWebResponse)request.GetResponse();
-
-                Dispatcher.Invoke(() =>
+                AsyncFtpClient client = new(address.ToString());
+                await client.Connect();
+                ftpList = await client.GetListing();
+                await client.Disconnect();
+            }
+            catch (Exception ex)
+            {
+                TextBlockConnection.Text = "Disconnected";
+                ButtonConnect.IsEnabled = true;
+                MessageBox.Show($"Failed to connect to the PS2's FTP server.\n\n{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            foreach (var item in ftpList)
+            {
+                if (item.Name.Contains("mass"))
                 {
                     TextBlockConnection.Text = "Connected";
                     TextBoxPS2IP.IsEnabled = false;
                     ButtonConnect.IsEnabled = false;
                     SaveIPSetting();
-                });
-                return true;
+                    return true;
+                }
             }
-            catch (WebException ex)
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    TextBlockConnection.Text = "Disconnected";
-                    ButtonConnect.IsEnabled = true;
-                    MessageBox.Show($"Failed to connect to the PS2's FTP server.\n\n{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
-                });
-                return false;
-            }
+            TextBlockConnection.Text = "Disconnected";
+            ButtonConnect.IsEnabled = true;
+            MessageBox.Show($"Failed to detect USB storage on the PS2's FTP server.\nPlease make sure the USB drive is plugged in.", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
         }
 
         private bool CheckForExFat()
