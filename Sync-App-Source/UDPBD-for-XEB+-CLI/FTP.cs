@@ -6,7 +6,7 @@ namespace UDPBD_for_XEB__CLI
 {
     internal class FTP
     {
-        public static bool TestConnection(IPAddress ps2ip)
+        public static bool TestConnection(FtpClient client, IPAddress ps2ip)
         {
             try
             {
@@ -25,92 +25,115 @@ namespace UDPBD_for_XEB__CLI
             }
             try
             {
-                FtpClient client = new(ps2ip.ToString());
                 client.Connect();
+                Thread.Sleep(200);
                 client.GetListing();
-                client.Disconnect();
+                Thread.Sleep(200);
                 Console.WriteLine("Connected to the PS2's FTP server Successfully!");
-                Thread.Sleep(100);
                 return true;
             }
             catch (Exception ex)
             {
+                client.Disconnect();
                 Console.WriteLine($"\nCONNECTION FAILED\n\nFailed to connect to the PS2's FTP server.\n{ex.Message}");
                 return false;
             }
         }
 
-        public static bool DirectoryExists(IPAddress ps2ip, string directoryPath)
+        public static void CreateDirectory(FtpClient client, string directoryPath)
         {
             try
             {
-                FtpClient client = new(ps2ip.ToString());
-                client.Connect();
-                client.GetListing(directoryPath);
-                client.Disconnect();
-                Thread.Sleep(100);
-                return true;
-            }
-            catch { return false; }
-        }
-
-        public static void CreateDirectory(IPAddress ps2ip, string directoryPath)
-        {
-            try
-            {
-                FtpClient client = new(ps2ip.ToString());
-                client.Connect();
                 client.CreateDirectory(directoryPath);
-                client.Disconnect();
                 Thread.Sleep(200);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to create the directory {directoryPath} on the PS2 via FTP.\n{ex.Message}");
-                Program.PauseExit(10);
-            }
-        }
-
-        public static void UploadFile(IPAddress ps2ip, string filePath, string ftpPath)
-        {
-            try
-            {
-                FtpClient client = new(ps2ip.ToString());
-                client.Connect();
-                client.UploadFile(filePath, ftpPath);
-                Thread.Sleep(200);
-                var fileExists = client.FileExists(ftpPath);
-                client.Disconnect();
-                Thread.Sleep(100);
-                if (!fileExists)
+                if (!DirectoryExists(client, directoryPath))
                 {
-                    Console.WriteLine($"Failed to upload file {filePath} to the PS2 via FTP.\nNo exceptions raised.");
+                    Console.WriteLine($"Failed to create the directory {directoryPath} on the PS2 via FTP.\nNo exceptions raised.");
+                    client.Disconnect();
                     Program.PauseExit(11);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to upload file {filePath} to the PS2 via FTP.\n{ex.Message}");
-                Program.PauseExit(11);
+                Console.WriteLine($"Failed to create the directory {directoryPath} on the PS2 via FTP.\n{ex.Message}");
+                client.Disconnect();
+                Program.PauseExit(12);
             }
         }
 
-        public static bool FileExists(IPAddress ps2ip, string ftpPath)
+        public static bool DirectoryExists(FtpClient client, string directoryPath)
         {
             try
             {
-                FtpClient client = new(ps2ip.ToString());
-                client.Connect();
-                var fileExists = client.FileExists(ftpPath);
-                client.Disconnect();
-                Thread.Sleep(100);
-                if (fileExists)
+                client.GetListing(directoryPath);
+                Thread.Sleep(200);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static void UploadFile(FtpClient client, string filePath, string ftpPath, string targetFile)
+        {
+            try
+            {
+                client.UploadFile(filePath, ftpPath + targetFile);
+                Thread.Sleep(200);
+                if (!FileExists(client, ftpPath, targetFile))
                 {
-                    return true;
+                    Console.WriteLine($"Failed to upload file {filePath} to the PS2 via FTP.\nNo exceptions raised.");
+                    client.Disconnect();
+                    Program.PauseExit(13);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to upload file {filePath} to the PS2 via FTP.\n{ex.Message}\n{ex.InnerException}");
+                client.Disconnect();
+                Program.PauseExit(14);
+            }
+        }
+
+        public static string GetDir(FtpClient client, string ftpPath)
+        {
+            try
+            {
+                string returnList = "";
+                var ftpList = client.GetListing(ftpPath);
+                Thread.Sleep(200);
+                foreach (var item in ftpList)
+                {
+                    returnList += $" {item.Name} ";
+                }
+                return returnList;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public static bool FileExists(FtpClient client, string ftpPath, string ftpFile)
+        {
+            try
+            {
+                var files = client.GetListing(ftpPath);
+                Thread.Sleep(200);
+                foreach (var file in files)
+                {
+                    if (file.Name.Contains(ftpFile))
+                    {
+                        return true;
+                    }
                 }
                 return false;
             }
-            catch { return false; }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
