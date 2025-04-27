@@ -22,7 +22,9 @@ if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
     & "C:\msys64\usr\bin\bash" "-lc" "pacman --noconfirm -Syuu"
 
     & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-vexfat-MSYS2.sh"
-    & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-server-MSYS2.sh"
+	# TODO FIX - Build From 2025-4-14 fails to work with VMCs, revert to build from 2023-3-8
+	# Disable automatic build
+    # & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-server-MSYS2.sh"
 }
 
 if (Test-Path -Path ".\udpbd-vexfat\target\x86_64-pc-windows-gnu\release\udpbd-vexfat.exe" -PathType Leaf)
