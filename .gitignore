@@ -3,7 +3,7 @@ luac.out
 
 # luarocks build files
 *.src.rock
-*.zip
+# *.zip
 *.tar.gz
 
 # Object files
@@ -31,7 +31,7 @@ luac.out
 *.dylib
 
 # Executables
-*.exe
+# *.exe
 *.out
 *.app
 *.i*86
@@ -42,3 +42,8 @@ __pycache__
 .vscode
 XEBPLUS/boot.lua
 XEBPLUS/THM
+
+.vs/
+bin/
+obj/
+*.user
