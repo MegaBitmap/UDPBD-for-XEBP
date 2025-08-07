@@ -2,6 +2,7 @@
 dotnet build ".\UDPBD-for-XEB+-CLI.sln"
 dotnet build ".\UDPBD-for-XEB+-GUI.sln"
 
+<#
 if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
 {
     # Preserve the current working directory
@@ -14,7 +15,8 @@ if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
     & "C:\msys64\usr\bin\bash" "-lc" "pacman --noconfirm -Syuu"
 
     & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-vexfat-MSYS2.sh"
-    & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-server-MSYS2.sh"
+    # TODO FIX: The udpbd-server compiled by this script doesn't work with virtual memory cards.
+    # & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-server-MSYS2.sh"
 }
 
 if (Test-Path -Path ".\udpbd-vexfat\target\x86_64-pc-windows-gnu\release\udpbd-vexfat.exe" -PathType Leaf)
@@ -25,8 +27,10 @@ if (Test-Path -Path ".\udpbd-server\udpbd-server.exe" -PathType Leaf)
 {
     Copy-Item -Path ".\udpbd-server\udpbd-server.exe" -Destination ".\Needed-for-Release\udpbd-server.exe"
 }
+#>
 
 Copy-Item -Path ".\Needed-for-Release\*" -Exclude *.txt -Destination ".\UDPBD-for-XEB+-CLI\bin\Debug\net8.0"
+Copy-Item -Path "..\List Builder\vmc_groups.list" -Destination ".\UDPBD-for-XEB+-CLI\bin\Debug\net8.0"
 Copy-Item -Path ".\UDPBD-for-XEB+-CLI\bin\Debug\net8.0\*" -Destination ".\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows"
 Copy-Item -Path ".\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows\*" -Destination ".\UDPBD-for-XEB+-CLI\bin\Debug\net8.0"
 

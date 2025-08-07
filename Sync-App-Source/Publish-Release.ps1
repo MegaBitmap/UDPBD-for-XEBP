@@ -10,6 +10,7 @@ New-Item -ItemType Directory -Path "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 Get-ChildItem -File -Path ".\UDPBD-for-XEB+-CLI\bin\Release\net8.0\publish\*" | Move-Item -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 Get-ChildItem -File -Path ".\UDPBD-for-XEB+-GUI\bin\Release\net8.0-windows\publish\*" | Move-Item -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 
+<#
 if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
 {
     # Preserve the current working directory
@@ -22,7 +23,8 @@ if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
     & "C:\msys64\usr\bin\bash" "-lc" "pacman --noconfirm -Syuu"
 
     & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-vexfat-MSYS2.sh"
-    & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-server-MSYS2.sh"
+	# TODO FIX: The udpbd-server compiled by this script doesn't work with virtual memory cards.
+    # & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-server-MSYS2.sh"
 }
 
 if (Test-Path -Path ".\udpbd-vexfat\target\x86_64-pc-windows-gnu\release\udpbd-vexfat.exe" -PathType Leaf)
@@ -33,9 +35,12 @@ if (Test-Path -Path ".\udpbd-server\udpbd-server.exe" -PathType Leaf)
 {
     Copy-Item -Path ".\udpbd-server\udpbd-server.exe" -Destination ".\Needed-for-Release\udpbd-server.exe"
 }
+#>
 
 Copy-Item -Path ".\Needed-for-Release\*" -Exclude *.txt -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 Copy-Item -Path ".\Needed-for-Release\*" -Include *.txt -Destination $ReleaseFolder
+Copy-Item -Path "..\List Builder\vmc_groups.list" -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
+Get-Content "..\README.md" -Encoding utf8 | Out-File "$ReleaseFolder\README.txt" -Encoding utf8
 Copy-Item -Path "..\List Builder" -Destination $ReleaseFolder -Recurse
 
 New-Item -ItemType Directory -Path "$ReleaseFolder\XEBPLUS"
