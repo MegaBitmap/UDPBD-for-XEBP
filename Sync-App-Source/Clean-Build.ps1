@@ -1,8 +1,19 @@
 
-Remove-Item -Path ".\UDPBD-for-XEB+-CLI\bin" -Recurse
-Remove-Item -Path ".\UDPBD-for-XEB+-CLI\obj" -Recurse
-Remove-Item -Path ".\UDPBD-for-XEB+-GUI\bin" -Recurse
-Remove-Item -Path ".\UDPBD-for-XEB+-GUI\obj" -Recurse
-Remove-Item -Path ".\udpbd-vexfat" -Recurse
-Remove-Item -Path ".\udpbd-server" -Recurse
+$DelPaths = @(
+".\UDPBD-for-XEB+-CLI\bin"
+".\UDPBD-for-XEB+-CLI\obj"
+".\UDPBD-for-XEB+-GUI\bin"
+".\UDPBD-for-XEB+-GUI\obj"
+".\udpbd-vexfat"
+".\udpbd-server"
+)
+
+
+foreach ($delPath in $DelPaths)
+{
+    if (Test-Path $delPath)
+    {
+        Remove-Item -Path $delPath -Recurse
+    }
+}
 
