@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -16,26 +17,52 @@ namespace UDPBD_for_XEB__GUI
         const string helpUrl = "https://github.com/MegaBitmap/UDPBD-for-XEBP?tab=readme-ov-file#setup";
 
         const string credits =
-            "\n\nawaken1ng - udpbd-vexfat - v0.2.0\n" +
+            "\n\nawaken1ng - udpbd-vexfat - 2025-4-14\n" +
             "https://github.com/awaken1ng/udpbd-vexfat\n\n" +
             "Howling Wolf & Chelsea - XtremeEliteBoot+\n" +
             "https://web.archive.org/web/*/hwc.nat.cu/ps2-vault/hwc-projects/xebplus\n\n" +
-            "Rick Gaiser - neutrino - v1.6.1\n" +
+            "Rick Gaiser - neutrino - v1.7.0-21-gc063dbc\n" +
             "https://github.com/rickgaiser/neutrino\n\n" +
-            "sync-on-luma - neutrino plugin for XEB+ - forked from v2.7.4\n" +
+            "sync-on-luma - neutrino plugin for XEB+ - forked from v2.9.3\n" +
             "https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin";
 
         readonly List<string> gameList = [];
         string gamePath = "";
+        readonly string VHDXNameZip = "PS2-Games-exFAT-udpbd.zip";
+        readonly string VHDXName = "PS2-Games-exFAT-udpbd.vhdx";
+        readonly string traySettingsFile = "UDPBDTraySettings.txt";
 
         public MainWindow()
         {
             InitializeComponent();
+            CheckAlreadyRunning();
             TextBlockVersion.Text = version;
             KillServer();
             LoadIPSetting();
             LoadGamePathSetting();
+            if (File.Exists(VHDXName))
+            {
+                if (!IsDiskImageMounted(VHDXName))
+                {
+                    MountDiskImage(VHDXName);
+                }
+            }
             CheckFiles();
+            if (!CheckForExFat())
+            {
+                SelectVexfat();
+            }
+        }
+
+        private static void CheckAlreadyRunning()
+        {
+            string pName = Process.GetCurrentProcess().ProcessName;
+            int pCount = Process.GetProcessesByName(pName).Length;
+            if (pCount > 1)
+            {
+                MessageBox.Show("This program is already running.", "Already Running", MessageBoxButton.OK, MessageBoxImage.Information);
+                Environment.Exit(-1);
+            }
         }
 
         private async void Connect_Click(object sender, RoutedEventArgs e)
@@ -78,7 +105,7 @@ namespace UDPBD_for_XEB__GUI
             {
                 extraArgs += " -bin2iso";
             }
-            if (ComboBoxServer.SelectedIndex == 1 && CheckBoxEnableVMC.IsChecked == true)
+            if (ComboBoxServer.SelectedIndex == 0 && CheckBoxEnableVMC.IsChecked == true)
             {
                 extraArgs += " -enablevmc";
             }
@@ -86,6 +113,11 @@ namespace UDPBD_for_XEB__GUI
             process.StartInfo.FileName = "UDPBD-for-XEB+-CLI.exe";
             process.StartInfo.Arguments = $"-path \"{gamePath}\" -ps2ip \"{TextBoxPS2IP.Text}\"{extraArgs}";
             process.Start();
+        }
+
+        private void CheckBoxEnableVMC_Checked(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("After checking this box you will need to sync.\r\nThen in the XEB+ neutrino Launcher with a game in view, press the ⏹ square button to open the context menu.\r\nIn the context menu you can enable or disable VMCs globally or individually per game.");
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)
@@ -104,7 +136,7 @@ namespace UDPBD_for_XEB__GUI
                 return;
             }
             string serverName;
-            if (ComboBoxServer.SelectedIndex == 0)
+            if (ComboBoxServer.SelectedIndex == 1)
             {
                 serverName = "udpbd-vexfat";
                 if (CheckServer(serverName)) return;
@@ -123,36 +155,28 @@ namespace UDPBD_for_XEB__GUI
                 MessageBox.Show("Please first select the game folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            SaveTraySettings(serverName);
+
             Process process = new();
-            process.StartInfo.FileName = "cmd.exe";
-            if (serverName.Contains("vexfat"))
-            {
-                process.StartInfo.Arguments = $"/K {serverName} \"{gamePath}\"";
-                if (CheckBoxShowConsole.IsChecked != true)
-                {
-                    process.StartInfo.FileName = serverName;
-                    process.StartInfo.Arguments = $"\"{gamePath}\"";
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                }
-            }
-            else
-            {
-                process.StartInfo.Arguments = $"/K \"{Path.GetFullPath(serverName)}\" \\\\.\\{gamePath}";
-                if (CheckBoxShowConsole.IsChecked != true)
-                {
-                    process.StartInfo.FileName = serverName;
-                    process.StartInfo.Arguments = $"\\\\.\\{gamePath}";
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                }
-                process.StartInfo.UseShellExecute = true;
-                process.StartInfo.Verb = "runas";
-            }
+            process.StartInfo.FileName = "UDPBDTray.exe";
             process.Start();
-            if (CheckBoxShowConsole.IsChecked != true)
-            {
-                CheckServerStart(serverName);
-            }
             ServerButton.Content = "Stop Server";
+        }
+
+        private void SaveTraySettings(string serverName)
+        {
+            string trayMountPath = gamePath;
+            if (File.Exists(VHDXName) && IsDiskImageMounted(VHDXName))
+            {
+                string driveLetter = GetDiskImageDriveLetter(VHDXName);
+                if (!string.IsNullOrEmpty(driveLetter) && gamePath.Contains(driveLetter))
+                {
+                    trayMountPath = VHDXName;
+                }
+            }
+            using TextWriter traySettings = new StreamWriter(traySettingsFile);
+            traySettings.WriteLine(trayMountPath);
+            traySettings.WriteLine(serverName);
         }
 
         private void About_Click(object sender, RoutedEventArgs e)
@@ -165,10 +189,9 @@ namespace UDPBD_for_XEB__GUI
         private void LoadGamePathSetting()
         {
             if (!File.Exists("GamePathSetting.cfg")) return;
-            TextReader settings = new StreamReader("GamePathSetting.cfg");
+            using TextReader settings = new StreamReader("GamePathSetting.cfg");
             string? tempPath = settings.ReadLine();
             string? serveVMC = settings.ReadLine();
-            settings.Close();
             if (tempPath != null && Directory.Exists(tempPath))
             {
                 GetGameList(tempPath);
@@ -176,7 +199,7 @@ namespace UDPBD_for_XEB__GUI
 
                 if (!string.IsNullOrEmpty(serveVMC) && serveVMC.Contains("VMCServer"))
                 {
-                    ComboBoxServer.SelectedIndex = 1;
+                    ComboBoxServer.SelectedIndex = 0;
                     CheckBoxEnableVMC.IsChecked = true;
                     int itemNum = 0;
                     foreach (var item in ComboBoxGameVolume.Items)
@@ -197,7 +220,7 @@ namespace UDPBD_for_XEB__GUI
         {
             TextWriter settings = new StreamWriter("GamePathSetting.cfg");
             settings.WriteLine(gamePath);
-            if (CheckBoxEnableVMC.IsChecked == true && ComboBoxServer.SelectedIndex == 1)
+            if (CheckBoxEnableVMC.IsChecked == true && ComboBoxServer.SelectedIndex == 0)
             {
                 settings.WriteLine("VMCServer");
             }
@@ -207,9 +230,8 @@ namespace UDPBD_for_XEB__GUI
         private void LoadIPSetting()
         {
             if (!File.Exists("IPSetting.cfg")) return;
-            TextReader settings = new StreamReader("IPSetting.cfg");
+            using TextReader settings = new StreamReader("IPSetting.cfg");
             string? tempIP = settings.ReadLine();
-            settings.Close();
             if (!string.IsNullOrEmpty(tempIP)) TextBoxPS2IP.Text = tempIP;
         }
 
@@ -222,7 +244,7 @@ namespace UDPBD_for_XEB__GUI
 
         private async Task<bool> ValidateSyncAsync()
         {
-            if (ComboBoxServer.SelectedIndex == 1)
+            if (ComboBoxServer.SelectedIndex == 0)
             {
                 string? tempGameDrive = ComboBoxGameVolume.SelectedItem.ToString();
                 if (tempGameDrive == null) return false;
@@ -348,14 +370,74 @@ namespace UDPBD_for_XEB__GUI
             }
             else
             {
-                MessageBox.Show("The program was unable to find an exFAT volume or partition.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxResult result = MessageBox.Show("The program was unable to find an exFAT volume or partition.\r\nDo you want to mount a Virtual Drive?", "exFAT not Found", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (result != MessageBoxResult.Yes)
+                {
+                    return false;
+                }
+                if (!File.Exists(VHDXName))
+                {
+                    ZipFile.ExtractToDirectory(VHDXNameZip, Directory.GetCurrentDirectory());
+                }
+                MountDiskImage(VHDXName);
+                if (!IsDiskImageMounted(VHDXName))
+                {
+                    MessageBox.Show($"Failed to mount the disk image '{VHDXName}'.", "Error Mounting VHDX", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Environment.Exit(-1);
+                }
+                MessageBox.Show("The virtual drive has been mounted. Add your PS2 game ISOs to the DVD or CD folder then restart this sync app.", "Virtual Drive Mounted", MessageBoxButton.OK, MessageBoxImage.Information);
+                Environment.Exit(0);
                 return false;
             }
         }
 
+        private static void MountDiskImage(string fileName)
+        {
+            Process process = new();
+            process.StartInfo.FileName = "cmd";
+            process.StartInfo.Arguments = $"/c {fileName} && timeout /t 1 /nobreak"; // for some reason a 1 second delay is needed or the vhdx will not be mounted
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            process.Start();
+            process.WaitForExit();
+        }
+
+        private static bool IsDiskImageMounted(string fileName)
+        {
+            Process process = new();
+            process.StartInfo.FileName = "powershell";
+            process.StartInfo.Arguments = $"-Command (Get-DiskImage (Resolve-Path {fileName})).Attached;";
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            process.Start();
+            process.WaitForExit();
+            string result = process.StandardOutput.ReadLine() + "";
+            if (result.Contains("True"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static string GetDiskImageDriveLetter(string fileName)
+        {
+            Process process = new();
+            process.StartInfo.FileName = "powershell";
+            process.StartInfo.Arguments = $"-Command (Get-Partition ((Get-DiskImage (Resolve-Path {fileName})).DevicePath -replace '....PhysicalDrive', '')).DriveLetter";
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            process.Start();
+            process.WaitForExit();
+            int testChar = process.StandardOutput.Peek();
+            if (testChar == 0)
+            {
+                return "";
+            }
+            return process.StandardOutput.ReadLine() + "";
+        }
+
         private static void CheckFiles()
         {
-            string[] files = ["bsd-udpbd.toml", "UDPBD-for-XEB+-CLI.exe", "udpbd-server.exe", "udpbd-vexfat.exe"];
+            string[] files = ["bsd-udpbd.toml", "UDPBD-for-XEB+-CLI.exe", "udpbd-server.exe", "udpbd-vexfat.exe", "PS2-Games-exFAT-udpbd.zip", "UDPBDTray.exe"];
             foreach (var file in files)
             {
                 if (!File.Exists(file))
@@ -377,32 +459,33 @@ namespace UDPBD_for_XEB__GUI
             return false;
         }
 
-        private static void CheckServerStart(string serverName)
-        {
-            Thread.Sleep(500); //wait 0.5 seconds for the server to start before checking if it failed
-            Process[] processesStarted = Process.GetProcessesByName(serverName);
-            if (!(processesStarted.Length == 0))
-            {
-                MessageBox.Show("The server is now running and ready to Play!", "Server is running", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else MessageBox.Show("Failed to start the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-
         private void KillServer()
         {
-            string[] serverNames = ["udpbd-server", "udpbd-vexfat"];
+            bool killAll = false;
+            string[] serverNames = ["udpbd-server", "udpbd-vexfat", "UDPBDTray"];
             foreach (var server in serverNames)
             {
                 Process[] processes = Process.GetProcessesByName(server);
                 if (!(processes.Length == 0))
                 {
-                    MessageBoxResult response = MessageBox.Show("The server is currently running.\nClick OK to stop the server and sync.", "The server is running", MessageBoxButton.OKCancel, MessageBoxImage.Question);
-                    if (response == MessageBoxResult.OK)
+                    if (killAll)
                     {
                         foreach (var item in processes) item.Kill();
-                        ServerButton.Content = "Start Server";
                     }
-                    else Environment.Exit(-1);
+                    else
+                    {
+                        MessageBoxResult response = MessageBox.Show("The server is currently running.\nClick OK to stop the server and sync.", "The server is running", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                        if (response == MessageBoxResult.OK)
+                        {
+                            killAll = true;
+                            foreach (var item in processes) item.Kill();
+                            ServerButton.Content = "Start Server";
+                        }
+                        else
+                        {
+                            Environment.Exit(-1);
+                        }
+                    }
                 }
             }
         }
@@ -410,13 +493,16 @@ namespace UDPBD_for_XEB__GUI
         private static void QuickKillServer()
         {
             bool hasKilled = false;
-            string[] serverNames = ["udpbd-server", "udpbd-vexfat"];
+            string[] serverNames = ["udpbd-server", "udpbd-vexfat", "UDPBDTray"];
             foreach (var server in serverNames)
             {
                 Process[] processes = Process.GetProcessesByName(server);
                 if (!(processes.Length == 0))
                 {
-                    hasKilled = true;
+                    if (!server.Contains("Tray"))
+                    {
+                        hasKilled = true;
+                    }
                     foreach (var item in processes) item.Kill();
                 }
             }
@@ -434,33 +520,40 @@ namespace UDPBD_for_XEB__GUI
             if (TextBlockGameList == null) return;
             ComboBoxGameVolume.Items.Clear();
             TextBlockGameList.Text = "";
-            if (ComboBoxServer.SelectedIndex == 0)
+            if (ComboBoxServer.SelectedIndex == 1)
             {
-                ButtonSelectGamePath.Visibility = Visibility.Visible;
-                TextBlockGameList.Visibility = Visibility.Visible;
-                TextBlockSelectExFAT.Visibility = Visibility.Hidden;
-                ComboBoxGameVolume.Visibility = Visibility.Hidden;
-                CheckBoxEnableVMC.Visibility = Visibility.Hidden;
+                SelectVexfat();
             }
             else
             {
                 if (!CheckForExFat())
                 {
-                    ComboBoxServer.SelectedIndex = 0;
-                    ButtonSelectGamePath.Visibility = Visibility.Visible;
-                    TextBlockGameList.Visibility = Visibility.Visible;
-                    TextBlockSelectExFAT.Visibility = Visibility.Hidden;
-                    ComboBoxGameVolume.Visibility = Visibility.Hidden;
-                    CheckBoxEnableVMC.Visibility = Visibility.Hidden;
+                    SelectVexfat();
                     return;
                 }
-                ButtonSelectGamePath.Visibility = Visibility.Hidden;
-                TextBlockGameList.Visibility = Visibility.Hidden;
-                TextBlockSelectExFAT.Visibility = Visibility.Visible;
-                ComboBoxGameVolume.Visibility = Visibility.Visible;
-                CheckBoxEnableVMC.Visibility = Visibility.Visible;
+                SelectUServer();
             }
         }
+
+        private void SelectVexfat()
+        {
+            ComboBoxServer.SelectedIndex = 1;
+            ButtonSelectGamePath.Visibility = Visibility.Visible;
+            TextBlockGameList.Visibility = Visibility.Visible;
+            TextBlockSelectExFAT.Visibility = Visibility.Hidden;
+            ComboBoxGameVolume.Visibility = Visibility.Hidden;
+            CheckBoxEnableVMC.Visibility = Visibility.Hidden;
+        }
+
+        private void SelectUServer()
+        {
+            ButtonSelectGamePath.Visibility = Visibility.Hidden;
+            TextBlockGameList.Visibility = Visibility.Hidden;
+            TextBlockSelectExFAT.Visibility = Visibility.Visible;
+            ComboBoxGameVolume.Visibility = Visibility.Visible;
+            CheckBoxEnableVMC.Visibility = Visibility.Visible;
+        }
+
         [GeneratedRegex(@"\\.*")]
         private static partial Regex SelectedVolume();
     }
