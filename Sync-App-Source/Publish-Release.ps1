@@ -4,11 +4,13 @@ $ReleaseFolder = ".\UDPBD-for-XEB+-GUI\bin\Release\net8.0-windows\publish\releas
 
 dotnet publish ".\UDPBD-for-XEB+-CLI.sln"
 dotnet publish ".\UDPBD-for-XEB+-GUI.sln"
+dotnet publish ".\UDPBDTray.sln"
 
 New-Item -ItemType Directory -Path "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 
 Get-ChildItem -File -Path ".\UDPBD-for-XEB+-CLI\bin\Release\net8.0\publish\*" | Move-Item -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 Get-ChildItem -File -Path ".\UDPBD-for-XEB+-GUI\bin\Release\net8.0-windows\publish\*" | Move-Item -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
+Get-ChildItem -File -Path ".\UDPBDTray\bin\Release\net8.0-windows\publish\*" | Move-Item -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 
 <#
 if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
@@ -52,5 +54,5 @@ Compress-Archive -Path "$ReleaseFolder\*" -DestinationPath ".\UDPBD-for-XEBP-v$R
 
 Remove-Item -Path ".\UDPBD-for-XEB+-CLI\bin\Release" -Recurse
 Remove-Item -Path ".\UDPBD-for-XEB+-GUI\bin\Release" -Recurse
-
+Remove-Item -Path ".\UDPBDTray\bin\Release" -Recurse
 
