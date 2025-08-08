@@ -1,6 +1,7 @@
 
 dotnet build ".\UDPBD-for-XEB+-CLI.sln"
 dotnet build ".\UDPBD-for-XEB+-GUI.sln"
+dotnet build ".\UDPBDTray.sln"
 
 <#
 if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
@@ -32,6 +33,6 @@ if (Test-Path -Path ".\udpbd-server\udpbd-server.exe" -PathType Leaf)
 Copy-Item -Path ".\Needed-for-Release\*" -Exclude *.txt -Destination ".\UDPBD-for-XEB+-CLI\bin\Debug\net8.0"
 Copy-Item -Path "..\List Builder\vmc_groups.list" -Destination ".\UDPBD-for-XEB+-CLI\bin\Debug\net8.0"
 Copy-Item -Path ".\UDPBD-for-XEB+-CLI\bin\Debug\net8.0\*" -Destination ".\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows"
-Copy-Item -Path ".\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows\*" -Destination ".\UDPBD-for-XEB+-CLI\bin\Debug\net8.0"
-
+Copy-Item -Path ".\UDPBDTray\bin\Debug\net8.0-windows\*" -Destination ".\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows"
+Copy-Item -Path ".\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows\*" -Destination ".\UDPBDTray\bin\Debug\net8.0-windows"
 

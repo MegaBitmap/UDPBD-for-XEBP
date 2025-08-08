@@ -4,6 +4,8 @@ $DelPaths = @(
 ".\UDPBD-for-XEB+-CLI\obj"
 ".\UDPBD-for-XEB+-GUI\bin"
 ".\UDPBD-for-XEB+-GUI\obj"
+".\UDPBDTray\bin"
+".\UDPBDTray\obj"
 ".\udpbd-vexfat"
 ".\udpbd-server"
 )

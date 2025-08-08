@@ -637,6 +637,9 @@ https://github.com/awaken1ng/udpbd-vexfat
 Howling Wolf & Chelsea - XtremeEliteBoot+  
 https://www.psx-place.com/threads/xtremeeliteboot-s-dashboard-special-xmas-showcase.38959/
 
+PS2Dev Team - ps2client - 2024-8-5  
+https://github.com/ps2dev/ps2client
+
 Rick Gaiser - neutrino - v1.7.0-21-gc063dbc  
 https://github.com/rickgaiser/neutrino
 
