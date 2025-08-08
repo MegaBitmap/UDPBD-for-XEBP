@@ -67,10 +67,13 @@ namespace UDPBD_for_XEB__CLI
             {
                 client.GetListing(directoryPath);
                 Thread.Sleep(200);
+                client.GetListing(directoryPath); // Try twice because the launchELF ftp server is strange
+                Thread.Sleep(200);
                 return true;
             }
             catch
             {
+                Thread.Sleep(200);
                 return false;
             }
         }
@@ -79,14 +82,26 @@ namespace UDPBD_for_XEB__CLI
         {
             try
             {
-                client.UploadFile(filePath, ftpPath + targetFile);
-                Thread.Sleep(200);
+                client.UploadFile(Path.GetFullPath(filePath), ftpPath + targetFile);
+                Thread.Sleep(1000);
                 if (!FileExists(client, ftpPath, targetFile))
                 {
                     Console.WriteLine($"Failed to upload file {filePath} to the PS2 via FTP.\nNo exceptions raised.");
                     client.Disconnect();
                     Program.PauseExit(13);
                 }
+                FileInfo fileInfo = new(filePath);
+                long ftpSize = GetSize(client, ftpPath, targetFile);
+                for (int i = 0; i < 3; i++) // Try 3 times to match the file size before throwing an error
+                {
+                    if (ftpSize == fileInfo.Length) { return; }
+                    ftpSize = GetSize(client, ftpPath, targetFile);
+                }
+                Console.WriteLine($"Target file size: {fileInfo.Length}");
+                Console.WriteLine($"File size reported by launchELF: {ftpSize}");
+                Console.WriteLine($"Failed to upload file {filePath} to the PS2 via FTP.\nWrong file size.");
+                client.Disconnect();
+                Program.PauseExit(13);
             }
             catch (Exception ex)
             {
@@ -103,16 +118,49 @@ namespace UDPBD_for_XEB__CLI
                 string returnList = "";
                 var ftpList = client.GetListing(ftpPath);
                 Thread.Sleep(200);
+                var ftpList2 = client.GetListing(ftpPath); // Try twice because the launchELF ftp server is strange
+                Thread.Sleep(200);
                 foreach (var item in ftpList)
                 {
                     returnList += $" {item.Name} ";
+                }
+                foreach (var item in ftpList2)
+                {
+                    if (!returnList.Contains(item.ToString()))
+                    {
+                        returnList += $" {item.Name} ";
+                    }
                 }
                 return returnList;
             }
             catch
             {
+                Thread.Sleep(200);
                 return "";
             }
+        }
+
+        public static long GetSize(FtpClient client, string ftpPath, string file)
+        {
+            var ftpList = client.GetListing(ftpPath);
+            Thread.Sleep(200);
+            var ftpList2 = client.GetListing(ftpPath);
+            Thread.Sleep(200);
+            foreach (var item in ftpList)
+            {
+                if (item.Name == file)
+                {
+                    return item.Size;
+                }
+            }
+            foreach (var item in ftpList2)
+            {
+                if (item.Name == file)
+                {
+                    return item.Size;
+                }
+            }
+            return 0;
         }
 
         public static bool FileExists(FtpClient client, string ftpPath, string ftpFile)
@@ -128,10 +176,20 @@ namespace UDPBD_for_XEB__CLI
                         return true;
                     }
                 }
+                var files2 = client.GetListing(ftpPath); // Try twice because the launchELF ftp server is strange
+                Thread.Sleep(200);
+                foreach (var file in files2)
+                {
+                    if (file.Name.Contains(ftpFile))
+                    {
+                        return true;
+                    }
+                }
                 return false;
             }
             catch
             {
+                Thread.Sleep(200);
                 return false;
             }
         }
