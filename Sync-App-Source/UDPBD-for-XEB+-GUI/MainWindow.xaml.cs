@@ -77,14 +77,14 @@ namespace UDPBD_for_XEB__GUI
         {
             OpenFileDialog dialog = new()
             {
-                Filter = "PS2 ISO Files | *.iso",
-                Title = "Select a game from the DVD folder..."
+                Filter = "PS2 Games(*.iso;*.bin)|*.iso;*.bin",
+                Title = "Select a game from the DVD or CD folder..."
             };
             bool? result = dialog.ShowDialog();
             if (!result == true) return;
             if (!dialog.FileName.Contains(@"\DVD\" + dialog.SafeFileName) && !dialog.FileName.Contains(@"\CD\" + dialog.SafeFileName))
             {
-                MessageBox.Show("Game ISOs need to be in a folder named DVD or CD", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Game files need to be in a folder named DVD or CD", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             gamePath = dialog.FileName.Replace(@"\DVD\" + dialog.SafeFileName, "").Replace(@"\CD\" + dialog.SafeFileName, "");
@@ -258,7 +258,7 @@ namespace UDPBD_for_XEB__GUI
             }
             if (gameList.Count == 0)
             {
-                MessageBox.Show("Please first select the game folder.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("The sync app was unable to find any games.\r\nPlease first select the game path.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             if (!await PS2ConnectAsync(TextBoxPS2IP.Text))
@@ -277,12 +277,21 @@ namespace UDPBD_for_XEB__GUI
             TextBlockGameList.Text = "";
             gameList.Clear();
             string[] scanFolders = [$"{testPath}/CD", $"{testPath}/DVD"];
-            foreach (var item in scanFolders)
+            foreach (string folder in scanFolders)
             {
-                if (Directory.Exists(item))
+                if (Directory.Exists(folder))
                 {
-                    IEnumerable<string> ISOFiles = Directory.EnumerateFiles(item, "*.iso", SearchOption.TopDirectoryOnly);
-                    foreach (string file in ISOFiles) gameList.Add(file.Replace(testPath + @"\", ""));
+                    IEnumerable<string> ISOFiles = Directory.EnumerateFiles(folder, "*.iso", SearchOption.TopDirectoryOnly);
+                    foreach (string ISOFile in ISOFiles) gameList.Add(ISOFile.Replace(testPath + @"\", ""));
+                    IEnumerable<string> BINFiles = Directory.EnumerateFiles(folder, "*.bin", SearchOption.TopDirectoryOnly);
+                    foreach (string BINFile in BINFiles)
+                    {
+                        string alreadyScanned = string.Join(" ", ISOFiles);
+                        if (!alreadyScanned.Contains(Path.GetFileNameWithoutExtension(BINFile)))
+                        {
+                            gameList.Add(BINFile.Replace(testPath + @"\", ""));
+                        }
+                    }
                 }
             }
             if (gameList.Count == 0) return;
