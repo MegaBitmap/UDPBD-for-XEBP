@@ -31,6 +31,7 @@ namespace UDPBD_for_XEB__GUI
         readonly string VHDXNameZip = "PS2-Games-exFAT-udpbd.zip";
         readonly string VHDXName = "PS2-Games-exFAT-udpbd.vhdx";
         readonly string traySettingsFile = "UDPBDTraySettings.txt";
+        readonly bool firstLoad = true;
 
         public MainWindow()
         {
@@ -52,6 +53,7 @@ namespace UDPBD_for_XEB__GUI
             {
                 SelectVexfat();
             }
+            firstLoad = false;
         }
 
         private static void CheckAlreadyRunning()
@@ -117,7 +119,10 @@ namespace UDPBD_for_XEB__GUI
 
         private void CheckBoxEnableVMC_Checked(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("After checking this box you will need to sync.\r\nThen in the XEB+ neutrino Launcher with a game in view, press the ⏹ square button to open the context menu.\r\nIn the context menu you can enable or disable VMCs globally or individually per game.");
+            if (!firstLoad)
+            {
+                MessageBox.Show("After checking this box you will need to sync.\r\nThen in the XEB+ neutrino Launcher with a game in view, press the ⏹ square button to open the context menu.\r\nIn the context menu you can enable or disable VMCs globally or individually per game.");
+            }
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)
