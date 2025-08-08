@@ -32,7 +32,7 @@ namespace UDPBDTray
             CheckFiles();
             InitNotifyIcon();
             LoadSettings("UDPBDTraySettings.txt");
-            StartServer();
+            StartServer(1000);
         }
 
         private static void CheckAlreadyRunning()
@@ -189,6 +189,7 @@ namespace UDPBDTray
 
         private void MenuItemRestart_Click(object? sender, EventArgs e)
         {
+            int waitTime = 1000;
             QuickKillServer();
             if (showConsole == false)
             {
@@ -199,8 +200,9 @@ namespace UDPBDTray
             {
                 showConsole = false;
                 menuItemRestart.Text = "Restart and Show Console";
+                waitTime = 10000; // Takes longer to start the terminal
             }
-            StartServer();
+            StartServer(waitTime);
         }
         private void MenuItemKill_Click(object? sender, EventArgs e)
         {
@@ -240,7 +242,7 @@ namespace UDPBDTray
             }
         }
 
-        private void StartServer()
+        private void StartServer(int waitTime)
         {
             Process process = new();
             process.StartInfo.FileName = "cmd";
@@ -272,7 +274,7 @@ namespace UDPBDTray
             try
             {
                 process.Start();
-                CheckServerStart();
+                CheckServerStart(waitTime);
             }
             catch (Exception ex)
             {
@@ -280,9 +282,9 @@ namespace UDPBDTray
             }
         }
 
-        private void CheckServerStart()
+        private void CheckServerStart(int waitTime)
         {
-            Thread.Sleep(1000); //wait 1 second for the server to start before checking if it failed
+            Thread.Sleep(waitTime); //wait 1 second for the server to start before checking if it failed
             Process[] processesStarted = Process.GetProcessesByName(serverName);
             if (processesStarted.Length != 0)
             {
