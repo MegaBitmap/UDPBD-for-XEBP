@@ -79,10 +79,8 @@ PS2BBL supports this by default. ExFAT support can be added to FreeMcBoot with [
 
 ## Setup
 
-*Notes:  
-This setup guide assumes you are using the included List Builder desktop application. A web-based version can also be used and is avalible [here](https://flvinny.github.io/neutrinoListBuilderWeb/).  
-This setup process is for version plugin 2.7 and later.  
-If you are updating from version 2.5 or earlier, you may need to remove the `XEBPLUS/CFG/neutrinoLuancher` folder on your USB drive.  
+*Note: This setup process is for version 2.9 of this plugin.  
+If you are updating from version 2.6 or earlier, you may need to remove the `XEBPLUS/CFG/neutrinoLuancher` folder on your USB drive.  
 If you are updating from version 1.x, you will need to remove the old version of neutrino Launcher from your XEB+ install before continuing.  
 This includes all neutrino Launcher files in the `APPS`, `PLG`, and `CFG` folders, as well as the `CD` and `DVD` folders on the root of your USB drive.*
 
@@ -104,33 +102,28 @@ Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders 
 ### UDPBD on Windows
 
 **If you plan to use virtual memory cards please read this:**  
-To make use of virtual memory cards please follow these steps:  
-Make sure you are using the latest release of the neutrino plugin and sync app (2.3.0.1 or newer).  
-On step 17 of this section change vexfat to udpbd-server then check "use vmcs" then sync to the PS2.  
 You must use udpbd-server when using VMCs, udpbd-vexfat does NOT support VMCs.  
 AFAIK udpbd-server only works with exFAT partitions made with Linux/exfatprogs/GParted.  
-The beginning of a [previous tutorial](https://www.youtube.com/watch?v=F6Ffg5DlKC4) that I made shows how to do this.  
+A preformatted virtual exFAT drive can be mounted if no other exFAT partition is found.  
 After opening neutrino Launcher in XEBP with a game in view, press the ⏹ square button to open the context menu.  
 In the context menu you can enable or disable VMCs globally or individually per game.  
 For transferring, importing, or exporting saves from VMC files you can use [PS2-VMC-GUI](https://github.com/MegaBitmap/PS2-VMC-GUI).  
 
-7. Somewhere on your PC, for example `Documents`, create a new folder `PS2`.
+7. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), extract the `UDPBD-for-XEB+ Sync App` folder somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
 
-8. Inside the `PS2` folder, create `CD` and `DVD` folders.
+8.  Run `UDPBD-for-XEB+-GUI.exe`. If no exFAT partitions are found, a prompt will appear to mount a virtual exFAT drive.
 
-9. Rip/copy any PlayStation 2 ISOs you wish to load into the folder that corresponds with their original source media.
+9. Rip/copy any PlayStation 2 ISOs you wish to load into the folder (CD or DVD) that corresponds with their original source media.
 
 10. All `.bin` + `.cue` CD games must be converted to `.iso` format.  
 The sync app will convert them automatically if placed in the CD folder and check the `Convert CD Bin to ISO` box before synchronizing.
 
-11. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), extract the `UDPBD-for-XEB+ Sync App` folder somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
-
-12. **Direct Connection** - Plug in the ethernet cable as shown: ↓  
+11. **Direct Connection** - Plug in the ethernet cable as shown: ↓  
 ![ps2-slim-connected-to-laptop](readme-images/ps2-slim-connected-to-laptop.jpg)  
 **Router Connection** - Plug in the ethernet cables as shown: ↓  
 ![ps2-slim-connected-to-router-and-laptop](readme-images/ps2-slim-connected-to-router-and-laptop.jpg)  
 
-13. For a direct connection, as seen in the previous step, set a manual IPv4 address and subnet mask.  
+12. For a direct connection, as seen in the previous step, set a manual IPv4 address and subnet mask.  
 ![pc-ip-settings](readme-images/pc-ip-settings.jpg)  
 For using a router instead of a direct connection, set the PC's IP assignment to *Automatic (DHCP)*.  
 On the PC go into network connections or run `ncpa.cpl`.  
@@ -145,49 +138,43 @@ Set the middle number, subnet mask, to `255.255.255.0`
 The third IP address or default gateway, must match the default gateway of the router or switch.  
 Most likely it will be `192.168.0.1` or `192.168.1.1`  
 
-14. Hold *R1* on the controller during FreeMCBoot/PS2BBL startup to open LaunchELF.  
+13. Hold *R1* on the controller during FreeMCBoot/PS2BBL startup to open LaunchELF.  
 Open MISC -> PS2Net  
 ![launchelf-ps2net](readme-images/launchelf-ps2net.jpg)  
 
-15. Let the PS2 idle on this screen for the next steps on the PC.  
+14. Let the PS2 idle on this screen for the next steps on the PC.  
 ![launchelf-ftp-enabled](readme-images/launchelf-ftp-enabled.jpg)
 
-16. Run `UDPBD-for-XEB+-GUI.exe` and click connect.  
+15. Run `UDPBD-for-XEB+-GUI.exe` and click connect.  
 ![udpbd-xeb-1](readme-images/udpbd-xeb-sync-1.jpg)
 
-17. Click `Select Game Path` then choose an ISO from the `DVD` folder from step 8.
+16. Click `Select Game Path` then choose an ISO from the `DVD` folder from step 8.
 
-18. Click `Sync with PS2`, upon success this message will be displayed:  
+17. Click `Sync with PS2`, upon success this message will be displayed:  
 ![udpbd-xeb-synced](readme-images/udpbd-xeb-sync-2.jpg)
 
-19. Click `Start Server` and make sure to allow.  
+18. Click `Start Server` and make sure to allow.  
 ![udpbd-vexfat-firewall](readme-images/udpbd-vexfat-firewall.jpg)  
-If you miss clicked, either move the `UDPBD-for-XEB+` folder inside a new folder or manually delete the inbound rules for `udpbd-vexfat` in `Windows Defender Firewall with Advanced Security`.  
-udpbd-vexfat will open minimized.  
+If you miss clicked, either move the UDPBD-for-XEB+ folder inside a new folder or manually delete the inbound rules for udpbd-server/vexfat in `WF.msc` (Windows Defender Firewall with Advanced Security).  
+UDPBDTray will start the server and add a notification tray icon.
 The server needs to be open and running for the entire play session. (Disable sleep on the PC.)
 
-20. The PC setup is now complete, back on the PS2 run XEB+.  
+19. The PC setup is now complete, back on the PS2 run XEB+.  
 ![launchelf-xeb](readme-images/launchelf-xeb.jpg)
 It's recommended to set FreeMCBoot or PS2BBL to autorun the `.ELF` file.
-21. Play!  
+20. Play!  
 ![xeb-game-list](readme-images/xeb-game-list.jpg)  
 
-Repeat steps 14-21 of the setup process after adding or renaming/removing games.
+Repeat steps 13-20 of the setup process after adding or renaming/removing games.
 
 If you want the server to start automatically when the PC is turned on follow these steps:
 
-- Create a shortcut to `udpbd-vexfat.exe`
-- Right click the shortcut then select properties
-- In the `Target` text box add a space the location of the DVD and CD folders in quotes.  
-Here is an example:
-```
-"C:\Users\%USERNAME%\Documents\UDPBD-for-XEB+ Sync App\udpbd-vexfat.exe" "C:\Users\%USERNAME%\Documents\PS2 Games"
-```
-- Now test the shortcut and check if the server is able to find games.  
-If the server exits immediately then there is most likely a typo in the shortcut's target.  
-- Move the vexfat shortcut to this folder:  
+- Right Click `UDPBDTray.exe` → Show more → Create Shortcut
+- Move the UDPBDTray shortcut to this folder:  
 `C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`  
 Now the server will start automatically.  
+
+UDPBDTray adds a notification tray icon with controls for stopping and restarting the server as well starting ps2client for console output debugging.
 
 
 ### UDPBD on Linux
@@ -633,11 +620,9 @@ If this happens, the behavior will persist until the cache is refreshed manually
 If you wish to make any modifications to the windows presentation foundation (WPF) app or console app follow these steps:
 1. Download and install Visual Studio Community with the `.NET desktop development` workload.
 2. Clone this repository.
-3. Open the `Sync-App-Source\UDPBD-for-XEB+-GUI.sln` or `Sync-App-Source\UDPBD-for-XEB+-CLI.sln` file with Visual Studio.
-4. The command line app requires the `DiscUtils.Iso9660` library from NuGet to be installed.
-5. Click Build -> Build Solution, then copy the files from `Sync-App-Source\Needed-for-Release` and `Sync-App-Source\UDPBD-for-XEB+-CLI\bin\Debug\net8.0` to `Sync-App-Source\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows`  
-This only needs to be done once.
-6. Now you can test your changes by clicking the green arrow in VS or open `Sync-App-Source\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows\UDPBD-for-XEB+-GUI.exe`
+3. Run `Sync-App-Source\Debug-Build.ps1` with powershell.
+4. Open the `Sync-App-Source\UDPBD-for-XEB+-GUI.sln` or `Sync-App-Source\UDPBD-for-XEB+-CLI.sln` file with Visual Studio.
+5. Now you can test your changes by clicking the green arrow in VS or open `Sync-App-Source\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows\UDPBD-for-XEB+-GUI.exe`
 
 ## Credits
 
@@ -646,17 +631,17 @@ Big Thanks to these Devs!
 Alex Parrado & El_isra & Rick Gaiser - udpbd-server - 2023-3-8  
 https://github.com/israpps/udpbd-server
 
-awaken1ng - udpbd-vexfat - v0.2.0  
+awaken1ng - udpbd-vexfat - 2025-4-14  
 https://github.com/awaken1ng/udpbd-vexfat
 
 Howling Wolf & Chelsea - XtremeEliteBoot+  
 https://www.psx-place.com/threads/xtremeeliteboot-s-dashboard-special-xmas-showcase.38959/
 
-Rick Gaiser - neutrino - v1.6.1  
+Rick Gaiser - neutrino - v1.7.0-21-gc063dbc  
 https://github.com/rickgaiser/neutrino
 
-sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.7.3  
+sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.9.3  
 https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin
 
-Wes Castro & El_isra & sync-on-luma - CheatDevice - 2025-2-25  
+Wes Castro & El_isra & sync-on-luma - CheatDevice - 2025-3-16  
 https://github.com/sync-on-luma/CheatDevice-for-neutrino-Laucnher
