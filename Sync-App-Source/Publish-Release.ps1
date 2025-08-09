@@ -44,9 +44,9 @@ Copy-Item -Path ".\Needed-for-Release\*" -Include *.txt -Destination $ReleaseFol
 Copy-Item -Path "..\List Builder\vmc_groups.list" -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 Get-Content "..\README.md" -Encoding utf8 | Out-File "$ReleaseFolder\README.txt" -Encoding utf8
 Copy-Item -Path "..\List Builder" -Destination $ReleaseFolder -Recurse
+Copy-Item -Path "..\PS2BBL-Network-Init" -Destination $ReleaseFolder -Recurse
 
 New-Item -ItemType Directory -Path "$ReleaseFolder\XEBPLUS"
-
 Copy-Item -Path "..\XEBPLUS\APPS" -Destination "$ReleaseFolder\XEBPLUS" -Recurse
 Copy-Item -Path "..\XEBPLUS\PLG" -Destination "$ReleaseFolder\XEBPLUS" -Recurse
 
