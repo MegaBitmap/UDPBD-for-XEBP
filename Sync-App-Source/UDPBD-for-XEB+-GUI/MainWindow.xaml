@@ -45,9 +45,9 @@
             <TextBlock Text="UDPBD for XEB+ Sync App" Width="200" TextWrapping="Wrap" FontSize="24" TextAlignment="Center" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0" Grid.Column="1" Grid.Row="0"/>
             <TextBlock Name="TextBlockVersion" Text="Version" FontSize="12" TextAlignment="Center" VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Column="2" Grid.Row="0"/>
             <TextBox Name="TextBoxPS2IP" Text="192.168.0.10" TextAlignment="Center" HorizontalAlignment="Center" Width="180" VerticalAlignment="Bottom" Margin="-20" Grid.Column="0" Grid.Row="0"/>
-            <Button Name="ButtonConnect"  Content="Connect to PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="0" Grid.Row="1" Click="Connect_Click"/>
+            <Button Name="ButtonConnect"  Content="Connect to PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="0" Grid.Row="1" Click="Connect_ClickAsync"/>
             <TextBlock Name="TextBlockConnection" Text="Disconnected" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="40,20" Grid.Column="0" Grid.Row="1"/>
-            <ComboBox Name="ComboBoxServer" Margin="0, 10, 0, 0" SelectedIndex="0" VerticalAlignment="Top" Height="40" Grid.Column="1" Grid.Row="1" SelectionChanged="ComboBoxGameVolume_SelectionChanged">
+            <ComboBox Name="ComboBoxServer" Margin="0, 10, 0, 0" SelectedIndex="0" VerticalAlignment="Top" Height="40" Grid.Column="1" Grid.Row="1" SelectionChanged="ComboBoxGameVolume_SelectionChangedAsync">
                 <ComboBoxItem Name="udpbdServer" Content="UDPBD-Server"/>
                 <ComboBoxItem Name="udpbdVexfat" Content="UDPBD-VexFAT (read-only)"/>
             </ComboBox>
@@ -57,7 +57,7 @@
             <TextBlock Name="TextBlockGameList" Text="" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="40,20" Visibility="Hidden" Grid.Column="1" Grid.Row="1"/>
             <CheckBox Name="CheckBoxArtworkDownload" Content="Download Artwork" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="4,-6,0,0" Margin="30, 5, 0, 0" Grid.Column="2" Grid.Row="1"/>
             <CheckBox Name="CheckBoxBinConvert" Content="Convert CD Bin to ISO" IsChecked="True" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="4,-6,0,0" Margin="30, 30, 0, 0" Grid.Column="2" Grid.Row="1"/>
-            <Button Content="Sync with PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="2" Grid.Row="1" Click="Sync_Click"/>
+            <Button Content="Sync with PS2" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="2" Grid.Row="1" Click="Sync_ClickAsync"/>
             <Button Content="View Help" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="0" Grid.Row="2" Click="Help_Click"/>
             <Button Name="ServerButton" Content="Start Server" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="1" Grid.Row="2" Click="StartServer_Click"/>
             <Button Content="About" Style="{DynamicResource RoundButton}" Background="WhiteSmoke" Margin="40,60" Grid.Column="2" Grid.Row="2" Click="About_Click"/>
