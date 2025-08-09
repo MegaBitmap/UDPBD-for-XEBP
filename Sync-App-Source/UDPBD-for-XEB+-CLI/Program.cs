@@ -468,11 +468,11 @@ namespace UDPBD_for_XEB__CLI
 
         static bool KillServer()
         {
-            string[] serverNames = ["udpbd-server", "udpbd-vexfat"];
+            string[] serverNames = ["UDPBDTray", "udpbd-server", "udpbd-vexfat"];
             foreach (var server in serverNames)
             {
                 Process[] processes = Process.GetProcessesByName(server);
-                if (!(processes.Length == 0))
+                if (processes.Length != 0)
                 {
                     Console.Write("The server is currently running, do you want to stop the server and sync? (y/n): ");
                     char response = Console.ReadKey().KeyChar;
@@ -480,6 +480,7 @@ namespace UDPBD_for_XEB__CLI
                     if (response == 'y' || response == 'Y')
                     {
                         foreach (var item in processes) item.Kill();
+                        Thread.Sleep(200);
                         return true;
                     }
                     else return false;
