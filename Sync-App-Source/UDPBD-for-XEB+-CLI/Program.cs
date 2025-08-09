@@ -468,7 +468,7 @@ namespace UDPBD_for_XEB__CLI
 
         static bool KillServer()
         {
-            string[] serverNames = ["udpbd-server", "udpbd-vexfat"];
+            string[] serverNames = ["UDPBDTray", "udpbd-server", "udpbd-vexfat"];
             foreach (var server in serverNames)
             {
                 Process[] processes = Process.GetProcessesByName(server);
