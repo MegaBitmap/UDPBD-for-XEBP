@@ -84,6 +84,9 @@ namespace UDPBD_for_XEB__CLI
             CreateGameList(gamePath, gameList);
 
             FtpClient client = new(ps2ip.ToString());
+            client.Config.LogToConsole = false; // Set to true when debugging FTP commands
+            client.Config.DataConnectionType = FtpDataConnectionType.PASVEX;
+            client.Config.CheckCapabilities = false;
 
             if (!FTP.TestConnection(client, ps2ip))
             {
