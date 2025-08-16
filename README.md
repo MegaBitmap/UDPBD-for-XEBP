@@ -156,16 +156,27 @@ Open MISC -> PS2Net
 18. Click `Start Server` and make sure to allow.  
 ![udpbd-vexfat-firewall](readme-images/udpbd-vexfat-firewall.jpg)  
 If you miss clicked, either move the UDPBD-for-XEB+ folder inside a new folder or manually delete the inbound rules for udpbd-server/vexfat in `WF.msc` (Windows Defender Firewall with Advanced Security).  
-UDPBDTray will start the server and add a notification tray icon.
-The server needs to be open and running for the entire play session. (Disable sleep on the PC.)
+UDPBDTray will start the server and add a notification tray icon.  
+The server needs to be open and running for the entire play session. (Disable sleep on the PC.)  
 
-19. The PC setup is now complete, back on the PS2 run XEB+.  
+19. For automatic network initialization follow these Steps:  
+ - The files in PS2BBL-Network-Init are for automatic network initialization when using UDPBD for XEB+.  
+ This is needed on server cold boots as an uninitialized network will crash the server.  
+ This is only compatible with PS2BBL version 1.2.0 (Oct 5 2023) or newer.  
+ - To install copy these files onto a memory card with PS2BBL installed.  
+ Depending on which version the config can be found in mc?:/SYS-CONF/ or mc?:/PS2BBL/  
+ - If the SYS-CONF folder exists paste these files into the folder:  
+ PS2BBL.INI, netman.irx, ps2dev9.irx, and smap.irx  
+ - If the PS2BBL folder exists paste these files into the folder:  
+ CONFIG.INI, netman.irx, ps2dev9.irx, and smap.irx  
+
+20. The PC setup is now complete, back on the PS2 run XEB+.  
 ![launchelf-xeb](readme-images/launchelf-xeb.jpg)
-It's recommended to set FreeMCBoot or PS2BBL to autorun the `.ELF` file.
-20. Play!  
+The config from step 19 sets PS2BBL to autorun the `.ELF` file.  
+21. Play!  
 ![xeb-game-list](readme-images/xeb-game-list.jpg)  
 
-Repeat steps 13-20 of the setup process after adding or renaming/removing games.
+Repeat steps 13-21 of the setup process after adding, renaming, or removing games.  
 
 If you want the server to start automatically when the PC is turned on follow these steps:
 
@@ -250,13 +261,24 @@ sudo ./udpbd-server /dev/nvme0n1p6
 ```
 The server needs to be open and running for the entire play session.
 
-19. Launch XEB+ then Play!
+19. For automatic network initialization follow these Steps:  
+ - The files in PS2BBL-Network-Init are for automatic network initialization when using UDPBD for XEB+.  
+ This is needed on server cold boots as an uninitialized network will crash the server.  
+ This is only compatible with PS2BBL version 1.2.0 (Oct 5 2023) or newer.  
+ - To install copy these files onto a memory card with PS2BBL installed.  
+ Depending on which version the config can be found in mc?:/SYS-CONF/ or mc?:/PS2BBL/  
+ - If the SYS-CONF folder exists paste these files into the folder:  
+ PS2BBL.INI, netman.irx, ps2dev9.irx, and smap.irx  
+ - If the PS2BBL folder exists paste these files into the folder:  
+ CONFIG.INI, netman.irx, ps2dev9.irx, and smap.irx  
 
-To add or rename/remove games, stop the server then mount the exFAT storage device to `/mnt/ps2`  
+20. Launch XEB+ then Play!
+
+To add, rename, or remove games stop the server then mount the exFAT storage device to `/mnt/ps2`  
 ```
 sudo mount /dev/nvme0n1p6 /mnt/ps2/ -o uid=$USER
 ```
-Then add your games and repeat steps 15-19 of the Linux setup process.
+Make the changes and repeat steps 15-20 of the Linux setup process.
 
 ### HDD (exFAT format)
 
