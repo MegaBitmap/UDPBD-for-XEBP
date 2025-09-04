@@ -345,13 +345,24 @@ namespace UDPBD_for_XEB__GUI
             }
             try
             {
-                Ping pingSender = new();
-                PingReply reply = await pingSender.SendPingAsync(address, 6000);
-                if (!(reply.Status == IPStatus.Success))
+                bool pingSuccess = false;
+                for (int i = 0; i < 2; i++)
+                {
+                    Ping pingSender = new();
+                    PingReply reply = await pingSender.SendPingAsync(address, 3000);
+                    if (reply.Status == IPStatus.Success)
+                    {
+                        pingSuccess = true;
+                    }
+                }
+                if (!pingSuccess)
                 {
                     TextBlockConnection.Text = "Disconnected";
                     ButtonConnect.IsEnabled = true;
-                    MessageBox.Show($"Failed to receive a ping reply:\n\nPlease verify that your network settings are configured properly and all cables are connected. Try adjusting the IP address settings in launchELF.\n\n{reply.Status}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Failed to receive a ping reply:\n\n" +
+                        "Please verify that your network settings are configured properly and all cables are connected. " +
+                        "Try adjusting the IP address settings in launchELF.\n\n",
+                        "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
             }
@@ -359,7 +370,10 @@ namespace UDPBD_for_XEB__GUI
             {
                 TextBlockConnection.Text = "Disconnected";
                 ButtonConnect.IsEnabled = true;
-                MessageBox.Show($"The network location cannot be reached:\n\nPlease verify that your network settings are configured properly and all cables are connected. Try manually assigning an IPv4 address and subnet mask to this PC.\n\n{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("The network location cannot be reached:\n\n" +
+                    "Please verify that your network settings are configured properly and all cables are connected. " +
+                    "Try manually assigning an IPv4 address and subnet mask to this PC.\n\n" +
+                    $"{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             FtpListItem[] ftpList;
@@ -374,7 +388,8 @@ namespace UDPBD_for_XEB__GUI
             {
                 TextBlockConnection.Text = "Disconnected";
                 ButtonConnect.IsEnabled = true;
-                MessageBox.Show($"Failed to connect to the PS2's FTP server.\n\n{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Failed to connect to the PS2's FTP server.\n\n" +
+                    $"{ex.Message}", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             foreach (var item in ftpList)
@@ -390,7 +405,8 @@ namespace UDPBD_for_XEB__GUI
             }
             TextBlockConnection.Text = "Disconnected";
             ButtonConnect.IsEnabled = true;
-            MessageBox.Show($"Failed to detect USB storage on the PS2's FTP server.\nPlease make sure the USB drive is plugged in.", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("Failed to connect to the PS2's FTP server.\n\n" +
+                "No exceptions were raised.", "Connection Failed", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
 
