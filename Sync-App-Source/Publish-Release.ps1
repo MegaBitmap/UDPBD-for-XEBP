@@ -25,8 +25,8 @@ if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
     & "C:\msys64\usr\bin\bash" "-lc" "pacman --noconfirm -Syuu"
 
     & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-vexfat-MSYS2.sh"
-	# TODO FIX: The udpbd-server compiled by this script doesn't work with virtual memory cards.
-    # & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-server-MSYS2.sh"
+
+    & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-server-MSYS2.sh"
 }
 
 if (Test-Path -Path ".\udpbd-vexfat\target\x86_64-pc-windows-gnu\release\udpbd-vexfat.exe" -PathType Leaf)
