@@ -103,8 +103,8 @@ Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders 
 
 **If you plan to use virtual memory cards please read this:**  
 You must use udpbd-server when using VMCs, udpbd-vexfat does NOT support VMCs.  
-AFAIK udpbd-server only works with exFAT partitions made with Linux/exfatprogs/GParted.  
-A preformatted virtual exFAT drive can be mounted if no other exFAT partition is found.  
+udpbd-server only works with exFAT partitions.  
+A preformatted virtual exFAT drive can be mounted if no exFAT partition is found.  
 After opening neutrino Launcher in XEBP with a game in view, press the ⏹ square button to open the context menu.  
 In the context menu you can enable or disable VMCs globally or individually per game.  
 For transferring, importing, or exporting saves from VMC files you can use [PS2-VMC-GUI](https://github.com/MegaBitmap/PS2-VMC-GUI).  
@@ -161,7 +161,7 @@ The server needs to be open and running for the entire play session. (Disable sl
 
 19. For automatic network initialization follow these Steps:  
  - The files in PS2BBL-Network-Init are for automatic network initialization when using UDPBD for XEB+.  
- This is needed on server cold boots as an uninitialized network will crash the server.  
+ This is needed on server cold boots to prevent the first game launch from failing.  
  This is only compatible with PS2BBL version 1.2.0 (Oct 5 2023) or newer.  
  - To install copy these files onto a memory card with PS2BBL installed.  
  Depending on which version the config can be found in mc?:/SYS-CONF/ or mc?:/PS2BBL/  
@@ -650,7 +650,7 @@ If you wish to make any modifications to the windows presentation foundation (WP
 
 Big Thanks to these Devs!  
 
-Alex Parrado & El_isra & Rick Gaiser - udpbd-server - 2023-3-8  
+Alex Parrado & El_isra & Rick Gaiser - udpbd-server - 2025-9-12  
 https://github.com/israpps/udpbd-server
 
 awaken1ng - udpbd-vexfat - 2025-4-14  
