@@ -132,6 +132,7 @@ namespace UDPBDTray
                         notifyIcon.ShowBalloonTip(10000, "Server Down", "The Server stopped unexpectedly.\r\n" +
                             "If that was intentional please close UDPBDTray as well.", ToolTipIcon.Warning);
                     }
+                    isActive = false;
                     firstStart = false;
                     await StartServerAsync(wait);
                 }
@@ -305,7 +306,7 @@ namespace UDPBDTray
             if (serverName.Contains("vexfat"))
             {
                 process.StartInfo.Arguments = $"/k {serverName} \"{gamePath}\"";
-                if (showConsole != true)
+                if (!showConsole)
                 {
                     process.StartInfo.FileName = serverName;
                     process.StartInfo.Arguments = $"\"{gamePath}\"";
@@ -315,11 +316,19 @@ namespace UDPBDTray
             else
             {
                 process.StartInfo.Arguments = $"/k \"{Path.GetFullPath(serverName)}\" \\\\.\\{gamePath}";
-                if (showConsole != true)
+                if (!showConsole)
                 {
-                    process.StartInfo.FileName = serverName;
-                    process.StartInfo.Arguments = $"\\\\.\\{gamePath}";
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    if (needAdmin)
+                    {
+                        waitTime = 10000;
+                        process.StartInfo.Arguments = $"/c \"{Path.GetFullPath(serverName)}\" \\\\.\\{gamePath}";
+                    }
+                    else
+                    {
+                        process.StartInfo.FileName = serverName;
+                        process.StartInfo.Arguments = $"\\\\.\\{gamePath}";
+                    }
                 }
                 if (needAdmin)
                 {
