@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-	<AssemblyVersion>2.9.4.2</AssemblyVersion>
+	<AssemblyVersion>2.9.7.1</AssemblyVersion>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentFTP" Version="53.0.1" />
+    <PackageReference Include="FluentFTP" Version="53.0.2" />
   </ItemGroup>
 
 </Project>
