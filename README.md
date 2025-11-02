@@ -1,12 +1,13 @@
 # XEB+ neutrino Launcher Plugin
 
 This is a plugin for the Xtreme Elite Boot Plus dashboard for the PlayStation 2.  
-It allows XEB+ to load PlayStation 2 games from HDD, MX4SIO, USB, and UDPBD via [neutrino](https://github.com/rickgaiser/neutrino).
+It allows XEB+ to load PlayStation 2 games from HDD, MX4SIO, USB, and UDPBD via [neutrino](https://github.com/rickgaiser/neutrino).  
 
 This fork includes a sync app `UDPBD-for-XEB+-GUI.exe` for windows or `UDPBD-for-XEB+-CLI.dll` for Linux.  
-It automates the setup process when using UDPBD. 
+It automates the setup process when using UDPBD.  
 
-**Please Note** that version 2 of the Sync App **Requires** version 2 of the XEB+ Plug-in and vice versa.
+**Please Note** When updating versions it is **Required** to update BOTH the XEBPLUS plugin, and the sync app.  
+It is NOT recommended to mismatch different versions of the XEBPLUS plugin and the sync app.  
 
 ## Features
 
@@ -79,6 +80,9 @@ PS2BBL supports this by default. ExFAT support can be added to FreeMcBoot with [
 
 ## Setup
 
+**Please Note** When updating versions it is **Required** to update BOTH the XEBPLUS plugin, and the sync app.  
+It is NOT recommended to mismatch different versions of the XEBPLUS plugin and the sync app.  
+
 *Note: This setup process is for version 2.9 of this plugin.  
 If you are updating from version 2.6 or earlier, you may need to remove the `XEBPLUS/CFG/neutrinoLuancher` folder on your USB drive.  
 If you are updating from version 1.x, you will need to remove the old version of neutrino Launcher from your XEB+ install before continuing.  
@@ -88,9 +92,9 @@ This includes all neutrino Launcher files in the `APPS`, `PLG`, and `CFG` folder
 [Archive.org Mirror (recommended)](https://web.archive.org/web/*/hwc.nat.cu/ps2-vault/hwc-projects/xebplus)  
 or  
 [Howling Wolf & Chelsea's PS2-Vault](http://www.hwc.nat.cu/ps2-vault/hwc-projects/xebplus/)  
-2. Extract the `XEBPLUS` folder to the root of your MBR FAT32 or MBR exFAT USB drive, and ensure that you can load into the XEB+ dashboard on your PlayStation 2.  
-Use [7-zip](https://7-zip.org/) to extract the `XEBPLUS` folder to the root of your USB drive. (Windows does not natively support `.rar` with passwords.)  
+2. Use [7-zip](https://7-zip.org/) to extract the RAR file. (Windows does not natively support `.rar` with passwords.)  
 The password is at the bottom of `xebplus_xmas_showcase.rar\Distribution License.txt`.  
+Extract the RAR then copy the `XEBPLUS` folder to the root of your MBR FAT32 or MBR exFAT USB drive, and ensure that you can load into the XEB+ dashboard on your PlayStation 2.  
 Note that if you are using an MBR exFAT formatted USB drive, you will need to use PS2BBL and [this version](https://github.com/israpps/wLaunchELF_ISR) of wLaunchELF.  
 3. (optional) Configure your PS2 exploit of choice to autorun XEB+ on startup.  
 4. Download the latest version of this plugin from the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases).  
@@ -263,7 +267,7 @@ The server needs to be open and running for the entire play session.
 
 19. For automatic network initialization follow these Steps:  
  - The files in PS2BBL-Network-Init are for automatic network initialization when using UDPBD for XEB+.  
- This is needed on server cold boots as an uninitialized network will crash the server.  
+ This is needed on server cold boots as an uninitialized network will fail on the first game launch.  
  This is only compatible with PS2BBL version 1.2.0 (Oct 5 2023) or newer.  
  - To install copy these files onto a memory card with PS2BBL installed.  
  Depending on which version the config can be found in mc?:/SYS-CONF/ or mc?:/PS2BBL/  
@@ -665,7 +669,7 @@ https://github.com/ps2dev/ps2client
 Rick Gaiser - neutrino - v1.7.0-30-g607309e  
 https://github.com/rickgaiser/neutrino
 
-sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.9.3  
+sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.9.7  
 https://github.com/sync-on-luma/xebplus-neutrino-loader-plugin
 
 Wes Castro & El_isra & sync-on-luma - CheatDevice - 2025-3-16  
