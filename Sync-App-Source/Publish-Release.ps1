@@ -50,6 +50,8 @@ New-Item -ItemType Directory -Path "$ReleaseFolder\XEBPLUS"
 Copy-Item -Path "..\XEBPLUS\APPS" -Destination "$ReleaseFolder\XEBPLUS" -Recurse
 Copy-Item -Path "..\XEBPLUS\PLG" -Destination "$ReleaseFolder\XEBPLUS" -Recurse
 
+Add-Content -Path "$ReleaseFolder\XEBPLUS\APPS\neutrinoLauncher\version.txt" -Value "neutrino`n`nv$ReleaseVersion`nUDPBD-for-XEB+"
+
 Compress-Archive -Path "$ReleaseFolder\*" -DestinationPath ".\UDPBD-for-XEBP-v$ReleaseVersion.zip" -Force
 
 Remove-Item -Path ".\UDPBD-for-XEB+-CLI\bin\Release" -Recurse
