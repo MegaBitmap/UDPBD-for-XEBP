@@ -2,28 +2,25 @@
 {
     internal class CDBin
     {
+        static readonly byte[] CDROMHeaderReference = [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00];
+        const int sector_raw_size = 2352;
+        const int sector_target_size = 2048;
+
         public static string ScanBin(FileStream fileIn)
         {
-            byte[] CDROMHeaderReference = [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00];
-            int sector_raw_size = 2352;
-
             int numSectors = (int)(fileIn.Length / sector_raw_size);
             for (int sectorIndex = 0; sectorIndex < numSectors; sectorIndex++)
             {
                 fileIn.Position = sectorIndex * sector_raw_size;
                 byte[] header = new byte[16];
-                fileIn.Read(header, 0, header.Length);
-                if (header[0..12].SequenceEqual(CDROMHeaderReference)) return "data";
+                fileIn.ReadExactly(header);
+                if (header.AsSpan()[0..12].SequenceEqual(CDROMHeaderReference)) return "data";
             }
             return "";
         }
 
         public static void GenerateISO(FileStream fileIn, string outputISO)
         {
-            byte[] CDROMHeaderReference = [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00];
-            int sector_raw_size = 2352;
-            int sector_target_size = 2048;
-
             using FileStream fileOutISO = new(outputISO, FileMode.Create, FileAccess.Write);
 
             int numSectors = (int)(fileIn.Length / sector_raw_size);
@@ -32,8 +29,8 @@
             {
                 fileIn.Position = sectorIndex * sector_raw_size;
                 byte[] header = new byte[16];
-                fileIn.Read(header, 0, header.Length);
-                if (header[0..12].SequenceEqual(CDROMHeaderReference))
+                fileIn.ReadExactly(header);
+                if (header.AsSpan()[0..12].SequenceEqual(CDROMHeaderReference))
                 {
                     int mode = header[15];
                     if (mode == 1) sector_offset = 16;
@@ -42,7 +39,7 @@
 
                     fileIn.Position = sectorIndex * sector_raw_size + sector_offset;
                     byte[] dataOut = new byte[sector_target_size];
-                    fileIn.Read(dataOut, 0, dataOut.Length);
+                    fileIn.ReadExactly(dataOut);
                     fileOutISO.Write(dataOut, 0, dataOut.Length);
                 }
             }

@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using FluentFTP;
+using Microsoft.Win32;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -6,8 +8,6 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
-using FluentFTP;
-using Microsoft.Win32;
 
 namespace UDPBD_for_XEB__GUI
 {

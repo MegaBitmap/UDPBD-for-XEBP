@@ -205,9 +205,9 @@ git clone https://gitlab.com/ps2max/udpbd-server.git
 cd udpbd-server
 make
 ```
-8. Install .NET 8, GParted, and exfatprogs
+8. Install .NET 10, GParted, and exfatprogs
 ```
-sudo apt install dotnet-runtime-8.0 gparted exfatprogs
+sudo apt install dotnet-runtime-10.0 gparted exfatprogs
 ```
 9. Create a new exFAT partition in GParted and note the partition number.  
 For this guide the exFAT partition is `/dev/nvme0n1p6`, it will most likely be slightly different on your system.  
@@ -648,7 +648,7 @@ If you wish to make any modifications to the windows presentation foundation (WP
 2. Clone this repository.
 3. Run `Sync-App-Source\Debug-Build.ps1` with powershell.
 4. Open the `Sync-App-Source\UDPBD-for-XEB+-GUI.sln` or `Sync-App-Source\UDPBD-for-XEB+-CLI.sln` file with Visual Studio.
-5. Now you can test your changes by clicking the green arrow in VS or open `Sync-App-Source\UDPBD-for-XEB+-GUI\bin\Debug\net8.0-windows\UDPBD-for-XEB+-GUI.exe`
+5. Now you can test your changes by clicking the green arrow in VS or open `Sync-App-Source\UDPBD-for-XEB+-GUI\bin\Debug\net10.0-windows7.0\UDPBD-for-XEB+-GUI.exe`
 
 ## Credits
 
