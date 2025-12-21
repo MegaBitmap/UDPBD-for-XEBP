@@ -1,11 +1,11 @@
-﻿using System.Diagnostics;
+﻿using DiscUtils.Iso9660;
+using FluentFTP;
+using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using DiscUtils.Iso9660;
-using FluentFTP;
 
 namespace UDPBD_for_XEB__CLI
 {
@@ -78,6 +78,7 @@ namespace UDPBD_for_XEB__CLI
             if (gameList.Count < 1)
             {
                 Console.WriteLine($"No games found in {gamePath}/CD or {gamePath}/DVD");
+                Console.WriteLine("Try adding -bin2iso to the command to convert BIN format games to iso.");
                 PauseExit(5);
             }
             Console.WriteLine($"{gameList.Count} games loaded");

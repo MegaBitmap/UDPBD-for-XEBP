@@ -1,16 +1,15 @@
 
+$CLIDir = ".\UDPBD-for-XEB+-CLI\bin\Release\net10.0\publish"
+$GUIDir = ".\UDPBD-for-XEB+-GUI\bin\Release\net10.0-windows7.0\publish"
+$TrayDir = ".\UDPBDTray\bin\Release\net10.0-windows7.0\publish"
+
 $ReleaseVersion = (Get-Content -Path ".\UDPBD-for-XEB+-GUI\UDPBD-for-XEB+-GUI.csproj" | Select-String -Pattern AssemblyVersion).ToString().Trim() -replace "<[^>]+>"
-$ReleaseFolder = ".\UDPBD-for-XEB+-GUI\bin\Release\net8.0-windows\publish\release-$ReleaseVersion"
+$ReleaseFolder = "$GUIDir\release-$ReleaseVersion"
+$GUIDestinationFolder = "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 
 dotnet publish ".\UDPBD-for-XEB+-CLI.sln"
 dotnet publish ".\UDPBD-for-XEB+-GUI.sln"
 dotnet publish ".\UDPBDTray.sln"
-
-New-Item -ItemType Directory -Path "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
-
-Get-ChildItem -File -Path ".\UDPBD-for-XEB+-CLI\bin\Release\net8.0\publish\*" | Move-Item -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
-Get-ChildItem -File -Path ".\UDPBD-for-XEB+-GUI\bin\Release\net8.0-windows\publish\*" | Move-Item -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
-Get-ChildItem -File -Path ".\UDPBDTray\bin\Release\net8.0-windows\publish\*" | Move-Item -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
 
 <#
 if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
@@ -39,9 +38,15 @@ if (Test-Path -Path ".\udpbd-server\udpbd-server.exe" -PathType Leaf)
 }
 #>
 
-Copy-Item -Path ".\Needed-for-Release\*" -Exclude *.txt -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
+New-Item -ItemType Directory -Path $GUIDestinationFolder
+
+Get-ChildItem -File -Path "$CLIDir\*" | Move-Item -Destination $GUIDestinationFolder -Force
+Get-ChildItem -File -Path "$GUIDir\*" | Move-Item -Destination $GUIDestinationFolder -Force
+Get-ChildItem -File -Path "$TrayDir\*" | Move-Item -Destination $GUIDestinationFolder -Force
+
+Copy-Item -Path ".\Needed-for-Release\*" -Exclude *.txt -Destination $GUIDestinationFolder
 Copy-Item -Path ".\Needed-for-Release\*" -Include *.txt -Destination $ReleaseFolder
-Copy-Item -Path "..\List Builder\vmc_groups.list" -Destination "$ReleaseFolder\UDPBD-for-XEB+ Sync App"
+Copy-Item -Path "..\List Builder\vmc_groups.list" -Destination $GUIDestinationFolder
 Get-Content "..\README.md" -Encoding utf8 | Out-File "$ReleaseFolder\README.txt" -Encoding utf8
 Copy-Item -Path "..\List Builder" -Destination $ReleaseFolder -Recurse
 Copy-Item -Path "..\PS2BBL-Network-Init" -Destination $ReleaseFolder -Recurse
@@ -53,8 +58,4 @@ Copy-Item -Path "..\XEBPLUS\PLG" -Destination "$ReleaseFolder\XEBPLUS" -Recurse
 Add-Content -Path "$ReleaseFolder\XEBPLUS\APPS\neutrinoLauncher\version.txt" -Value "neutrino`n`nv$ReleaseVersion`nUDPBD-for-XEB+"
 
 Compress-Archive -Path "$ReleaseFolder\*" -DestinationPath ".\UDPBD-for-XEBP-v$ReleaseVersion.zip" -Force
-
-Remove-Item -Path ".\UDPBD-for-XEB+-CLI\bin\Release" -Recurse
-Remove-Item -Path ".\UDPBD-for-XEB+-GUI\bin\Release" -Recurse
-Remove-Item -Path ".\UDPBDTray\bin\Release" -Recurse
 
