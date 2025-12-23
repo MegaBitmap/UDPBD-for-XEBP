@@ -7,33 +7,32 @@ dotnet build ".\UDPBD-for-XEB+-CLI.sln"
 dotnet build ".\UDPBD-for-XEB+-GUI.sln"
 dotnet build ".\UDPBDTray.sln"
 
-<#
-if (Test-Path -Path "C:\msys64\usr\bin\bash.exe" -PathType Leaf)
-{
-    # Preserve the current working directory
-    $env:CHERE_INVOKING = "yes"
-    # Start a 64 bit Mingw environment
-    $env:MSYSTEM = "UCRT64"
-    # Run for the first time
-    & "C:\msys64\usr\bin\bash" "-lc" " "
-    # Update MSYS2 Core (in case any core packages are outdated)
-    & "C:\msys64\usr\bin\bash" "-lc" "pacman --noconfirm -Syuu"
+# Preserve the current working directory
+$env:CHERE_INVOKING = "yes"
+# Start a 64 bit Mingw environment
+$env:MSYSTEM = "UCRT64"
+# Run for the first time
+& "C:\msys64\usr\bin\bash" "-lc" " "
+# Update MSYS2 Core (in case any core packages are outdated)
+& "C:\msys64\usr\bin\bash" "-lc" "pacman --noconfirm -Syuu"
+& "C:\msys64\usr\bin\bash" "-lc" "pacman --noconfirm -Syuu"
+& "C:\msys64\usr\bin\bash" "-lc" "pacman --noconfirm --needed -S git make mingw-w64-ucrt-x86_64-gcc"
+& "C:\msys64\usr\bin\bash" "-lc" "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-host x86_64-pc-windows-gnu --no-modify-path"
+# Build udpbd_vexfat.dll
+& "C:\msys64\usr\bin\bash" "-lc" "git clone --recurse-submodules -b windows_dll https://github.com/MegaBitmap/udpbd-vexfat.git"
+& "C:\msys64\usr\bin\bash" "-lc" "export PATH=`"/c/Users/`$USER/.cargo/bin:`$PATH`"
+cd udpbd-vexfat/vexfatbd/
+cargo update
+cd ..
+cargo update
+cargo build --release --target x86_64-pc-windows-gnu"
+# Build udpbd_server.dll
+& "C:\msys64\usr\bin\bash" "-lc" "git clone -b windows_dll https://github.com/MegaBitmap/udpbd-server.git"
+& "C:\msys64\usr\bin\bash" "-lc" "cd udpbd-server/
+make"
 
-    & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-vexfat-MSYS2.sh"
-
-    & "C:\msys64\usr\bin\bash.exe" "-lc" "bash ./Build-udpbd-server-MSYS2.sh"
-}
-
-if (Test-Path -Path ".\udpbd-vexfat\target\x86_64-pc-windows-gnu\release\udpbd-vexfat.exe" -PathType Leaf)
-{
-    Copy-Item -Path ".\udpbd-vexfat\target\x86_64-pc-windows-gnu\release\udpbd-vexfat.exe" -Destination ".\Needed-for-Release\udpbd-vexfat.exe"
-}
-if (Test-Path -Path ".\udpbd-server\udpbd-server.exe" -PathType Leaf)
-{
-    Copy-Item -Path ".\udpbd-server\udpbd-server.exe" -Destination ".\Needed-for-Release\udpbd-server.exe"
-}
-#>
-
+Copy-Item -Path .\udpbd-vexfat\target\x86_64-pc-windows-gnu\release\udpbd_vexfat.dll -Destination $GUIDir -Force
+Copy-Item -Path .\udpbd-server\udpbd_server.dll -Destination $GUIDir -Force
 Copy-Item -Path "..\List Builder\vmc_groups.list" -Destination $CLIDir -Force
 
 Copy-Item -Path ".\Needed-for-Release\*" -Exclude *.txt -Destination $CLIDir -Force

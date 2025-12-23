@@ -1,49 +1,59 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Text;
 
 namespace UDPBDTray
 {
-    internal class TrayNotifyIcon : ApplicationContext
+    internal partial class TrayNotifyIcon : ApplicationContext
     {
         private readonly NotifyIcon notifyIcon;
-        private readonly ContextMenuStrip contextMenu;
-        private readonly ToolStripMenuItem menuItemOpenSync;
-        private readonly ToolStripMenuItem menuItemRestart;
-        private readonly ToolStripMenuItem menuItemDebug;
-        private readonly ToolStripMenuItem menuItemKill;
+        private readonly ContextMenuStrip contextMenu = new();
+        private readonly ToolStripMenuItem menuItemOpenSync = new();
+        public static ToolStripMenuItem menuItemConsoleToggle = new();
+        private readonly ToolStripMenuItem menuItemKill = new();
         private readonly IContainer components;
-        private readonly System.Windows.Forms.Timer timerServerCheck;
 
-        private bool showConsole = false;
-        private string serverName = "udpbd-server";
-        private string gamePath = "FAILED TO SET GAMEPATH";
-        private bool needAdmin = true;
-        private bool isActive = false;
-        private bool firstStart = true;
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool AllocConsole();
+        [LibraryImport("kernel32.dll")]
+        private static partial nint GetConsoleWindow();
+        [LibraryImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool ShowWindow(nint hWnd, int nCmdShow);
+        [LibraryImport("udpbd_server.dll", StringMarshalling = StringMarshalling.Utf8, SetLastError = true)]
+        private static partial int Run_udpbd_server(string path);
+        [LibraryImport("udpbd_vexfat.dll", StringMarshalling = StringMarshalling.Utf8, SetLastError = true)]
+        private static partial int run_vexfat_server(string path);
+
+        public static bool showConsole = false;
+        public static string ServerName { get; private set; } = "udpbd-server";
+        private string gamePath = "FAILED TO SET GAMEPATH" ;
+        private static bool isActive = false;
         private readonly string syncApp = "UDPBD-for-XEB+-GUI";
+        private readonly static string edition = "UDPBD-for-XEB+";
+        private readonly int listenPort = 0x4712;
+        public static StringBuilder conHistory = new();
+        public CustomConsole? customConsole;
+        public static bool flagAskShutdown = true;
 
         public TrayNotifyIcon()
         {
             components = new Container();
-            contextMenu = new();
-            menuItemOpenSync = new();
-            menuItemRestart = new();
-            menuItemDebug = new();
-            menuItemKill = new();
             notifyIcon = new(components);
-            timerServerCheck = new();
-
             CheckAlreadyRunning();
-            SilentKillServer();
             CheckFiles();
             LoadSettings("UDPBDTraySettings.txt");
+            GetConsole();
             InitNotifyIcon();
-            isActive = true;
-            InitKeepServerAlive();
         }
 
-        private void CheckAlreadyRunning()
+        private static void CheckAlreadyRunning()
         {
             string pName = Process.GetCurrentProcess().ProcessName;
             int pCount = Process.GetProcessesByName(pName).Length;
@@ -58,90 +68,103 @@ namespace UDPBDTray
         private void InitNotifyIcon()
         {
             contextMenu.Items.Add(menuItemOpenSync);
-            contextMenu.Items.Add(menuItemRestart);
-            contextMenu.Items.Add(menuItemDebug);
+            contextMenu.Items.Add(menuItemConsoleToggle);
             contextMenu.Items.Add(menuItemKill);
 
             menuItemOpenSync.Text = "Open Sync App/Change Server Settings";
             menuItemOpenSync.Click += new EventHandler(MenuItemOpenSync_Click);
-            menuItemRestart.Text = "Restart and Show Server Console";
-            menuItemRestart.Click += new EventHandler(MenuItemRestart_ClickAsync);
-            menuItemDebug.Text = "Show PS2Client Debug Console";
-            menuItemDebug.Click += new EventHandler(MenuItemDebug_Click);
+            menuItemConsoleToggle.Text = "Show Server Console";
+            menuItemConsoleToggle.Click += new EventHandler(MenuItemConsoleToggle_Click);
+            menuItemConsoleToggle.CheckOnClick = true;
+
+            // use menuItem to create events
+            menuItemKill.TextChanged += new EventHandler(StartServerAsync);
+            menuItemKill.TextChanged += new EventHandler(PS2ListenAsync);
+            menuItemKill.TextChanged += new EventHandler(ServerStartBaloonAsync);
+
+            // update menuItemText to start running async events
             menuItemKill.Text = "Stop Server and Exit";
             menuItemKill.Click += new EventHandler(MenuItemKill_Click);
 
             notifyIcon.Icon = Properties.Resources.Icon;
             notifyIcon.ContextMenuStrip = contextMenu;
-            notifyIcon.Text = $"{serverName.ToUpper()} is Running";
+            notifyIcon.Text = $"{ServerName} is Running";
             notifyIcon.Visible = true;
             notifyIcon.MouseUp += new MouseEventHandler(NotifyIcon_Click);
         }
 
-        private void MenuItemOpenSync_Click(object? sender, EventArgs e)
+        private async void PS2ListenAsync(object? sender, EventArgs e)
         {
-            if (!File.Exists($"{syncApp}.exe"))
+            await Task.Delay(1000);
+            if (!isActive) return;
+            IPEndPoint ipEndPoint = new(IPAddress.Any, listenPort);
+            using Socket ps2sock = new(ipEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+            try
             {
-                MessageBox.Show($"Unable to locate {syncApp}", "Sync app missing", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                ps2sock.Bind(ipEndPoint);
+                Console.WriteLine($"Listening to PS2 console output on port {listenPort} (0x{listenPort:X})");
+                while (true)
+                {
+                    byte[] buffer = new byte[512];
+                    int numBytes = await ps2sock.ReceiveAsync(buffer);
+                    Console.Write(Encoding.UTF8.GetString(buffer, 0, numBytes));
+                }
             }
-            else if (Process.GetProcessesByName(syncApp).Length != 0)
+            catch (Exception ex)
             {
-                MessageBox.Show("The sync app is already running.", "Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
+                MessageBox.Show("An error has occured in PS2ListenAsync.\n\n" +
+                    $"{ex.Message}\n\n{ex}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void StartServerAsync(object? sender, EventArgs e)
+        {
+            GetInterferingProcess();
+            Console.WriteLine("Starting Server . . .");
+            Func<int> serverFunc;
+            if (ServerName.Contains("vexfat"))
+            {
+                serverFunc = new Func<int>(() => run_vexfat_server(gamePath));
             }
             else
             {
-                SilentKillServer();
-                Process syncProcess = new();
-                syncProcess.StartInfo.FileName = syncApp;
-                syncProcess.Start();
-                Environment.Exit(0);
+                serverFunc = new Func<int>(() => Run_udpbd_server($"\\\\.\\{gamePath}"));
             }
-        }
-
-        private void InitKeepServerAlive()
-        {
-            timerServerCheck.Tick += new EventHandler(KeepServerAliveAsync);
-            timerServerCheck.Interval = 100;
-            timerServerCheck.Start();
-        }
-
-        private async void KeepServerAliveAsync(object? sender, EventArgs e)
-        {
-            timerServerCheck.Interval = 30000;
-            Process[] UCLIProcess = Process.GetProcessesByName("UDPBD-for-XEB+-CLI");
-            Process[] SCLIProcess = Process.GetProcessesByName("SNL-CLI");
-            if (UCLIProcess.Length != 0 || SCLIProcess.Length != 0)
+            isActive = true;
+            // server starts here v
+            int rValue = await Task.Run(serverFunc);            
+            isActive = false;
+            if (rValue == 5)
             {
-                notifyIcon.ShowBalloonTip(10000, "CLI is Running", "Please close UDPBD-for-XEB+-CLI and SNL-CLI while UDPBDTray is running.", ToolTipIcon.Warning);
+                RestartAdmin();
             }
-            else if (isActive)
+            ShowConsoleError();
+            string errorMessage = "";
+            if (rValue > 0)
             {
-                Process[] serverProcess = Process.GetProcessesByName(serverName);
-                if (serverProcess.Length == 0)
-                {
-                    int wait = 1000;
-                    if (showConsole)
-                    {
-                        wait = 15000;
-                    }
-                    if (!firstStart)
-                    {
-                        wait = 10000;
-                        notifyIcon.ShowBalloonTip(10000, "Server Down", "The Server stopped unexpectedly.\r\n" +
-                            "If that was intentional please close UDPBDTray as well.", ToolTipIcon.Warning);
-                    }
-                    isActive = false;
-                    firstStart = false;
-                    await StartServerAsync(wait);
-                }
+                Win32Exception ex = new(rValue);
+                errorMessage = $"This might be caused by the following:\n\n{ex.Message}";
             }
+            DialogResult response = MessageBox.Show($"Server stopped unexpectedly with a return value of {rValue}\n{errorMessage}\n" +
+                "Do you want to save the server console history?",
+                "Server Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+            if (response == DialogResult.Yes)
+            {
+                CustomConsole.CopyConsoleHistory();
+                MessageBox.Show("The server history has been copied to your clipboard",
+                    "Copied to clipboard", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            Environment.Exit(rValue);
         }
 
-        private void CheckFiles()
+        private void MenuItemOpenSync_Click(object? sender, EventArgs e)
         {
-            string[] files = ["ps2client.exe", "udpbd-server.exe", "udpbd-vexfat.exe"];
+            StartSyncApp();
+        }
+
+        private static void CheckFiles()
+        {
+            string[] files = ["udpbd_server.dll", "udpbd_vexfat.dll"];
             foreach (var file in files)
             {
                 if (!File.Exists(file))
@@ -158,7 +181,13 @@ namespace UDPBDTray
             if (!File.Exists(settingsFile))
             {
                 isActive = false;
-                MessageBox.Show("Error the settings file 'UDPBDTraySettings.txt' does not exist.", "Error Reading Settings", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult response = MessageBox.Show("Error the settings file 'UDPBDTraySettings.txt' does not exist.\n" +
+                    "Do you want to open the sync app to apply new settings?",
+                    "Error Reading Settings", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (response == DialogResult.Yes)
+                {
+                    StartSyncApp();
+                }
                 Environment.Exit(-1);
             }
             using TextReader settingsReader = new StreamReader(settingsFile);
@@ -167,25 +196,32 @@ namespace UDPBDTray
             if (string.IsNullOrEmpty(tempPath) || string.IsNullOrEmpty(tempServer))
             {
                 isActive = false;
-                MessageBox.Show("Failed to read the settings file 'UDPBDTraySettings.txt' .", "Error Reading Settings", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Failed to read the settings file 'UDPBDTraySettings.txt'",
+                    "Error Reading Settings", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(-1);
             }
-            serverName = tempServer;
+            ServerName = tempServer;
             if (tempPath.Contains(".vhdx") && File.Exists(tempPath))
             {
                 string driveLetter = InitVHDX(tempPath);
                 if (string.IsNullOrEmpty(driveLetter))
                 {
-                    MessageBox.Show($"Failed to mount the disk image '{tempPath}'.", "Error Mounting VHDX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Failed to mount the disk image '{tempPath}'",
+                        "Error Mounting VHDX", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Environment.Exit(-1);
                 }
                 gamePath = $"{driveLetter}:";
-                needAdmin = false;
             }
             else
             {
+                if (!Path.Exists(tempPath))
+                {
+                    isActive = false;
+                    MessageBox.Show($"Error the file path '{tempPath}' does not exist.",
+                        "Error finding path", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Environment.Exit(-1);
+                }
                 gamePath = tempPath;
-                needAdmin = true;
             }
         }
 
@@ -203,11 +239,30 @@ namespace UDPBDTray
             process.Start();
             process.WaitForExit();
             int testChar = process.StandardOutput.Peek();
-            if (testChar == 0)
-            {
-                return "";
-            }
+            if (testChar == 0) return "";
             return process.StandardOutput.ReadLine() + "";
+        }
+
+        private void StartSyncApp()
+        {
+            if (!File.Exists($"{syncApp}.exe"))
+            {
+                MessageBox.Show($"Unable to locate {syncApp}", "Sync app missing", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            else if (Process.GetProcessesByName(syncApp).Length != 0)
+            {
+                MessageBox.Show("The sync app is already running.", "Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            else
+            {
+                Process syncProcess = new();
+                syncProcess.StartInfo.FileName = syncApp;
+                syncProcess.StartInfo.UseShellExecute = true;
+                syncProcess.Start();
+                Environment.Exit(0);
+            }
         }
 
         private void NotifyIcon_Click(object? sender, MouseEventArgs e)
@@ -219,152 +274,89 @@ namespace UDPBDTray
             }
         }
 
-        private void MenuItemDebug_Click(object? sender, EventArgs e)
+        private void MenuItemConsoleToggle_Click(object? sender, EventArgs e)
         {
-            if (!File.Exists("IPSetting.cfg"))
+            showConsole = !showConsole;
+            if (showConsole)
             {
-                MessageBox.Show($"The file IPSetting.cfg is missing.", "File Missing", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            using TextReader cfgIP = new StreamReader("IPSetting.cfg");
-            string? tempIP = cfgIP.ReadLine();
-            if (string.IsNullOrEmpty(tempIP))
-            {
-                MessageBox.Show($"The file IPSetting.cfg is unable to be read or empty.", "File Empty", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            Process ps2client = new();
-            ps2client.StartInfo.FileName = "cmd";
-            ps2client.StartInfo.Arguments = $"/k ps2client -h {tempIP} listen";
-            ps2client.Start();
-        }
-
-        private async void MenuItemRestart_ClickAsync(object? sender, EventArgs e)
-        {
-            int waitTime = 1000;
-            isActive = false;
-            QuickKillServer();
-            if (showConsole == false)
-            {
-                showConsole = true;
-                menuItemRestart.Text = "Restart and Hide Console";
-                waitTime = 15000; // Takes longer to start the terminal
+                customConsole = new();
+                customConsole.Show();
             }
             else
             {
-                showConsole = false;
-                menuItemRestart.Text = "Restart and Show Console";
+                flagAskShutdown = false;
+                customConsole?.Close();
             }
-            await StartServerAsync(waitTime);
         }
 
         private void MenuItemKill_Click(object? sender, EventArgs e)
         {
-            isActive = false;
-            QuickKillServer();
             Environment.Exit(0);
         }
 
-        private void QuickKillServer()
+        private async void ServerStartBaloonAsync(object? sender, EventArgs e)
         {
-            bool hasKilled = false;
-            string[] serverNames = ["udpbd-server", "udpbd-vexfat"];
-            foreach (var server in serverNames)
+            await Task.Delay(4000); // wait for the server to start before checking if it failed
+            if (isActive)
             {
-                Process[] processes = Process.GetProcessesByName(server);
-                if (processes.Length != 0)
-                {
-                    hasKilled = true;
-                    foreach (var item in processes) item.Kill();
-                    Thread.Sleep(200);
-                }
-            }
-            if (!hasKilled)
-            {
-                notifyIcon.ShowBalloonTip(10000, $"{serverName} was not Running", "The server was already stopped by another program.", ToolTipIcon.Warning);
+                notifyIcon.ShowBalloonTip(10000, $"{ServerName} is Active!", "The PS2 game server is ready to Play!", ToolTipIcon.None);
             }
         }
 
-        private static void SilentKillServer()
+        private static void RestartAdmin()
         {
-            string[] serverNames = ["udpbd-server", "udpbd-vexfat"];
-            foreach (var server in serverNames)
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            WindowsPrincipal pricipal = new(identity);
+            if (!pricipal.IsInRole(WindowsBuiltInRole.Administrator))
             {
-                Process[] processes = Process.GetProcessesByName(server);
-                if (processes.Length != 0)
+                try
                 {
-                    foreach (var item in processes) item.Kill();
-                }
-            }
-            Thread.Sleep(200);
-        }
-
-        private async Task StartServerAsync(int waitTime)
-        {
-            Process process = new();
-            process.StartInfo.FileName = "cmd";
-            if (serverName.Contains("vexfat"))
-            {
-                process.StartInfo.Arguments = $"/k {serverName} \"{gamePath}\"";
-                if (!showConsole)
-                {
-                    process.StartInfo.FileName = serverName;
-                    process.StartInfo.Arguments = $"\"{gamePath}\"";
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                }
-            }
-            else
-            {
-                process.StartInfo.Arguments = $"/k \"{Path.GetFullPath(serverName)}\" \\\\.\\{gamePath}";
-                if (!showConsole)
-                {
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    if (needAdmin)
-                    {
-                        waitTime = 10000;
-                        process.StartInfo.Arguments = $"/c \"{Path.GetFullPath(serverName)}\" \\\\.\\{gamePath}";
-                    }
-                    else
-                    {
-                        process.StartInfo.FileName = serverName;
-                        process.StartInfo.Arguments = $"\\\\.\\{gamePath}";
-                    }
-                }
-                if (needAdmin)
-                {
-                    process.StartInfo.UseShellExecute = true;
+                    Process process = new();
                     process.StartInfo.Verb = "runas";
+                    process.StartInfo.UseShellExecute = true;
+                    process.StartInfo.FileName = Environment.ProcessPath;
+                    process.Start();
                 }
-            }
-            try
-            {
-                process.Start();
-                await CheckServerStartAsync(waitTime);
-            }
-            catch (Exception ex)
-            {
-                isActive = false;
-                MessageBox.Show($"Failed to start {serverName}.\r\n{ex.Message}\r\n" +
-                    "Try Clicking 'Restart and Show Console' on the tray icon.", $"Error Starting {serverName}", MessageBoxButtons.OK, MessageBoxIcon.Error, 0, MessageBoxOptions.DefaultDesktopOnly);
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An error has occured while trying to run as Administrator.\n\n" +
+                        $"{ex.Message}\n\n{ex}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                Environment.Exit(5);
             }
         }
 
-        private async Task CheckServerStartAsync(int waitTime)
+        private static void GetInterferingProcess()
         {
-            await Task.Delay(waitTime); // wait for the server to start before checking if it failed
-            Process[] processesStarted = Process.GetProcessesByName(serverName);
-            if (processesStarted.Length != 0)
+            string[] pNames = ["SNL-CLI", "UDPBD-for-XEB+-CLI", "udpbd-server", "udpbd-vexfat"];
+            foreach (string p in pNames)
             {
-                isActive = true;
-                notifyIcon.ShowBalloonTip(10000, $"{serverName} is Active!", "The PS2 game server is ready to Play!", ToolTipIcon.None);
+                if (Process.GetProcessesByName(p).Length != 0)
+                {
+                    MessageBox.Show($"{p} is currently running.\n Stop the {p} app before starting UDPBDTray.",
+                    "Interfering Process is Running", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Environment.Exit(-1);
+                }
             }
-            else
+        }
+
+        private static void GetConsole()
+        {
+            AllocConsole();
+            ShowWindow(GetConsoleWindow(), 0);
+            Console.WriteLine($"{edition} UDPBDTray {Assembly.GetExecutingAssembly().GetName().Version} by MegaBitmap");
+        }
+
+        private void ShowConsoleError()
+        {
+            showConsole = true;
+            menuItemConsoleToggle.Checked = true;
+            if (customConsole == null)
             {
-                isActive = false;
-                notifyIcon.Text = $"{serverName.ToUpper()} is Stopped";
-                MessageBox.Show($"Failed to start {serverName}.\r\n" +
-                    "Try Clicking 'Restart and Show Console' on the notification tray icon.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error, 0, MessageBoxOptions.DefaultDesktopOnly);
+                customConsole = new();
+                customConsole.Show();
             }
+            ShowWindow(GetConsoleWindow(), 5);
         }
     }
 }
