@@ -84,7 +84,7 @@ PS2BBL supports this by default. ExFAT support can be added to FreeMcBoot with [
 It is NOT recommended to mismatch different versions of the XEBPLUS plugin and the sync app.  
 
 *Note: This setup process is for version 2.9 of this plugin.  
-If you are updating from version 2.6 or earlier, you may need to remove the `XEBPLUS/CFG/neutrinoLuancher` folder on your USB drive.  
+If you are updating from version 2.6 or earlier, you may need to remove the `XEBPLUS/CFG/neutrinoLauncher` folder on your USB drive.  
 If you are updating from version 1.x, you will need to remove the old version of neutrino Launcher from your XEB+ install before continuing.  
 This includes all neutrino Launcher files in the `APPS`, `PLG`, and `CFG` folders, as well as the `CD` and `DVD` folders on the root of your USB drive.*
 
@@ -96,7 +96,7 @@ or
 The password is at the bottom of `xebplus_xmas_showcase.rar\Distribution License.txt`.  
 Extract the RAR then copy the `XEBPLUS` folder to the root of your MBR FAT32 or MBR exFAT USB drive, and ensure that you can load into the XEB+ dashboard on your PlayStation 2.  
 Note that if you are using an MBR exFAT formatted USB drive, you will need to use PS2BBL and [this version](https://github.com/israpps/wLaunchELF_ISR) of wLaunchELF.  
-3. (optional) Configure your PS2 exploit of choice to autorun XEB+ on startup.  
+3. (optional) Configure your PS2 exploit of choice to autostart XEB+.  
 4. Download the latest version of this plugin from the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases).  
 Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders if prompted.  
 5. Extract the UDPBD Sync app or List Builder script to somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
@@ -163,20 +163,15 @@ If you miss clicked, either move the UDPBD-for-XEB+ folder inside a new folder o
 UDPBDTray will start the server and add a notification tray icon.  
 The server needs to be open and running for the entire play session. (Disable sleep on the PC.)  
 
-19. For automatic network initialization follow these Steps:  
- - The files in PS2BBL-Network-Init are for automatic network initialization when using UDPBD for XEB+.  
- This is needed on server cold boots to prevent the first game launch from failing.  
- This is only compatible with PS2BBL version 1.2.0 (Oct 5 2023) or newer.  
+19. (optional) For automatic XEB+ startup:  
+ - The files in PS2BBL-AutoStart will set PS2BBL to automatically run XEB+.  
  - To install copy these files onto a memory card with PS2BBL installed.  
  Depending on which version the config can be found in mc?:/SYS-CONF/ or mc?:/PS2BBL/  
- - If the SYS-CONF folder exists paste these files into the folder:  
- PS2BBL.INI, netman.irx, ps2dev9.irx, and smap.irx  
- - If the PS2BBL folder exists paste these files into the folder:  
- CONFIG.INI, netman.irx, ps2dev9.irx, and smap.irx  
+ - See [this](PS2BBL-AutoStart/README.txt) for more info.  
 
 20. The PC setup is now complete, back on the PS2 run XEB+.  
 ![launchelf-xeb](readme-images/launchelf-xeb.jpg)
-The config from step 19 sets PS2BBL to autorun the `.ELF` file.  
+The config from step 19 sets PS2BBL to autostart the `.ELF` file.  
 21. Play!  
 ![xeb-game-list](readme-images/xeb-game-list.jpg)  
 
@@ -265,16 +260,11 @@ sudo ./udpbd-server /dev/nvme0n1p6
 ```
 The server needs to be open and running for the entire play session.
 
-19. For automatic network initialization follow these Steps:  
- - The files in PS2BBL-Network-Init are for automatic network initialization when using UDPBD for XEB+.  
- This is needed on server cold boots as an uninitialized network will fail on the first game launch.  
- This is only compatible with PS2BBL version 1.2.0 (Oct 5 2023) or newer.  
+19. (optional) For automatic XEB+ startup:  
+ - The files in PS2BBL-AutoStart will set PS2BBL to automatically run XEB+.  
  - To install copy these files onto a memory card with PS2BBL installed.  
  Depending on which version the config can be found in mc?:/SYS-CONF/ or mc?:/PS2BBL/  
- - If the SYS-CONF folder exists paste these files into the folder:  
- PS2BBL.INI, netman.irx, ps2dev9.irx, and smap.irx  
- - If the PS2BBL folder exists paste these files into the folder:  
- CONFIG.INI, netman.irx, ps2dev9.irx, and smap.irx  
+ - See [this](PS2BBL-AutoStart/README.txt) for more info.  
 
 20. Launch XEB+ then Play!
 
