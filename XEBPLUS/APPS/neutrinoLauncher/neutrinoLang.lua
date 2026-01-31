@@ -96,7 +96,10 @@ if XEBPlusLanguage == "en-US" then
     neuLang[94] = " 1080i x1"
     neuLang[95] = " 1080i x2"
     neuLang[96] = " 1080i x3"
-
+    neuLang[97] = "Enable in game Networking"
+    neuLang[98] = "Used for games with Online/LAN support"
+    neuLang[99] = "Enable in game HDD access"
+    neuLang[100] = "Used for games with HDD support"
 
     NEUTRINO_Control1 = "image/controlmap1.png"
     NEUTRINO_Control2 = "image/controlmap2.png"
@@ -200,6 +203,10 @@ elseif XEBPlusLanguage == "es-419" then
     neuLang[94] = " 1080i x1"
     neuLang[95] = " 1080i x2"
     neuLang[96] = " 1080i x3"
+    neuLang[97] = "Habilitar la red dentro del juego"
+    neuLang[98] = "Utiliza para juegos en línea/LAN"
+    neuLang[99] = "Habilite el disco duro"
+    neuLang[100] = "Se utiliza para juegos compatibles\ncon disco duro."
 
     NEUTRINO_Control1 = "image/controlmap1_es.png"
     NEUTRINO_Control2 = "image/controlmap2_es.png"
@@ -303,6 +310,10 @@ elseif XEBPlusLanguage == "pt-BR" then
     neuLang[94] = " 1080i x1"
     neuLang[95] = " 1080i x2"
     neuLang[96] = " 1080i x3"
+    neuLang[97] = "Ativar rede no jogo"
+    neuLang[98] = "Usado para jogos com suporte Online/LAN"
+    neuLang[99] = "Ative o disco rígido"
+    neuLang[100] = "Usado para jogos com suporte\na disco rígido."
 
     NEUTRINO_Control1 = "image/controlmap1_pt.png"
     NEUTRINO_Control2 = "image/controlmap2_pt.png"

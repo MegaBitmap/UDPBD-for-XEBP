@@ -1287,6 +1287,22 @@ function ContextMenu_ReadSettings(Settings)
 		ContextMenu_Gc = ""
 		ContextMenu[11+ContextMenu_Offset].Name = neuLang[81]..neuLang[89]
 	end
+
+	if string.match(Settings, "(.*)atanet(.*)") then
+		ContextMenu_AltBSD = "atanet"
+		ContextMenu[13+ContextMenu_Offset].Name = "\194\172  "..neuLang[97]
+	else
+		ContextMenu_AltBSD = ""
+		ContextMenu[13+ContextMenu_Offset].Name = "     "..neuLang[97]
+	end
+
+	if string.match(Settings, "(.*)udpbdhdd(.*)") then
+		ContextMenu_AltBSD = "udpbdhdd"
+		ContextMenu[13+ContextMenu_Offset].Name = "\194\172  "..neuLang[99]
+	else
+		ContextMenu_AltBSD = ""
+		ContextMenu[13+ContextMenu_Offset].Name = "     "..neuLang[99]
+	end
 end
 ContextMenu_FirstRun = true
 function NEUTRINO_ContextMenu()
@@ -1299,6 +1315,10 @@ function NEUTRINO_ContextMenu()
 		ContextMenu_Offset = 1
 		ContextMenu_EnableVmc = true
 		ContextMenu_EnableUnique = false
+		ContextMenu_AltBSD = ""
+		ContextMenu_EnableAltBSD = false
+		ContextMenu_EnableATANet = false
+		ContextMenu_EnableUDPBDHDD = false
 		
 		if string.match(NEUTRINO_CheckGroups(NEUTRINO_CurrentList[NEUTRINO_SelectedItem].TitleId), "(.*)XEBP(.*)") then
 			ContextMenu_Offset = ContextMenu_Offset + 1
@@ -1309,25 +1329,25 @@ function NEUTRINO_ContextMenu()
 			ContextMenu_EnableVmc = false
 		end
 			
-		ContextMenu={};
-		ContextMenu[1] = {};
-		ContextMenu[2] = {};
-		ContextMenu[3] = {};
-		ContextMenu[4] = {};
-		ContextMenu[5] = {};
-		ContextMenu[6] = {};
-		ContextMenu[7] = {};
-		ContextMenu[8] = {};
-		ContextMenu[9] = {};
-		ContextMenu[10] = {};
-		ContextMenu[11] = {};
-		ContextMenu[12] = {};
-		ContextMenu[13] = {};
-		if ContextMenu_Offset > 0 then
-			ContextMenu[14] = {};
+		if NEUTRINO_Bsd == "ata" then
+			ContextMenu_EnableAltBSD = true
+			ContextMenu_EnableATANet = true
+		elseif NEUTRINO_Bsd == "udpbd" then
+			ContextMenu_EnableAltBSD = true
+			ContextMenu_EnableUDPBDHDD = true
 		end
-		if ContextMenu_Offset == 2 then
-			ContextMenu[15] = {};
+
+		ContextMenu={};
+		for i = 1, 12+ContextMenu_Offset do
+			ContextMenu[i] = {};
+		end
+		if ContextMenu_EnableAltBSD == true then
+			ContextMenu[13+ContextMenu_Offset] = {};
+			if ContextMenu_EnableUDPBDHDD then
+				ContextMenu[13+ContextMenu_Offset].Description = neuLang[100]
+			else
+				ContextMenu[13+ContextMenu_Offset].Description = neuLang[98]
+			end
 		end
 
 		ContextMenu[1].Description = neuLang[21]
@@ -1348,10 +1368,12 @@ function NEUTRINO_ContextMenu()
 		ContextMenu[10+ContextMenu_Offset].Description = neuLang[58]
 		ContextMenu[11+ContextMenu_Offset].Description = neuLang[58]
 		ContextMenu[12+ContextMenu_Offset].Description = neuLang[28]
-		ContextMenu[13+ContextMenu_Offset].Description = neuLang[28]
 
 		ContextMenu_AllItems = 12 + ContextMenu_Offset
 		
+		if ContextMenu_EnableAltBSD == true then
+			ContextMenu_AllItems = ContextMenu_AllItems + 1
+		end
 		if System.doesFileExist(NEUTRINO_DataFolder..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name..".cfg") then
 			NEUTRINO_TempFile = io.open(NEUTRINO_DataFolder..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name..".cfg", "r")
 			ContextMenu_LocalSettings = NEUTRINO_TempFile:read()
@@ -1611,6 +1633,24 @@ function NEUTRINO_ContextMenu()
 					NEUTRINO_TempFile:write(NEUTRINO_ArtTotal)
 					NEUTRINO_TempFile:close()
 				end
+			elseif ContextMenu_EnableAltBSD == true and ContextMenu_SelectedItem == 13+ContextMenu_Offset then
+				if ContextMenu_EnableATANet == true then
+					if ContextMenu_AltBSD == "" then
+						ContextMenu[13+ContextMenu_Offset].Name = "\194\172  "..neuLang[97]
+						ContextMenu_AltBSD = "atanet"
+					else
+						ContextMenu[13+ContextMenu_Offset].Name = "     "..neuLang[97]
+						ContextMenu_AltBSD = ""
+					end
+				elseif ContextMenu_EnableUDPBDHDD == true then
+					if ContextMenu_AltBSD == "" then
+						ContextMenu[13+ContextMenu_Offset].Name = "\194\172  "..neuLang[99]
+						ContextMenu_AltBSD = "udpbdhdd"
+					else
+						ContextMenu[13+ContextMenu_Offset].Name = "     "..neuLang[99]
+						ContextMenu_AltBSD = ""
+					end
+				end
 			end
 			if ContextMenu_Gv == "" then
 				ContextMenu_Gsm = ""
@@ -1641,6 +1681,7 @@ function NEUTRINO_ContextMenu()
 		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_Gsm
 		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_Gv
 		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_Gc
+		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_AltBSD
 
 		if ContextMenu_Global == false then
 			if ContextMenu_NewSettings ~= ContextMenu_GlobalSettings or System.doesFileExist(NEUTRINO_DataFolder..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name..".cfg") then
@@ -1935,6 +1976,14 @@ while XEBKeepInSubMenu do
 			NEUTRINO_GameFolder = NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Folder.."/"
 			if string.match(NEUTRINO_Fs, "(.*)hdl(.*)") then
 				NEUTRINO_GameFolder = ""
+			end
+
+			if string.match(NEUTRINO_Bsd, "ata") and string.match(NEUTRINO_LaunchOptions, "(.*)atanet(.*)") then
+				NEUTRINO_LaunchOptions = string.sub(NEUTRINO_LaunchOptions, 7, string.len(NEUTRINO_LaunchOptions))
+				NEUTRINO_Bsd = "ata-net"
+			elseif string.match(NEUTRINO_Bsd, "udpbd") and string.match(NEUTRINO_LaunchOptions, "(.*)udpbdhdd(.*)") then
+				NEUTRINO_LaunchOptions = string.sub(NEUTRINO_LaunchOptions, 9, string.len(NEUTRINO_LaunchOptions))
+				NEUTRINO_Bsd = "udpbd-hdd"
 			end
 
 			System.removeFile(xebLua_AppWorkingPath.."radshellmod.ios")
