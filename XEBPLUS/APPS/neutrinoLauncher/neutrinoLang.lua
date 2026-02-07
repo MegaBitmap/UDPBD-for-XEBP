@@ -78,8 +78,8 @@ if XEBPlusLanguage == "en-US" then
     neuLang[76] = "Launch games from the iLink port with neutrino"
     neuLang[77] = "Fix Buffer Overrun"
     neuLang[78] = "Prevent crashes and other issues in\ncertain games."
-    neuLang[79] = "GSM Frame Mode:"
-    neuLang[80] = "GSM Field Mode:"
+    neuLang[79] = "GSM Video Mode:" -- TODO: Update for other languages
+    neuLang[80] = "GSM Field Mode:" -- Not used anymore
     neuLang[81] = "GSM Field Flipping:"
     neuLang[82] = " Default"
     neuLang[83] = "neutrino Launcher (MMCE)"
@@ -93,6 +93,10 @@ if XEBPlusLanguage == "en-US" then
     neuLang[91] = "Launch HDL format games from the hard drive"
     neuLang[92] = "Enable Debug Colors"
     neuLang[93] = "Flash a series of colors on launch.\nThis can help diagnose titles that will\nnot start."
+    neuLang[94] = " 1080i x1"
+    neuLang[95] = " 1080i x2"
+    neuLang[96] = " 1080i x3"
+
 
     NEUTRINO_Control1 = "image/controlmap1.png"
     NEUTRINO_Control2 = "image/controlmap2.png"

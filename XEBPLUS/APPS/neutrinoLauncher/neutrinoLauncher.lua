@@ -1249,18 +1249,27 @@ function ContextMenu_ReadSettings(Settings)
 	if string.match(Settings, "(.*)-gsm(.*)") then
 		ContextMenu_Gsm = " -gsm="
 		if string.match(Settings, "(.*)-gsm=fp(.*)") then
-			ContextMenu_Gx = "fp"
+			ContextMenu_Gx = ""
 			ContextMenu[10+ContextMenu_Offset].Name = neuLang[80]..neuLang[86]
 		else
 			ContextMenu_Gx = ""
 			ContextMenu[10+ContextMenu_Offset].Name = neuLang[80]..neuLang[82]
 		end
-		if string.match(Settings, "(.*):fp1(.*)") then
-			ContextMenu_Gy = ":fp1"
+		if string.match(Settings, "(.*)fp1(.*)") then
+			ContextMenu_Gy = "fp1"
 			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[87]
-		elseif string.match(Settings, "(.*):fp2(.*)") then
-			ContextMenu_Gy = ":fp2"
+		elseif string.match(Settings, "(.*)fp2(.*)") then
+			ContextMenu_Gy = "fp2"
 			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[88]
+		elseif string.match(Settings, "(.*)1080ix1(.*)") then
+			ContextMenu_Gy = "1080ix1"
+			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[94]
+		elseif string.match(Settings, "(.*)1080ix2(.*)") then
+			ContextMenu_Gy = "1080ix2"
+			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[95]
+		elseif string.match(Settings, "(.*)1080ix3(.*)") then
+			ContextMenu_Gy = "1080ix3"
+			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[96]
 		else
 			ContextMenu_Gy = ""
 			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[82]
@@ -1277,9 +1286,6 @@ function ContextMenu_ReadSettings(Settings)
 		else
 			ContextMenu_Gz = ""
 			ContextMenu[12+ContextMenu_Offset].Name = neuLang[81]..neuLang[89]
-		end
-		if ContextMenu_Gy == "" and ContextMenu_Gz ~= "" then
-			ContextMenu_Gy = ":"
 		end
 	else
 		ContextMenu_Gsm = ""
@@ -1528,24 +1534,25 @@ function NEUTRINO_ContextMenu()
 					ContextMenu[9+ContextMenu_Offset].Name = "     "..neuLang[92]
 					ContextMenu_Debug = ""
 				end
-			elseif ContextMenu_SelectedItem == 10+ContextMenu_Offset then
-				if ContextMenu_Gx == "fp" then
-					ContextMenu[10+ContextMenu_Offset].Name = neuLang[80]..neuLang[82]
-					ContextMenu_Gx = ""
-				else
-					ContextMenu[10+ContextMenu_Offset].Name = neuLang[80]..neuLang[86]
-					ContextMenu_Gx = "fp"
-				end
 			elseif ContextMenu_SelectedItem == 11+ContextMenu_Offset then
-				if ContextMenu_Gy == ":fp1" then
+                if ContextMenu_Gy == "" then
+					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[87]
+					ContextMenu_Gy = "fp1"
+				elseif ContextMenu_Gy == "fp1" then
 					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[88]
-					ContextMenu_Gy = ":fp2"
-				elseif ContextMenu_Gy == ":fp2" then
+					ContextMenu_Gy = "fp2"
+				elseif ContextMenu_Gy == "fp2" then
+					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[94]
+					ContextMenu_Gy = "1080ix1"
+				elseif ContextMenu_Gy == "1080ix1" then
+					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[95]
+					ContextMenu_Gy = "1080ix2"
+				elseif ContextMenu_Gy == "1080ix2" then
+					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[96]
+					ContextMenu_Gy = "1080ix3"
+				else
 					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[82]
 					ContextMenu_Gy = ""
-				else
-					ContextMenu[12+ContextMenu_Offset].Name = neuLang[79]..neuLang[87]
-					ContextMenu_Gy = ":fp1"
 				end
 			elseif ContextMenu_SelectedItem == 12+ContextMenu_Offset then
 				if ContextMenu_Gz == ":1" then
@@ -1614,13 +1621,12 @@ function NEUTRINO_ContextMenu()
 					NEUTRINO_TempFile:close()
 				end
 			end
-			if ContextMenu_Gy == "" and ContextMenu_Gz ~= "" then
-				ContextMenu_Gy = ":"
-			elseif ContextMenu_Gy == ":" and ContextMenu_Gz == "" then
-				ContextMenu_Gy = ""
-			end
-			if ContextMenu_Gx..ContextMenu_Gy..ContextMenu_Gz == "" then
+			
+			ContextMenu[13+ContextMenu_Offset].Name = ContextMenu_Gsm..ContextMenu_Gx..ContextMenu_Gy..ContextMenu_Gz -- REMOVE
+
+			if ContextMenu_Gy == "" then
 				ContextMenu_Gsm = ""
+				ContextMenu_Gz = "" -- You cannot set Gc without Gv
 			else
 				ContextMenu_Gsm = " -gsm="
 			end
