@@ -1248,53 +1248,44 @@ function ContextMenu_ReadSettings(Settings)
 
 	if string.match(Settings, "(.*)-gsm(.*)") then
 		ContextMenu_Gsm = " -gsm="
-		if string.match(Settings, "(.*)-gsm=fp(.*)") then
-			ContextMenu_Gx = ""
-			ContextMenu[10+ContextMenu_Offset].Name = neuLang[80]..neuLang[86]
-		else
-			ContextMenu_Gx = ""
-			ContextMenu[10+ContextMenu_Offset].Name = neuLang[80]..neuLang[82]
-		end
 		if string.match(Settings, "(.*)fp1(.*)") then
 			ContextMenu_Gv = "fp1"
-			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[87]
+			ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[87]
 		elseif string.match(Settings, "(.*)fp2(.*)") then
 			ContextMenu_Gv = "fp2"
-			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[88]
+			ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[88]
 		elseif string.match(Settings, "(.*)1080ix1(.*)") then
 			ContextMenu_Gv = "1080ix1"
-			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[94]
+			ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[94]
 		elseif string.match(Settings, "(.*)1080ix2(.*)") then
 			ContextMenu_Gv = "1080ix2"
-			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[95]
+			ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[95]
 		elseif string.match(Settings, "(.*)1080ix3(.*)") then
 			ContextMenu_Gv = "1080ix3"
-			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[96]
+			ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[96]
 		else
 			ContextMenu_Gv = ""
-			ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[82]
+			ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[82]
 		end
 		if string.match(Settings, "(.*):1(.*)") then
 			ContextMenu_Gc = ":1"
-			ContextMenu[12+ContextMenu_Offset].Name = neuLang[81]..neuLang[85].."  1"
+			ContextMenu[11+ContextMenu_Offset].Name = neuLang[81]..neuLang[85].."  1"
 		elseif string.match(Settings, "(.*):2(.*)") then
 			ContextMenu_Gc = ":2"
-			ContextMenu[12+ContextMenu_Offset].Name = neuLang[81]..neuLang[85].."  2"
+			ContextMenu[11+ContextMenu_Offset].Name = neuLang[81]..neuLang[85].."  2"
 		elseif string.match(Settings, "(.*):3(.*)") then
 			ContextMenu_Gc = ":3"
-			ContextMenu[12+ContextMenu_Offset].Name = neuLang[81]..neuLang[85].."  3"
+			ContextMenu[11+ContextMenu_Offset].Name = neuLang[81]..neuLang[85].."  3"
 		else
 			ContextMenu_Gc = ""
-			ContextMenu[12+ContextMenu_Offset].Name = neuLang[81]..neuLang[89]
+			ContextMenu[11+ContextMenu_Offset].Name = neuLang[81]..neuLang[89]
 		end
 	else
 		ContextMenu_Gsm = ""
-		ContextMenu_Gx = ""
-		ContextMenu[10+ContextMenu_Offset].Name = neuLang[80]..neuLang[82]
 		ContextMenu_Gv = ""
-		ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[82]
+		ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[82]
 		ContextMenu_Gc = ""
-		ContextMenu[12+ContextMenu_Offset].Name = neuLang[81]..neuLang[89]
+		ContextMenu[11+ContextMenu_Offset].Name = neuLang[81]..neuLang[89]
 	end
 end
 ContextMenu_FirstRun = true
@@ -1356,10 +1347,10 @@ function NEUTRINO_ContextMenu()
 		ContextMenu[9+ContextMenu_Offset].Description = neuLang[93]
 		ContextMenu[10+ContextMenu_Offset].Description = neuLang[58]
 		ContextMenu[11+ContextMenu_Offset].Description = neuLang[58]
-		ContextMenu[12+ContextMenu_Offset].Description = neuLang[58]
+		ContextMenu[12+ContextMenu_Offset].Description = neuLang[28]
 		ContextMenu[13+ContextMenu_Offset].Description = neuLang[28]
 
-		ContextMenu_AllItems = 13 + ContextMenu_Offset
+		ContextMenu_AllItems = 12 + ContextMenu_Offset
 		
 		if System.doesFileExist(NEUTRINO_DataFolder..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name..".cfg") then
 			NEUTRINO_TempFile = io.open(NEUTRINO_DataFolder..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name..".cfg", "r")
@@ -1383,7 +1374,7 @@ function NEUTRINO_ContextMenu()
 		else
 			ContextMenu_ReadSettings(ContextMenu_GlobalSettings)
 		end
-		ContextMenu[13+ContextMenu_Offset].Name = neuLang[33]
+		ContextMenu[12+ContextMenu_Offset].Name = neuLang[33]
 		ContextMenu_FirstRun = false
 		
 		if ContextMenu_Fast..ContextMenu_Sync..ContextMenu_Unhook..ContextMenu_Emulate..ContextMenu_Buffer == "" then
@@ -1534,42 +1525,42 @@ function NEUTRINO_ContextMenu()
 					ContextMenu[9+ContextMenu_Offset].Name = "     "..neuLang[92]
 					ContextMenu_Debug = ""
 				end
-			elseif ContextMenu_SelectedItem == 11+ContextMenu_Offset then
+			elseif ContextMenu_SelectedItem == 10+ContextMenu_Offset then
                 if ContextMenu_Gv == "" then
-					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[87]
+					ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[87]
 					ContextMenu_Gv = "fp1"
 				elseif ContextMenu_Gv == "fp1" then
-					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[88]
+					ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[88]
 					ContextMenu_Gv = "fp2"
 				elseif ContextMenu_Gv == "fp2" then
-					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[94]
+					ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[94]
 					ContextMenu_Gv = "1080ix1"
 				elseif ContextMenu_Gv == "1080ix1" then
-					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[95]
+					ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[95]
 					ContextMenu_Gv = "1080ix2"
 				elseif ContextMenu_Gv == "1080ix2" then
-					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[96]
+					ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[96]
 					ContextMenu_Gv = "1080ix3"
 				else
-					ContextMenu[11+ContextMenu_Offset].Name = neuLang[79]..neuLang[82]
+					ContextMenu[10+ContextMenu_Offset].Name = neuLang[79]..neuLang[82]
 					ContextMenu_Gv = ""
 				end
-			elseif ContextMenu_SelectedItem == 12+ContextMenu_Offset then
+			elseif ContextMenu_SelectedItem == 11+ContextMenu_Offset then
 				if ContextMenu_Gc == ":1" then
-					ContextMenu[12+ContextMenu_Offset].Name = neuLang[81].. neuLang[85].."  2"
+					ContextMenu[11+ContextMenu_Offset].Name = neuLang[81].. neuLang[85].."  2"
 					ContextMenu_Gc = ":2"
 				elseif ContextMenu_Gc == ":2" then
-					ContextMenu[12+ContextMenu_Offset].Name = neuLang[81].. neuLang[85].."  3"
+					ContextMenu[11+ContextMenu_Offset].Name = neuLang[81].. neuLang[85].."  3"
 					ContextMenu_Gc = ":3"
 				elseif ContextMenu_Gc == ":3" then
-					ContextMenu[12+ContextMenu_Offset].Name = neuLang[81]..neuLang[89]
+					ContextMenu[11+ContextMenu_Offset].Name = neuLang[81]..neuLang[89]
 					ContextMenu_Gc = ""
 				else
-					ContextMenu[12+ContextMenu_Offset].Name = neuLang[81].. neuLang[85].."  1 (OPL)"
+					ContextMenu[11+ContextMenu_Offset].Name = neuLang[81].. neuLang[85].."  1 (OPL)"
 					ContextMenu_Gc = ":1"
 				end
 					
-			elseif ContextMenu_SelectedItem == 13+ContextMenu_Offset then
+			elseif ContextMenu_SelectedItem == 12+ContextMenu_Offset then
 				if NEUTRINO_CurrentList[NEUTRINO_SelectedItem].TitleId ~= "" then
 					NEUTRINO_CachedCount = 0
 					System.removeFile("mass:/XEBPLUS/CFG/neutrinoLauncher/.cache/DISC/"..NEUTRINO_CurrentList[NEUTRINO_SelectedItem].TitleId..".png")
@@ -1648,7 +1639,6 @@ function NEUTRINO_ContextMenu()
 		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_Debug
 		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_Logo
 		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_Gsm
-		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_Gx
 		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_Gv
 		ContextMenu_NewSettings = ContextMenu_NewSettings..ContextMenu_Gc
 
