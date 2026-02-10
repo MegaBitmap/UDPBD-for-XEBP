@@ -1203,35 +1203,35 @@ function ContextMenu_ReadSettings(Settings)
 		ContextMenu[3+ContextMenu_Offset].Name = "     "..neuLang[14]
 	end
 
-	if string.match(Settings, "(.*)0(.*)") then
+	if string.match(Settings, "(.*)-gc=(%d*)0(.*)") then
 		ContextMenu_Fast = "0"
 		ContextMenu[4+ContextMenu_Offset].Name = "\194\172  "..neuLang[16]
 	else
 		ContextMenu_Fast = ""
 		ContextMenu[4+ContextMenu_Offset].Name = "     "..neuLang[16]
 	end
-	if string.match(Settings, "(.*)2(.*)") then
+	if string.match(Settings, "(.*)-gc=(%d*)2(.*)") then
 		ContextMenu_Sync = "2"
 		ContextMenu[5+ContextMenu_Offset].Name = "\194\172  "..neuLang[17]
 	else
 		ContextMenu_Sync = ""
 		ContextMenu[5+ContextMenu_Offset].Name = "     "..neuLang[17]
 	end
-	if string.match(Settings, "(.*)3(.*)") then
+	if string.match(Settings, "(.*)-gc=(%d*)3(.*)") then
 		ContextMenu_Unhook = "3"
 		ContextMenu[6+ContextMenu_Offset].Name = "\194\172  "..neuLang[18]
 	else
 		ContextMenu_Unhook = ""
 		ContextMenu[6+ContextMenu_Offset].Name = "     "..neuLang[18]
 	end
-	if string.match(Settings, "(.*)5(.*)") then
+	if string.match(Settings, "(.*)-gc=(%d*)5(.*)") then
 		ContextMenu_Emulate = "5"
 		ContextMenu[7+ContextMenu_Offset].Name = "\194\172  "..neuLang[19]
 	else
 		ContextMenu_Emulate = ""
 		ContextMenu[7+ContextMenu_Offset].Name = "     "..neuLang[19]
 	end
-	if string.match(Settings, "(.*)7(.*)") then
+	if string.match(Settings, "(.*)-gc=(%d*)7(.*)") then
 		ContextMenu_Buffer = "7"
 		ContextMenu[8+ContextMenu_Offset].Name = "\194\172  "..neuLang[77]
 	else

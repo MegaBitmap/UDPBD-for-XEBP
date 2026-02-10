@@ -197,6 +197,9 @@ elseif XEBPlusLanguage == "es-419" then
     neuLang[91] = "Ejecutar juegos en formato HDL desde el disco duro"
     neuLang[92] = "Habilitar colores de depuración"
     neuLang[93] = "Muestra una serie de colores al iniciarse.\nEsto puede ayudar a diagnosticar títulos\nque no inicien."
+    neuLang[94] = " 1080i x1"
+    neuLang[95] = " 1080i x2"
+    neuLang[96] = " 1080i x3"
 
     NEUTRINO_Control1 = "image/controlmap1_es.png"
     NEUTRINO_Control2 = "image/controlmap2_es.png"
@@ -297,6 +300,9 @@ elseif XEBPlusLanguage == "pt-BR" then
     neuLang[91] = "Inicialize jogos no formato HDL a partir do disco rígido"
     neuLang[92] = "Ativar cores de depuração"
     neuLang[93] = "Mostra uma série de cores no lançamento.\nIsto pode ajudar a diagnosticar títulos\nque não iniciam."
+    neuLang[94] = " 1080i x1"
+    neuLang[95] = " 1080i x2"
+    neuLang[96] = " 1080i x3"
 
     NEUTRINO_Control1 = "image/controlmap1_pt.png"
     NEUTRINO_Control2 = "image/controlmap2_pt.png"
