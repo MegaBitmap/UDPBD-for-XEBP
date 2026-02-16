@@ -83,8 +83,8 @@ PS2BBL supports this by default. ExFAT support can be added to FreeMcBoot with [
 **Please Note** When updating versions it is **Required** to update BOTH the XEBPLUS plugin, and the sync app.  
 It is NOT recommended to mismatch different versions of the XEBPLUS plugin and the sync app.  
 
-*Note: This setup process is for version 2.9 of this plugin.  
-If you are updating from version 2.6 or earlier, you may need to remove the `XEBPLUS/CFG/neutrinoLauncher` folder on your USB drive.  
+*Note: This setup process is for version 2.10 of this plugin.  
+If you are updating from version 2.9 or earlier, you may need to remove the `XEBPLUS/CFG/neutrinoLauncher` folder on your USB drive.  
 If you are updating from version 1.x, you will need to remove the old version of neutrino Launcher from your XEB+ install before continuing.  
 This includes all neutrino Launcher files in the `APPS`, `PLG`, and `CFG` folders, as well as the `CD` and `DVD` folders on the root of your USB drive.*
 
@@ -538,16 +538,15 @@ When set to Per-Game Settings, options shown below this one will apply only to t
   This will reduce load times if using UDPBD or a hard drive, but can cause compatibility issues with some titles.  
   * **Synchronous Reads** - When enabled, asynchronous (background) loading will not be used. This can affect load times, and fixes compatibility issues with some titles.
   * **Unhook Syscalls** - When enabled, neutrino Syscalls will be removed from memory after starting a game. This fixes compatibility issues with some titles.
-  * **Emulate DVD-DL**- When enabled, neutrino will emulate the data structure of a dual-layer DVD. This option is required for DVD9 images that have been modified to fit a DVD5.
-  * **Fix Buffer Overrun**- Fixes a compatibility issue present in a very small number of games.
-  * **GSM Field Mode**- Force the Graphics Synthesizer to use a specific field scanning mode.
-    * Default - Use the game's default video mode.
-    * Progressive - Use the progressive scan equivalent of the game's default video mode. This is 480p for NTSC titles and 576p for PAL.
-  * **GSM Frame Mode**- Force the Graphics Synthesizer to use a specific frame height.
-    * Default - Use the game's default video mode.
-    * 240p/288p - Use native 240p.
-    * 480p/576p - Use line-doubled 240p in progressive scan.
-  * **GSM Frame Mode**- Select between three different field-flipping types.  
+  * **Emulate DVD-DL** - When enabled, neutrino will emulate the data structure of a dual-layer DVD. This option is required for DVD9 images that have been modified to fit a DVD5.
+  * **Fix Buffer Overrun** - Fixes a compatibility issue present in a very small number of games.
+  * **GSM Video Mode** - Force the Graphics Synthesizer to use a specific field scanning mode.  
+    * Default - Use the game's default video mode.  
+    * Progressive - Use the progressive scan equivalent of the game's default video mode. This is 480p for NTSC titles and 576p for PAL.  
+    * 1080ix1 : force 1080i width x1, height x1 (very small!)  
+    * 1080ix2 : force 1080i width x2, height x2  
+    * 1080ix3 : force 1080i width x3, height x3  
+  * **GSM Compatibility Mode** - Select between three different field-flipping types.  
   Changing this can affect the compatibility of other GSM settings.  
   * **Refresh Artwork** - Immediately delete and re-copy cached artwork for the current game. This option is not affected by the current settings mode.
 
@@ -656,7 +655,7 @@ https://www.psx-place.com/threads/xtremeeliteboot-s-dashboard-special-xmas-showc
 PS2Dev Team - ps2client - 2024-8-5  
 https://github.com/ps2dev/ps2client
 
-Rick Gaiser - neutrino - v1.7.0-30-g607309e  
+Rick Gaiser - neutrino - v1.7.0-35-g1c1fe62  
 https://github.com/rickgaiser/neutrino
 
 sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.9.7  
