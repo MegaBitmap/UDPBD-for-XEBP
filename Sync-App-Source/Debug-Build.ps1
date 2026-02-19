@@ -1,11 +1,9 @@
 
 $CLIDir = ".\UDPBD-for-XEB+-CLI\bin\Debug\net10.0"
-$GUIDir = ".\UDPBD-for-XEB+-GUI\bin\Debug\net10.0-windows7.0"
-$TrayDir = ".\UDPBDTray\bin\Debug\net10.0-windows7.0"
+$GUIDir = ".\UDPBDG\bin\Debug\net10.0-windows"
 
 dotnet build ".\UDPBD-for-XEB+-CLI.sln"
-dotnet build ".\UDPBD-for-XEB+-GUI.sln"
-dotnet build ".\UDPBDTray.sln"
+dotnet build ".\UDPBDG.slnx"
 
 # Preserve the current working directory
 $env:CHERE_INVOKING = "yes"
@@ -36,7 +34,4 @@ Copy-Item -Path .\udpbd-server\udpbd_server.dll -Destination $GUIDir -Force
 Copy-Item -Path "..\List Builder\vmc_groups.list" -Destination $CLIDir -Force
 
 Copy-Item -Path ".\Needed-for-Release\*" -Exclude *.txt -Destination $CLIDir -Force
-Copy-Item -Path "$CLIDir\*" -Destination $GUIDir -Force
-Copy-Item -Path "$TrayDir\*" -Destination $GUIDir -Force
-Copy-Item -Path "$GUIDir\*" -Destination $TrayDir -Force
 
