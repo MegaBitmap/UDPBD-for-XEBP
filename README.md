@@ -99,7 +99,7 @@ Note that if you are using an MBR exFAT formatted USB drive, you will need to us
 3. (optional) Configure your PS2 exploit of choice to autostart XEB+.  
 4. Download the latest version of this plugin from the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases).  
 Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders if prompted.  
-5. Extract the UDPBD Sync app or List Builder script to somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
+5. Extract the UDPBDG app or List Builder script to somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
 6. Complete setup by following the steps specific to the device you want to load games from.  
 
 
@@ -113,14 +113,16 @@ After opening neutrino Launcher in XEBP with a game in view, press the ⏹ squar
 In the context menu you can enable or disable VMCs globally or individually per game.  
 For transferring, importing, or exporting saves from VMC files you can use [PS2-VMC-GUI](https://github.com/MegaBitmap/PS2-VMC-GUI).  
 
-7. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), extract the `UDPBD-for-XEB+ Sync App` folder somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
+7. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), download then extract the `UDPBDG` folder somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
 
-8.  Run `UDPBD-for-XEB+-GUI.exe`. If no exFAT partitions are found, a prompt will appear to mount a virtual exFAT drive.
+8. Start the UDPBDG sync/server app (UDPBDG.exe).  
+(optional) Click mount exFAT drive for VMC support.  
 
 9. Rip/copy any PlayStation 2 ISOs you wish to load into the folder (CD or DVD) that corresponds with their original source media.
 
-10. All `.bin` + `.cue` CD games must be converted to `.iso` format.  
-The sync app will convert them automatically if placed in the CD folder and check the `Convert CD Bin to ISO` box before synchronizing.
+10. Click on choose game path and pick any game in a CD or DVD folder.  
+Example:  `E:/DVD/Grand Theft Auto III.iso`  
+or        `C:\Users\%USERNAME%\Documents\PS2\DVD\TimeSplitters 2.iso`  
 
 11. **Direct Connection** - Plug in the ethernet cable as shown: ↓  
 ![ps2-slim-connected-to-laptop](readme-images/ps2-slim-connected-to-laptop.jpg)  
@@ -149,42 +151,36 @@ Open MISC -> PS2Net
 14. Let the PS2 idle on this screen for the next steps on the PC.  
 ![launchelf-ftp-enabled](readme-images/launchelf-ftp-enabled.jpg)
 
-15. Run `UDPBD-for-XEB+-GUI.exe` and click connect.  
-![udpbd-xeb-1](readme-images/udpbd-xeb-sync-1.jpg)
+15. Choose the game path and click Sync to SNL.  
+![mainWindow](readme-images/udpbdg-settings.jpg)  
 
-16. Click `Select Game Path` then choose an ISO from the `DVD` folder from step 8.
+16. Type in the IP address and connect to launchELF's PS2Net.  
+Click `Sync`, upon success this message will be displayed:  
+![udpbd-xeb-synced](readme-images/udpbdg-sync.jpg)
 
-17. Click `Sync with PS2`, upon success this message will be displayed:  
-![udpbd-xeb-synced](readme-images/udpbd-xeb-sync-2.jpg)
+17. Click `Start Server` and make sure to allow.  
+![udpbdg-firewall](readme-images/udpbdg-firewall.jpg)  
+This will start the UDPBDG notification tray icon that runs the server.  
+If you mistakenly clicked cancel on the firewall prompt, close UDPBDG by clicking Exit on the tray icon.  
+Then either move the UDPBDG folder inside a new folder or manually delete the inbound rules for UDPBDG in 'Windows Defender Firewall with Advanced Security' to make the prompt reappear.  
 
-18. Click `Start Server` and make sure to allow.  
-![udpbd-vexfat-firewall](readme-images/udpbd-vexfat-firewall.jpg)  
-If you miss clicked, either move the UDPBD-for-XEB+ folder inside a new folder or manually delete the inbound rules for udpbd-server/vexfat in `WF.msc` (Windows Defender Firewall with Advanced Security).  
-UDPBDTray will start the server and add a notification tray icon.  
-The server needs to be open and running for the entire play session. (Disable sleep on the PC.)  
+Click the tray icon to show/hide console output, open the settings/sync window, or shutdown the server.  
+The server needs to be open and running for the entire play session (Disable sleep on the PC).  
 
-19. (optional) For automatic XEB+ startup:  
- - The files in PS2BBL-AutoStart will set PS2BBL to automatically run XEB+.  
- - To install copy these files onto a memory card with PS2BBL installed.  
- Depending on which version the config can be found in mc?:/SYS-CONF/ or mc?:/PS2BBL/  
- - See [this](PS2BBL-AutoStart/README.txt) for more info.  
-
-20. The PC setup is now complete, back on the PS2 run XEB+.  
+18. The PC setup is now complete, back on the PS2 run XEB+.  
 ![launchelf-xeb](readme-images/launchelf-xeb.jpg)
-The config from step 19 sets PS2BBL to autostart the `.ELF` file.  
-21. Play!  
+
+19. Play!  
 ![xeb-game-list](readme-images/xeb-game-list.jpg)  
 
-Repeat steps 13-21 of the setup process after adding, renaming, or removing games.  
+Repeat steps 13-19 of the setup process after adding, renaming, or removing games.  
 
 If you want the server to start automatically when the PC is turned on follow these steps:
 
-- Right Click `UDPBDTray.exe` → Show more → Create Shortcut
-- Move the UDPBDTray shortcut to this folder:  
+- Right Click `UDPBDG.exe` → Show more → Create Shortcut
+- Move the UDPBDG shortcut to this folder:  
 `C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`  
 Now the server will start automatically.  
-
-UDPBDTray adds a notification tray icon with controls for stopping and restarting the server as well starting ps2client for console output debugging.
 
 
 ### UDPBD on Linux
@@ -216,7 +212,7 @@ sudo mount /dev/nvme0n1p6 /mnt/ps2/ -o uid=$USER
 Rip/copy any PlayStation 2 disc images you wish to load into the folder that corresponds with their original source media.  
 Example:  `/mnt/ps2/DVD/Grand Theft Auto III.iso`
 
-12. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), extract the `UDPBD-for-XEB+ Sync App` folder.
+12. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), extract the `UDPBD-XEB-CLI` folder.  
 
 13. **Direct Connection** - Plug in the ethernet cable as shown: ↓  
 ![ps2-slim-connected-to-laptop](readme-images/ps2-slim-connected-to-laptop.jpg)  
@@ -632,12 +628,13 @@ If this happens, the behavior will persist until the cache is refreshed manually
 
 ## Compiling the Sync App
 
-If you wish to make any modifications to the windows presentation foundation (WPF) app or console app follow these steps:
-1. Download and install Visual Studio Community with the `.NET desktop development` workload.
-2. Clone this repository.
-3. Run `Sync-App-Source\Debug-Build.ps1` with powershell.
-4. Open the `Sync-App-Source\UDPBD-for-XEB+-GUI.sln` or `Sync-App-Source\UDPBD-for-XEB+-CLI.sln` file with Visual Studio.
-5. Now you can test your changes by clicking the green arrow in VS or open `Sync-App-Source\UDPBD-for-XEB+-GUI\bin\Debug\net10.0-windows7.0\UDPBD-for-XEB+-GUI.exe`
+If you wish to make any modifications to the winforms app or console app follow these steps:  
+1. Download and install Visual Studio Community with the `.NET desktop development` workload.  
+2. Download and install MSYS2.  
+3. Clone this repository.  
+4. Run `Sync-App-Source\Debug-Build.ps1` with powershell.  
+5. Open the `Sync-App-Source\UDPBDG.slnx` or `Sync-App-Source\UDPBD-for-XEB+-CLI.sln` file with Visual Studio.  
+6. Now you can test your changes by clicking the green arrow in VS or open `Sync-App-Source\UDPBDG\bin\Debug\net10.0-windows\UDPBDG.exe`  
 
 ## Credits
 
