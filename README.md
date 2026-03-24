@@ -83,7 +83,7 @@ PS2BBL supports this by default. ExFAT support can be added to FreeMcBoot with [
 **Please Note** When updating versions it is **Required** to update BOTH the XEBPLUS plugin, and the sync app.  
 It is NOT recommended to mismatch different versions of the XEBPLUS plugin and the sync app.  
 
-*Note: This setup process is for version 2.10 of this plugin.  
+*Note: This setup process is for version 2.11 of this plugin.  
 If you are updating from version 2.9 or earlier, you may need to remove the `XEBPLUS/CFG/neutrinoLauncher` folder on your USB drive.  
 If you are updating from version 1.x, you will need to remove the old version of neutrino Launcher from your XEB+ install before continuing.  
 This includes all neutrino Launcher files in the `APPS`, `PLG`, and `CFG` folders, as well as the `CD` and `DVD` folders on the root of your USB drive.*
@@ -652,7 +652,7 @@ https://www.psx-place.com/threads/xtremeeliteboot-s-dashboard-special-xmas-showc
 PS2Dev Team - ps2client - 2024-8-5  
 https://github.com/ps2dev/ps2client
 
-Rick Gaiser - neutrino - v1.7.0-35-g1c1fe62  
+Rick Gaiser - neutrino - v1.8.0-19-gbe75aaf  
 https://github.com/rickgaiser/neutrino
 
 sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.9.7  
