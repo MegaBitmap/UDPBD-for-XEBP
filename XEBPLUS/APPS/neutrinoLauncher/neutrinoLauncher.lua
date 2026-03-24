@@ -1329,10 +1329,10 @@ function NEUTRINO_ContextMenu()
 			ContextMenu_EnableVmc = false
 		end
 			
-		if NEUTRINO_Bsd == "ata" then
+		if NEUTRINO_PathPrefix == "ata" then
 			ContextMenu_EnableAltBSD = true
 			ContextMenu_EnableATANet = true
-		elseif NEUTRINO_Bsd == "udpbd" then
+		elseif NEUTRINO_PathPrefix == "udpbd" then
 			ContextMenu_EnableAltBSD = true
 			ContextMenu_EnableUDPBDHDD = true
 		end
@@ -1973,17 +1973,17 @@ while XEBKeepInSubMenu do
 				NEUTRINO_GameFolder = ""
 			end
 
-			if string.match(NEUTRINO_Bsd, "ata") and string.match(NEUTRINO_LaunchOptions, "(.*)atanet(.*)") then
+			if string.match(NEUTRINO_PathPrefix, "ata") and string.match(NEUTRINO_LaunchOptions, "(.*)atanet(.*)") then
 				NEUTRINO_LaunchOptions = string.sub(NEUTRINO_LaunchOptions, 7, string.len(NEUTRINO_LaunchOptions))
-				NEUTRINO_Bsd = "ata-net"
-			elseif string.match(NEUTRINO_Bsd, "udpbd") and string.match(NEUTRINO_LaunchOptions, "(.*)udpbdhdd(.*)") then
+				NEUTRINO_Bsd = " -bsd=ata-net"
+			elseif string.match(NEUTRINO_PathPrefix, "udpbd") and string.match(NEUTRINO_LaunchOptions, "(.*)udpbdhdd(.*)") then
 				NEUTRINO_LaunchOptions = string.sub(NEUTRINO_LaunchOptions, 9, string.len(NEUTRINO_LaunchOptions))
-				NEUTRINO_Bsd = "udpbd-hdd"
+				NEUTRINO_Bsd = " -bsd=udpbd-hdd"
 			end
 
 			System.removeFile(xebLua_AppWorkingPath.."radshellmod.ios")
 			NEUTRINO_RadShellFile = io.open("mass:/XEBPLUS/APPS/neutrinoLauncher/radshellmod.ios", "w")
-			NEUTRINO_RadShellFile:write("fontsize 0.6\r\necho \"", neuLang[71], NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name, ".iso\"\r\nsleep 1\r\nrun neutrino.elf -bsd=", NEUTRINO_Bsd, NEUTRINO_Fs, " \"-dvd=", NEUTRINO_PathPrefix, ":", NEUTRINO_GameFolder, NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name, ".", NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Extension, "\"", NEUTRINO_LaunchOptions, NEUTRINO_Vmc, "\r\n")
+			NEUTRINO_RadShellFile:write("fontsize 0.6\r\necho \"", neuLang[71], NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name, ".iso\"\r\nsleep 1\r\nrun neutrino.elf", NEUTRINO_Bsd, NEUTRINO_Fs, " \"-dvd=", NEUTRINO_PathPrefix, ":", NEUTRINO_GameFolder, NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Name, ".", NEUTRINO_CurrentList[NEUTRINO_SelectedItem].Extension, "\"", NEUTRINO_LaunchOptions, NEUTRINO_Vmc, "\r\n")
 			NEUTRINO_RadShellFile:close()
 			NEUTRINO_SaveLast()
 			NEUTRINO_UpdateRecents()

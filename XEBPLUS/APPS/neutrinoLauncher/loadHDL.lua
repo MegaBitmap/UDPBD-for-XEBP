@@ -1,4 +1,4 @@
-NEUTRINO_Bsd = "ata"
+NEUTRINO_Bsd = " -bsd=ata"
 NEUTRINO_Fs = " -bsdfs=hdl"
 NEUTRINO_PathPrefix = "hdl"
 NEUTRINO_ListFile = "mass:XEBPLUS/CFG/neutrinoLauncher/neutrinoHDL.list"

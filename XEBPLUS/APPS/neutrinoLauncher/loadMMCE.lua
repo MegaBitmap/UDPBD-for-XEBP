@@ -1,4 +1,4 @@
-NEUTRINO_Bsd = "mmce"
+NEUTRINO_Bsd = ""
 NEUTRINO_Fs = ""
 NEUTRINO_PathPrefix = "mmce"
 NEUTRINO_ListFile = "mass:XEBPLUS/CFG/neutrinoLauncher/neutrinoMMCE.list"

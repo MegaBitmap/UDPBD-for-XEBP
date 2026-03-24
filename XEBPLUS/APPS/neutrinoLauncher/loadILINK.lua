@@ -1,6 +1,6 @@
-NEUTRINO_Bsd = "ilink"
-NEUTRINO_Fs = " -bsdfs=exfat"
-NEUTRINO_PathPrefix = "mass"
+NEUTRINO_Bsd = ""
+NEUTRINO_Fs = ""
+NEUTRINO_PathPrefix = "ilink"
 NEUTRINO_ListFile = "mass:XEBPLUS/CFG/neutrinoLauncher/neutrinoILINK.list"
 NEUTRINO_DataFolder = "mass:XEBPLUS/CFG/neutrinoLauncher/ILINK/"
 
