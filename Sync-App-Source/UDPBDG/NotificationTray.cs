@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Python.Runtime;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -38,6 +39,8 @@ internal partial class NotificationTray : ApplicationContext
     public const string oldSettings = "OldSettings.ini";
     public const string vhdxFile = "PS2-Games-exFAT-udpbd.vhdx";
     public const string vhdxLabel = "PS2-exFAT";
+    private const string pythonFolderDLL = @"\Python313\python313.dll";
+    private const string pythonVersion = "3.13";
     private const int listenPort = 0x4712;
     public static StringBuilder conHistory = new();
     private CustomConsole? customConsole;
@@ -55,9 +58,19 @@ internal partial class NotificationTray : ApplicationContext
 
     private static void CheckAlreadyRunning()
     {
-        string pName = Process.GetCurrentProcess().ProcessName;
-        int pCount = Process.GetProcessesByName(pName).Length;
-        if (pCount > 1)
+        bool alreadyRunning = true;
+        for (int i = 0; i < 5; i++)
+        {
+            string pName = Process.GetCurrentProcess().ProcessName;
+            int pCount = Process.GetProcessesByName(pName).Length;
+            if (pCount == 1)
+            {
+                alreadyRunning = false;
+                break;
+            }
+            Thread.Sleep(1000);
+        }
+        if (alreadyRunning)
         {
             MessageBox.Show("This program is already running.", "Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
             Environment.Exit(0);
@@ -117,12 +130,19 @@ internal partial class NotificationTray : ApplicationContext
     {
         GetInterferingProcess();
         Console.WriteLine("Starting Server . . .");
-        Func<int> serverFunc;
-        if (ServerName.Contains("vexfat", StringComparison.CurrentCultureIgnoreCase))
-            serverFunc = new Func<int>(() => run_vexfat_server(gamePath));
-        else
+        Func<int> serverFunc = new(() => run_vexfat_server(gamePath));
+        if (ServerName.Contains("udpbd-server", StringComparison.CurrentCultureIgnoreCase))
+        {
             serverFunc = new Func<int>(() => Run_udpbd_server($"\\\\.\\{gamePath}"));
-
+        }
+        else if (ServerName.Contains("udpfs_bd", StringComparison.CurrentCultureIgnoreCase))
+        {
+            serverFunc = new Func<int>(() => Run_udpfs_server("block-device", gamePath));
+        }
+        else if (ServerName.Contains("udpfs", StringComparison.CurrentCultureIgnoreCase))
+        {
+            serverFunc = new Func<int>(() => Run_udpfs_server("root-dir", gamePath));
+        }
         isActive = true;
         notifyIcon.Icon = Resources.OKIcon;
         notifyIcon.Text = $"{ServerName} is Running";
@@ -130,8 +150,17 @@ internal partial class NotificationTray : ApplicationContext
         int rValue = await Task.Run(serverFunc);
         isActive = false;
         if (rValue == 5)
-            RestartAdmin();
-
+        {
+            if (ServerName.Contains("udpbd-server", StringComparison.CurrentCultureIgnoreCase))
+            {
+                RestartAdmin();
+            }
+            else
+            {
+                MessageBox.Show($"Failed to open '{gamePath}'\n" +
+                    "Make sure that it is ejected/detached/unmounted.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         notifyIcon.Icon = Resources.XIcon;
         notifyIcon.Text = $"{ServerName} CRASHED!";
         ShowConsoleError();
@@ -150,7 +179,78 @@ internal partial class NotificationTray : ApplicationContext
             MessageBox.Show("The server history has been copied to your clipboard",
                 "Copied to clipboard", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+        Thread.Sleep(500); // wait for the python engine to shutdown first
         Environment.Exit(rValue);
+    }
+
+    private static int Run_udpfs_server(string mode, string path)
+    {
+        Runtime.PythonDLL = GetPythonDLL();
+        PythonEngine.Initialize();
+        PythonEngine.BeginAllowThreads();
+        var gil = Py.GIL();
+        int rVal = -1;
+        try
+        {
+            using PyModule pyScope = Py.CreateScope();
+            dynamic sys = pyScope.Import("sys");
+            sys.stdout = new PyConsoleWrite();
+            sys.stderr = new PyConsoleWrite();
+            sys.path.append($"{Directory.GetCurrentDirectory()}/udpfs_server");
+            dynamic udpfs_server = pyScope.Import("udpfs_server");
+            if (mode == "root-dir")
+            {
+                udpfs_server.fs_main(path);
+            }
+            else if (mode == "block-device")
+            {
+                udpfs_server.bd_main(path);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex);
+
+            if (ex.Message == "5")
+            {
+                rVal = 5;
+            }
+        }
+        finally
+        {
+            gil.Dispose();
+        }
+        return rVal;
+    }
+
+    private static string GetPythonDLL()
+    {
+        string[] python_paths = [
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + pythonFolderDLL,
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) +
+            @"\Programs\Python" + pythonFolderDLL
+        ];
+        string found_python_path = "";
+        foreach (string python_path in python_paths)
+        {
+            if (File.Exists(python_path))
+            {
+                found_python_path = python_path;
+                break;
+            }
+        }
+        if (string.IsNullOrEmpty(found_python_path))
+        {
+            isActive = false;
+            notifyIcon.Icon = Resources.XIcon;
+            notifyIcon.Text = $"{ServerName} failed, python is missing";
+            MessageBox.Show($"Failed to find a python {pythonVersion} installation.\n" +
+                $"Install python to either:\n{python_paths[0]}\nor\n{python_paths[1]}",
+                "Failed to find python", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Environment.Exit(-1);
+        }
+        return found_python_path;
     }
 
     private void MenuItemSettings_Click(object? sender, EventArgs e)
@@ -178,7 +278,9 @@ internal partial class NotificationTray : ApplicationContext
         {
             notifyIcon.Icon = Resources.XIcon;
             notifyIcon.Text = "Settings Not Found";
-            Settings settings = new();
+            SelectMode selectMode = new();
+            selectMode.ShowDialog();
+            Settings settings = new(selectMode.mode_clicked);
             settings.ShowDialog();
         }
         using TextReader settingsReader = new StreamReader(settingsFile);
@@ -260,6 +362,7 @@ internal partial class NotificationTray : ApplicationContext
         process.StartInfo.FileName = Environment.ProcessPath;
         process.StartInfo.UseShellExecute = true;
         process.Start();
+        Thread.Sleep(500); // wait for the python engine to shutdown first
         Environment.Exit(0);
     }
 
@@ -286,6 +389,7 @@ internal partial class NotificationTray : ApplicationContext
 
     private void MenuItemKill_Click(object? sender, EventArgs e)
     {
+        Thread.Sleep(500); // wait for the python engine to shutdown first
         Environment.Exit(0);
     }
 
@@ -312,8 +416,19 @@ internal partial class NotificationTray : ApplicationContext
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An error has occured while trying to run as Administrator.\n\n" +
-                    $"{ex.Message}\n\n{ex}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult response = MessageBox.Show("An error has occured while trying to run as Administrator.\n\n" +
+                    "Click YES to reset the server settings.\n\n" +
+                    $"{ex.Message}\n\n{ex}", "Error", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Error);
+                if (response == DialogResult.Yes)
+                {
+                    if (File.Exists(settingsFile))
+                    {
+                        if (File.Exists(oldSettings))
+                            File.Delete(oldSettings);
+
+                        File.Move(settingsFile, oldSettings);
+                    }
+                }
             }
             Environment.Exit(5);
         }

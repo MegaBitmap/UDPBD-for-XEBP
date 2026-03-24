@@ -9,11 +9,25 @@ public partial class Settings : Form
 {
     private bool startServer = false;
     private long openFileTime;
+    private readonly string mode = "";
 
-    public Settings()
+    public Settings(string mode_clicked)
     {
         InitializeComponent();
-        Text = $"UDPBDG v{Assembly.GetExecutingAssembly().GetName().Version} by MegaBitmap";
+        if (string.IsNullOrEmpty(mode_clicked))
+        {
+            Environment.Exit(-1);
+        }
+        mode = mode_clicked;
+        Text = $"UDPBDG v{Assembly.GetExecutingAssembly().GetName().Version} by MegaBitmap ({mode} mode)";
+        if (mode.Contains("udpfs", StringComparison.CurrentCultureIgnoreCase))
+        {
+            MountButton.Visible = false;
+        }
+        if (mode.Contains("udpfs_bd", StringComparison.CurrentCultureIgnoreCase))
+        {
+            udpfs_bd_label.Visible = true;
+        }
     }
 
     private void MountButton_Click(object sender, EventArgs e)
@@ -51,30 +65,53 @@ public partial class Settings : Form
     private void SyncSNL_Click(object sender, EventArgs e)
     {
         if (!IsGamePathValid()) return;
-        SyncSNL syncSNL = new(GamePathLabel.Text);
+        SyncSNL syncSNL = new(GamePathLabel.Text, mode);
         syncSNL.ShowDialog();
     }
 
     private void SyncXEBP_Click(object sender, EventArgs e)
     {
         if (!IsGamePathValid()) return;
-        SyncXEBP syncXEBP = new(GamePathLabel.Text);
+        SyncXEBP syncXEBP = new(GamePathLabel.Text, mode);
         syncXEBP.ShowDialog();
     }
 
     private async void StartServerButton_Click(object sender, EventArgs e)
     {
-        if (!IsGamePathValid()) return;
-        string server = "udpbd-vexfat";
-        bool exFAT = Is_exFAT();
-        if (exFAT)
-            server = "udpbd-server";
-
+        if (mode != "udpfs_bd" && !IsGamePathValid()) return;
+        if (string.IsNullOrEmpty(mode))
+        {
+            Close();
+            return;
+        }
+        string server = mode;
+        bool exFAT = false;
         string outGamepath = GamePathLabel.Text;
-        DriveInfo driveInfo = new(GamePathLabel.Text);
-        if (File.Exists(vhdxFile) && driveInfo.VolumeLabel == vhdxLabel)
-            outGamepath = vhdxFile;
-
+        if (mode == "udpbd")
+        {
+            server = "udpbd-server";
+            exFAT = Is_exFAT();
+            if (!exFAT)
+            {
+                server = "udpbd-vexfat";
+            }
+            DriveInfo driveInfo = new(GamePathLabel.Text);
+            if (File.Exists(vhdxFile) && driveInfo.VolumeLabel == vhdxLabel)
+                outGamepath = vhdxFile;
+        }
+        else if (mode == "udpfs_bd")
+        {
+            MessageBox.Show("Eject/Detach the VHD then select the bare VHD file.",
+                "Eject/Detach the VHD", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "exFAT fixed size VHD (*.vhd)|*.vhd",
+                Title = "Select the bare VHD file..."
+            };
+            DialogResult dialogResult = openFileDialog.ShowDialog();
+            if (dialogResult != DialogResult.OK) return;
+            outGamepath = openFileDialog.FileName;
+        }
         string startupConsole = $"Console={ShowServerCheckbox.Checked}";
         string outText = $"{outGamepath}\n{server}\n{startupConsole}";
         File.WriteAllText(settingsFile, outText);

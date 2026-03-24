@@ -13,7 +13,7 @@ internal class VMC
         string crossSaveIDs = string.Join("", VMCList);
         foreach (var game in gameList)
         {
-            string serialID = ISO.GetSerialID(gamePath + game, logLabel, logPanel);
+            string serialID = GameID.Get(gamePath + game, logLabel, logPanel);
             if (string.IsNullOrEmpty(serialID))
             {
                 SyncSNL.WriteLine($"Failed to get serial ID for {gamePath + game}", logLabel, logPanel);
@@ -70,10 +70,13 @@ internal class VMC
                 vmcFullPath = $"{gamePath}{vmcRelativePath}";
             }
             if (listType == "XEBP")
+            {
                 gameListVMC.Add($"{serialID} {game} {vmcRelativePath}");
+            }
             else
-                gameListVMC.Add($"{friendlyName}|{serialID}|-bsd=udpbd|-dvd=mass:{game}|-mc0=mass:{vmcRelativePath}");
-
+            {
+                gameListVMC.Add($"{friendlyName}|{serialID}|-dvd=udpbd:{game}|-mc0=udpbd:{vmcRelativePath}");
+            }
             if (!File.Exists(vmcFullPath))
             {
                 if (CDBin.CheckSpace(currentVmc.Length, vmcFullPath))

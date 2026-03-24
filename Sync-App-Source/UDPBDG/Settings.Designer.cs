@@ -36,6 +36,7 @@ partial class Settings
         SetPathButton = new Button();
         GameCountLabel = new Label();
         GamePathLabel = new Label();
+        udpfs_bd_label = new Label();
         SuspendLayout();
         // 
         // SyncSNL
@@ -89,7 +90,7 @@ partial class Settings
         MountButton.Name = "MountButton";
         MountButton.Size = new Size(600, 60);
         MountButton.TabIndex = 6;
-        MountButton.Text = "Mount Virtual exFAT Drive";
+        MountButton.Text = "Mount Virtual exFAT Drive (dynamic VHDX)";
         MountButton.UseVisualStyleBackColor = true;
         MountButton.Click += MountButton_Click;
         // 
@@ -121,12 +122,25 @@ partial class Settings
         GamePathLabel.TabIndex = 7;
         GamePathLabel.Text = "Path is Unset";
         // 
+        // udpfs_bd_label
+        // 
+        udpfs_bd_label.AutoSize = true;
+        udpfs_bd_label.Font = new Font("Noto Sans", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        udpfs_bd_label.Location = new Point(9, 19);
+        udpfs_bd_label.Margin = new Padding(0, 10, 0, 0);
+        udpfs_bd_label.Name = "udpfs_bd_label";
+        udpfs_bd_label.Size = new Size(590, 48);
+        udpfs_bd_label.TabIndex = 8;
+        udpfs_bd_label.Text = "This mode requies ISOs to be stored inside a fixed size VHD file formatted as\r\nexFAT. Mount it to sync the game list then eject/detatch it to run the server.";
+        udpfs_bd_label.Visible = false;
+        // 
         // Settings
         // 
         AutoScaleDimensions = new SizeF(11F, 29F);
         AutoScaleMode = AutoScaleMode.Font;
         AutoScroll = true;
         ClientSize = new Size(624, 441);
+        Controls.Add(udpfs_bd_label);
         Controls.Add(GamePathLabel);
         Controls.Add(GameCountLabel);
         Controls.Add(SetPathButton);
@@ -161,4 +175,5 @@ partial class Settings
     private Button SetPathButton;
     private Label GameCountLabel;
     private Label GamePathLabel;
+    private Label udpfs_bd_label;
 }

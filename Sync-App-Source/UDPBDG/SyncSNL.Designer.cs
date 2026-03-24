@@ -159,7 +159,7 @@ partial class SyncSNL
         SyncButton.Name = "SyncButton";
         SyncButton.Size = new Size(600, 33);
         SyncButton.TabIndex = 7;
-        SyncButton.Text = "Sync Game List and IP address";
+        SyncButton.Text = "Sync Game List, UDP mode, and IP address";
         SyncButton.UseVisualStyleBackColor = true;
         SyncButton.Click += SyncButton_Click;
         // 

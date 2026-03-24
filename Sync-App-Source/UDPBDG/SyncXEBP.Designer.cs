@@ -67,13 +67,14 @@ partial class SyncXEBP
         SyncButton.Name = "SyncButton";
         SyncButton.Size = new Size(600, 33);
         SyncButton.TabIndex = 5;
-        SyncButton.Text = "Sync Game List and IP address";
+        SyncButton.Text = "Sync Game List, UDP mode, and IP address";
         SyncButton.UseVisualStyleBackColor = true;
         SyncButton.Click += SyncButton_Click;
         // 
         // VMCCheckbox
         // 
         VMCCheckbox.AutoSize = true;
+        VMCCheckbox.Enabled = false;
         VMCCheckbox.Location = new Point(150, 129);
         VMCCheckbox.Name = "VMCCheckbox";
         VMCCheckbox.Size = new Size(283, 24);

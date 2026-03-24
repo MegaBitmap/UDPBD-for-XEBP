@@ -10,13 +10,16 @@ public partial class SyncSNL : Form
     private static bool foundMC1 = false;
     private static bool foundMass = false;
     private static string gamePath = "";
+    private readonly string mode = "";
 
-    public SyncSNL(string tempGamePath)
+    public SyncSNL(string tempGamePath, string input_mode)
     {
         InitializeComponent();
         gamePath = tempGamePath;
-        SetVMCCheckbox(VMCCheckbox);
+        SetVMCCheckbox(gamePath, VMCCheckbox, input_mode);
         LoadIP(PS2IPTextBox);
+        mode = input_mode;
+        Text += $" ({mode} mode)";
     }
 
     private async void ConnectButton_Click(object sender, EventArgs e)
@@ -112,12 +115,19 @@ public partial class SyncSNL : Form
         List<string> gameListWithID = [];
         foreach (var game in gameList)
         {
-            string serialGameID = ISO.GetSerialID(gamePath + game, LogLabel, LogPanel);
+            WriteLine($"Loading {game}");
+            string serialGameID = GameID.Get(gamePath + game, LogLabel, LogPanel);
             string friendlyName = Path.GetFileNameWithoutExtension(gamePath + game);
             if (!string.IsNullOrEmpty(serialGameID))
             {
-                gameListWithID.Add($"{friendlyName}|{serialGameID}|-bsd=udpbd|-dvd=mass:{game}");
-                WriteLine($"Loaded {game}");
+                if (mode == "udpfs")
+                {
+                    gameListWithID.Add($"{friendlyName}|{serialGameID}|-dvd=udpfs:{game}");
+                }
+                else
+                {
+                    gameListWithID.Add($"{friendlyName}|{serialGameID}|-dvd=udpbd:{game}");
+                }
             }
             else
                 WriteLine($"Unable to find a serial Game ID for {game}");
@@ -145,12 +155,23 @@ public partial class SyncSNL : Form
         string syncTarget = await GetInstallLocation(client);
         if (string.IsNullOrEmpty(syncTarget)) return;
 
-        string udpConf = BSDConf.Config(PS2IPTextBox.Text);
-        if (!InstallSNL.MakeDirectory("temp")) return;
-        File.WriteAllText("temp/temp-bsd-udpbd.toml", udpConf);
-        await FTP.UploadFile(client, "temp/temp-bsd-udpbd.toml", $"{syncTarget}/SimpleNeutrinoLoader/", "bsd-udpbd.toml", LogLabel, LogPanel);
-        WriteLine($"Set {syncTarget}/SimpleNeutrinoLoader/bsd-udpbd.toml to ip={PS2IPTextBox.Text}");
-
+        if (mode == "udpbd" || mode == "udpfs_bd")
+        {
+            string udpConf = BSDConf.Udpbd(PS2IPTextBox.Text, mode);
+            if (!InstallSNL.MakeDirectory("temp")) return;
+            File.WriteAllText("temp/temp-bsd-udpbd.toml", udpConf);
+            await FTP.UploadFile(client, "temp/temp-bsd-udpbd.toml", $"{syncTarget}/SimpleNeutrinoLoader/", "bsd-udpbd.toml", LogLabel, LogPanel);
+            WriteLine($"Updated {syncTarget}/SimpleNeutrinoLoader/bsd-udpbd.toml to ip={PS2IPTextBox.Text}\n" +
+                $"Updated udp driver to {mode}.irx");
+        }
+        else if (mode == "udpfs")
+        {
+            string udpConf = BSDConf.Udpfs(PS2IPTextBox.Text);
+            if (!InstallSNL.MakeDirectory("temp")) return;
+            File.WriteAllText("temp/temp-bsd-udpfs.toml", udpConf);
+            await FTP.UploadFile(client, "temp/temp-bsd-udpfs.toml", $"{syncTarget}/SimpleNeutrinoLoader/", "bsd-udpfs.toml", LogLabel, LogPanel);
+            WriteLine($"Updated {syncTarget}/SimpleNeutrinoLoader/bsd-udpfs.toml to ip={PS2IPTextBox.Text}");
+        }
         if (VMCCheckbox.Checked)
         {
             if (await VMC.Sync(gamePath, gameList, "SNL", LogLabel, LogPanel))
@@ -306,12 +327,19 @@ public partial class SyncSNL : Form
         ipBox.Text = tempIP;
     }
 
-    public static void SetVMCCheckbox(CheckBox vmcCheckbox)
+    public static void SetVMCCheckbox(string gamePath, CheckBox vmcCheckbox, string mode)
     {
+        if (mode == "udpfs")
+        {
+            vmcCheckbox.Visible = false;
+            return;
+        }
         if (gamePath.Length != 2) return; // the CD and DVD folders must be in the root of and exFAT drive
         DriveInfo driveInfo = new(gamePath);
         if (driveInfo.DriveFormat == "exFAT")
+        {
             vmcCheckbox.Enabled = true;
+        }
     }
 
     public static bool ValidateList(string fileName, Label logLabel, Panel logPanel)
