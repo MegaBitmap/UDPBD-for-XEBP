@@ -1,11 +1,9 @@
-﻿using DiscUtils.Iso9660;
-using FluentFTP;
+﻿using FluentFTP;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace UDPBD_for_XEB__CLI
 {
@@ -20,6 +18,7 @@ namespace UDPBD_for_XEB__CLI
             bool enableArt = false;
             bool enableBin2ISO = false;
             bool enableVMC = false;
+            string mode = "udpbd";
             
             if (args.Length < 2 || !args.Contains("-path"))
             {
@@ -49,12 +48,15 @@ namespace UDPBD_for_XEB__CLI
                 {
                     enableVMC = true;
                 }
+                else if (arg.Contains("-udpfs"))
+                {
+                    mode = "udpfs";
+                }
+                else if (arg.Contains("-udpfs_bd"))
+                {
+                    mode = "udpfs_bd";
+                }
                 argIndex++;
-            }
-            if (!File.Exists("bsd-udpbd.toml"))
-            {
-                Console.WriteLine("Missing file bsd-udpbd.toml");
-                PauseExit(1);
             }
             if (!KillServer())
             {
@@ -108,7 +110,7 @@ namespace UDPBD_for_XEB__CLI
                 FTP.CreateDirectory(client, "/mass/0/XEBPLUS/CFG/neutrinoLauncher/");
                 Console.WriteLine("Created the folder mass:/XEBPLUS/CFG/neutrinoLauncher/");
             }
-            UpdateUDPConfig(client, ps2ip);
+            UpdateUDPConfig(client, ps2ip, mode);
             if (enableArt)
             {
                 if (File.Exists("ArtworkURL.cfg"))
@@ -153,6 +155,8 @@ namespace UDPBD_for_XEB__CLI
             Console.WriteLine("-downloadart enables automatic game artwork downloading.\n");
             Console.WriteLine("-bin2iso enables automatic CD-ROM Bin to ISO conversion.\n");
             Console.WriteLine("-enablevmc will assign a virtual memory card for each game or group of games in 'vmc_groups.list'.\n");
+            Console.WriteLine("-udpfs will enable udpfs_server file-system support by updating 'loadUDPBD.lua'.\n");
+            Console.WriteLine("-udpfs_bd will enable udpfs_server block-device support by updating 'config/bsd-udpbd.toml'.\n");
         }
 		
         static void ValidateList()
@@ -189,7 +193,7 @@ namespace UDPBD_for_XEB__CLI
             List<string> gameListWithID = [];
             foreach (var game in gameList)
             {
-                string serialGameID = GetSerialID(gamePath + game);
+                string serialGameID = GameID.Get(gamePath + game);
                 if (!string.IsNullOrEmpty(serialGameID))
                 {
                     gameListWithID.Add($"{serialGameID} {game}");
@@ -236,7 +240,7 @@ namespace UDPBD_for_XEB__CLI
             var artList = FTP.GetDir(client, "/mass/0/XEBPLUS/GME/ART/");
             foreach (var game in gameList)
             {
-                string serialID = GetSerialID(gamePath + game);
+                string serialID = GameID.Get(gamePath + game);
                 if (string.IsNullOrEmpty(serialID)) continue;
                 if (!artList.Contains($"{serialID}_BG.png"))
                 {
@@ -324,7 +328,7 @@ namespace UDPBD_for_XEB__CLI
             string crossSaveIDs = string.Join("", groupsVMC);
             foreach (var game in gameList)
             {
-                string serialID = GetSerialID(gamePath + game);
+                string serialID = GameID.Get(gamePath + game);
                 if (string.IsNullOrEmpty(serialID))
                 {
                     Console.WriteLine($"Failed to get serial ID for {gamePath + game}");
@@ -412,44 +416,28 @@ namespace UDPBD_for_XEB__CLI
             }
         }
 
-        static void UpdateUDPConfig(FtpClient client, IPAddress ps2ip)
+        static void UpdateUDPConfig(FtpClient client, IPAddress ps2ip, string mode)
         {
-            string udpConf = File.ReadAllText("bsd-udpbd.toml").Replace("192.168.1.10", $"{ps2ip}");
-            File.WriteAllText("tempbsd-udpbd.toml", udpConf);
-            Thread.Sleep(200);
-            FTP.UploadFile(client, "tempbsd-udpbd.toml", "/mass/0/XEBPLUS/APPS/neutrinoLauncher/config/", "bsd-udpbd.toml");
-            Console.WriteLine($"Updated bsd-udpbd.toml with the IP address {ps2ip}");
-        }
-
-        static string GetSerialID(string fullGamePath)
-        {
-            try
+            if (mode == "udpbd" || mode == "udpfs_bd")
             {
-                string content;
-                using (FileStream isoStream = File.Open(fullGamePath, FileMode.Open))
-                {
-                    CDReader cd = new(isoStream, true);
-                    if (!cd.FileExists(@"SYSTEM.CNF"))
-                    {
-                        Console.WriteLine($"{fullGamePath} Is not a valid PS2 game ISO. The SYSTEM.CNF file is missing.");
-                        return "";
-                    }
-                    using Stream fileStream = cd.OpenFile(@"SYSTEM.CNF", FileMode.Open);
-                    using StreamReader reader = new(fileStream);
-                    content = reader.ReadToEnd();
-                }
-                if (!content.Contains("BOOT2"))
-                {
-                    Console.WriteLine($"{fullGamePath} Is not a valid PS2 game ISO.\nThe SYSTEM.CNF file does not contain BOOT2.");
-                    return "";
-                }
-                string serialID = SerialMask().Replace(content.Split("\n")[0], "");
-                return serialID;
+                string udpConf = BSDConf.Udpbd(ps2ip.ToString(), mode);
+                File.WriteAllText("temp-bsd-udpbd.toml", udpConf);
+                File.WriteAllText("temp-loadUDPBD.lua", XEBPConf.Set("udpbd"));
+                FTP.UploadFile(client, "temp-bsd-udpbd.toml", "/mass/0/XEBPLUS/APPS/neutrinoLauncher/config/", "bsd-udpbd.toml");
+                FTP.UploadFile(client, "temp-loadUDPBD.lua", "/mass/0/XEBPLUS/APPS/neutrinoLauncher/", "loadUDPBD.lua");
+                Console.WriteLine($"Updated XEBPLUS/APPS/neutrinoLauncher/config/bsd-udpbd.toml to ip={ps2ip}\n" +
+                $"Updated udp driver to {mode}.irx\n" +
+                "Updated XEBPLUS/APPS/neutrinoLauncher/loadUDPBD.lua to use udpbd");
             }
-            catch (Exception)
+            else if (mode == "udpfs")
             {
-                Console.WriteLine($"{fullGamePath} was unable to be read. The ISO file may be corrupt.");
-                return "";
+                string udpConf = BSDConf.Udpfs(ps2ip.ToString());
+                File.WriteAllText("temp-bsd-udpfs.toml", udpConf);
+                File.WriteAllText("temp-loadUDPBD.lua", XEBPConf.Set("udpfs"));
+                FTP.UploadFile(client, "temp-bsd-udpfs.toml", "/mass/0/XEBPLUS/APPS/neutrinoLauncher/config/", "bsd-udpfs.toml");
+                FTP.UploadFile(client, "temp-loadUDPBD.lua", "/mass/0/XEBPLUS/APPS/neutrinoLauncher/", "loadUDPBD.lua");
+                Console.WriteLine($"Updated XEBPLUS/APPS/neutrinoLauncher/config/bsd-udpfs.toml to ip={ps2ip}\n" +
+                "Updated XEBPLUS/APPS/neutrinoLauncher/loadUDPBD.lua to use udpfs");
             }
         }
 
@@ -497,8 +485,5 @@ namespace UDPBD_for_XEB__CLI
             Console.WriteLine();
             Environment.Exit(number);
         }
-
-        [GeneratedRegex(@".*\\|;.*")]
-        private static partial Regex SerialMask();
     }
 }
