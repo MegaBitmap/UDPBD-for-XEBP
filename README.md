@@ -1,10 +1,10 @@
 # XEB+ neutrino Launcher Plugin
 
 This is a plugin for the Xtreme Elite Boot Plus dashboard for the PlayStation 2.  
-It allows XEB+ to load PlayStation 2 games from HDD, MX4SIO, USB, and UDPBD via [neutrino](https://github.com/rickgaiser/neutrino).  
+It allows XEB+ to load PlayStation 2 games from HDD, HDL, iLink, MMCE, MX4SIO, UDPBD, UDPFS, and USB via [neutrino](https://github.com/rickgaiser/neutrino).  
 
-This fork includes a sync app `UDPBD-for-XEB+-GUI.exe` for windows or `UDPBD-for-XEB+-CLI.dll` for Linux.  
-It automates the setup process when using UDPBD.  
+This fork includes a sync app `UDPBDG.exe` for windows or `UDPBD-for-XEB+-CLI.dll` for Linux.  
+It automates the setup process when using UDPBD or UDPFS.  
 
 **Please Note** When updating versions it is **Required** to update BOTH the XEBPLUS plugin, and the sync app.  
 It is NOT recommended to mismatch different versions of the XEBPLUS plugin and the sync app.  
@@ -12,7 +12,7 @@ It is NOT recommended to mismatch different versions of the XEBPLUS plugin and t
 ## Features
 
   * Load PlayStation 2 game backups straight from the Xtreme Elite Boot Plus dashboard.
-  * Supports game loading from HDD, MX4SIO, MMCE, USB, and UDPBD.
+  * Supports game loading from HDD, HDL, iLink, MMCE, MX4SIO, UDPBD, UDPFS, and USB.
   * Supports high capacity exFAT drives (currently tested with drives up to 4TB).
   * Works with fragmented game files.
   * Quick navigation functions for browsing large game lists.
@@ -32,10 +32,10 @@ It is NOT recommended to mismatch different versions of the XEBPLUS plugin and t
 
   * A PlayStation 2 console with a memory card that has either FreeMCBoot or PS2BBL installed.  
 [PS2BBL](https://israpps.github.io/PlayStation2-Basic-BootLoader/) is the recommended option.
-  * If using ListBuilder, a computer with a recent version of [Python](https://www.python.org/) installed.
+  * If using ListBuilder or UDPFS, a computer with [Python](https://www.python.org/) 3.13 installed.  
   * All of the requirements specific to the device you want to load games from.
 
-### UDPBD
+### UDPBD/UDPFS
 
   * A PS2 slim (built-in ethernet) or a fat PS2 with an original Sony network/HDD adapter.
   * A PC with enough free space to store game ISOs.
@@ -103,20 +103,19 @@ Extract the `XEBPLUS` folder to the root of your USB drive, merging all folders 
 6. Complete setup by following the steps specific to the device you want to load games from.  
 
 
-### UDPBD on Windows
+### UDPBD/UDPFS on Windows
 
 **If you plan to use virtual memory cards please read this:**  
-You must use udpbd-server when using VMCs, udpbd-vexfat does NOT support VMCs.  
-udpbd-server only works with exFAT partitions.  
-A preformatted virtual exFAT drive can be mounted if no exFAT partition is found.  
+VMCs only work with exFAT partitions.  
+You must use udpbd-server or udpfs_bd when using VMCs, udpbd-vexfat and udpfs do NOT support VMCs.  
 After opening neutrino Launcher in XEBP with a game in view, press the ⏹ square button to open the context menu.  
 In the context menu you can enable or disable VMCs globally or individually per game.  
 For transferring, importing, or exporting saves from VMC files you can use [PS2-VMC-GUI](https://github.com/MegaBitmap/PS2-VMC-GUI).  
 
 7. From the [latest release on this page](https://github.com/MegaBitmap/UDPBD-for-XEBP/releases), download then extract the `UDPBDG` folder somewhere in `Documents` or `Downloads` (It is a portable app, do NOT use `Program Files` or any other system related folder).  
 
-8. Start the UDPBDG sync/server app (UDPBDG.exe).  
-(optional) Click mount exFAT drive for VMC support.  
+8. Start the UDPBDG sync/server app and pick a mode.  
+udpfs is the recommended.  
 
 9. Rip/copy any PlayStation 2 ISOs you wish to load into the folder (CD or DVD) that corresponds with their original source media.
 
@@ -183,7 +182,7 @@ If you want the server to start automatically when the PC is turned on follow th
 Now the server will start automatically.  
 
 
-### UDPBD on Linux
+### UDPBD/UDPFS on Linux
 
 This guide uses *APT* with Ubuntu, if you are using a different distribution these steps may vary.  
 
@@ -248,6 +247,8 @@ Here is a list of all parameters:
 `-downloadart` enables automatic game artwork downloading.  
 `-bin2iso` enables automatic CD-ROM Bin to ISO conversion.  
 `-enablevmc` will assign a virtual memory card for each game or group of games in 'vmc_groups.list'.  
+`-udpfs` will enable udpfs_server file-system support by updating 'loadUDPBD.lua'.  
+`-udpfs_bd` will enable udpfs_server block-device support by updating 'config/bsd-udpbd.toml'.  
 
 18. Unmount the exFAT partition then Start the udpbd-server.
 ```
