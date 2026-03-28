@@ -653,7 +653,7 @@ https://www.psx-place.com/threads/xtremeeliteboot-s-dashboard-special-xmas-showc
 PS2Dev Team - ps2client - 2024-8-5  
 https://github.com/ps2dev/ps2client
 
-Rick Gaiser - neutrino - v1.8.0-19-gbe75aaf  
+Rick Gaiser - neutrino - v1.8.0-27-ge6ba675  
 https://github.com/rickgaiser/neutrino
 
 sync-on-luma - neutrinoHDD plugin for XEB+ - forked from v2.9.7  
