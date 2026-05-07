@@ -1388,7 +1388,7 @@ class UdpfsServer:
         self.dsock.sendto(packet, addr)
 
     def _send_data(self, addr: Tuple[str, int], payload: bytes):
-        """Send DATA packet with payload (single packet, always FIN)"""
+        """Send DATA packet with payload (single packet, always FIN) and confirm receipt."""
         padded_size = (len(payload) + 3) & ~3
         padded_payload = payload.ljust(padded_size, b'\x00')
 
@@ -1401,9 +1401,10 @@ class UdpfsServer:
         )
 
         packet = hdr.pack() + data_hdr.pack() + padded_payload
+        self.tx_buffer = [(self.tx_seq_nr, packet)]
         self.dsock.sendto(packet, addr)
-
         self.tx_seq_nr = (self.tx_seq_nr + 1) & 0xFFF
+        self._wait_for_final_ack(addr)
 
     def _send_data_packet(self, addr: Tuple[str, int], payload: bytes,
                           fin: bool = False, hdr_size: int = 0):
@@ -1488,10 +1489,13 @@ class UdpfsServer:
                     ]
                     return
                 else:
-                    # NACK - update acked position and retransmit
+                    # NACK - retransmit and keep waiting for the ACK that
+                    # confirms the retransmitted packets arrived. Returning
+                    # here would let the outer loop increment window_retries
+                    # on every duplicate NACK before the retransmit lands.
                     self.tx_seq_nr_acked = (data_hdr.seq_nr_ack - 1) & 0xFFF
                     self._retransmit_from(addr, data_hdr.seq_nr_ack)
-                    return
+                    self.dsock.settimeout(WINDOW_ACK_TIMEOUT)  # reset timeout
         except socket.timeout:
             # No ACK received - retransmit all unacked
             self.dsock.settimeout(None)
@@ -1507,7 +1511,10 @@ class UdpfsServer:
         return (self.tx_seq_nr - self.tx_seq_nr_acked - 1) & 0xFFF
 
     def _wait_for_ack(self, addr: Tuple[str, int], timeout: float = 5.0) -> bool:
-        """Wait for ACK from peer before proceeding with next transfer"""
+        """Wait for ACK that confirms the FIN packet was received.
+        Mid-stream window ACKs (seq_nr_ack < fin_seq) are handled but do
+        not complete the wait — only an ACK covering the FIN does."""
+        fin_seq = (self.tx_seq_nr - 1) & 0xFFF
         self.dsock.settimeout(timeout)
         try:
             while True:
@@ -1520,15 +1527,40 @@ class UdpfsServer:
                 data_hdr = DataHeader.unpack(pkt[2:6])
                 if data_hdr.data_byte_count == 0 and data_hdr.hdr_word_count == 0:
                     if data_hdr.flags & DataFlags.ACK:
-                        self.tx_buffer = []
-                        return True
+                        # Always advance acked position and prune tx_buffer
+                        self.tx_seq_nr_acked = data_hdr.seq_nr_ack
+                        if self.tx_buffer:
+                            self.tx_buffer = [
+                                (seq, pkt) for seq, pkt in self.tx_buffer
+                                if ((seq - data_hdr.seq_nr_ack - 1) & 0xFFF) < 2048
+                            ]
+                        # Only accept as final ACK if it covers the FIN packet
+                        if data_hdr.seq_nr_ack == fin_seq:
+                            self.tx_buffer = []
+                            return True
+                        # else: mid-stream window ACK — keep waiting
                     else:
-                        # NACK - retransmit
+                        # NACK - retransmit and reset timeout
                         self._retransmit_from(addr, data_hdr.seq_nr_ack)
+                        self.dsock.settimeout(timeout)
         except socket.timeout:
             return False
         finally:
             self.dsock.settimeout(None)
+
+    def _wait_for_final_ack(self, addr: Tuple[str, int]):
+        """Confirm transfer completion: wait for ACK, retransmit on NACK or timeout.
+        Senders must always confirm receipt — single packet or stream."""
+        for attempt in range(MAX_WINDOW_RETRIES + 1):
+            if self._wait_for_ack(addr, timeout=WINDOW_ACK_TIMEOUT):
+                return  # Transfer confirmed
+            if not self.tx_buffer:
+                return
+            start_seq = self.tx_buffer[0][0]
+            if self.verbose:
+                self._print_event(
+                    f"  Final ACK timeout, retransmit from seq={start_seq} (attempt {attempt+1})")
+            self._retransmit_from(addr, start_seq)
 
     def _send_raw_data(self, addr: Tuple[str, int], data: bytes):
         """Send raw data as UDPRDMA multi-packet transfer with flow control"""
@@ -1560,6 +1592,8 @@ class UdpfsServer:
 
             self._send_data_packet(addr, chunk_data, fin=is_last)
             offset += chunk_size
+
+        self._wait_for_final_ack(addr)
 
     def _send_raw_data_with_header(self, addr: Tuple[str, int],
                                    header: bytes, data: bytes):
@@ -1599,6 +1633,8 @@ class UdpfsServer:
             self._send_data_packet(addr, data[offset:offset + chunk_size],
                                    fin=is_last)
             offset += chunk_size
+
+        self._wait_for_final_ack(addr)
 
     # --- Response builders ---
 
